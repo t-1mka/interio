@@ -13,6 +13,10 @@ services:
       - key: PYTHON_VERSION
         value: "3.11"
 
+      # Database (SQLite by default)
+      - key: DATABASE_URL
+        value: "sqlite:///./data.db"
+
       # GigaChat ИИ-советник
       - key: GIGACHAT_AUTH_KEY
         sync: false

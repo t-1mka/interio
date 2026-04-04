@@ -24,7 +24,14 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 # Настройки
-DB_PATH = "data.db"
+DB_PATH = os.getenv("DATABASE_URL", "data.db")
+if DB_PATH.startswith("sqlite"):
+    # Extract path from sqlite+aiosqlite:///./interio.db or similar
+    DB_PATH = DB_PATH.split("///")[-1]
+    if DB_PATH.startswith("/"):
+        DB_PATH = DB_PATH[1:]
+if not DB_PATH.endswith(".db") and not DB_PATH.endswith(".sqlite"):
+    DB_PATH = "data.db"
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
