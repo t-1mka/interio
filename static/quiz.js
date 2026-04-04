@@ -12,6 +12,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const successScreen = document.getElementById('successScreen');
     const downloadPdfBtn = document.getElementById('downloadPdfBtn');
 
+    const offerMiniQuizModal = document.getElementById('offerMiniQuizModal');
+    const acceptMiniQuizBtn = document.getElementById('acceptMiniQuizBtn');
+    const declineMiniQuizBtn = document.getElementById('declineMiniQuizBtn');
+    const miniQuizModal = document.getElementById('miniQuizModal');
+    const closeMiniQuiz = document.getElementById('closeMiniQuiz');
+    const undecidedRadio = document.getElementById('undecidedStyle');
+    let currentMiniStep = 1;
+    const totalMiniSteps = 6;
+    const miniStepsList = document.querySelectorAll('.mini-quiz-step');
+    const nextMiniBtn = document.getElementById('nextMiniBtn');
+    const prevMiniBtn = document.getElementById('prevMiniBtn');
+    let miniQuizCompleted = false;
+
     // --- Theme Toggle ---
     const themeToggle = document.getElementById('themeToggle');
     const html = document.documentElement;
@@ -136,6 +149,11 @@ document.addEventListener('DOMContentLoaded', () => {
         el.addEventListener('input', saveAnswer);
     });
 
+    const leadForm = document.getElementById('leadForm');
+    if (leadForm) {
+        leadForm.addEventListener('submit', (e) => e.preventDefault());
+    }
+
     function saveAnswer() {
         const answers = {};
         const room = document.querySelector('.quiz-container input[name="roomType"]:checked');
@@ -155,14 +173,41 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('interio_quiz_answers', JSON.stringify(answers));
     }
 
-    // --- Navigation ---
-    nextBtn.addEventListener('click', () => {
-        if (validateStep(currentStep)) {
-            if (currentStep === totalSteps) {
-                submitForm();
-            } else {
-                goToStep(currentStep + 1);
+    // --- Navigation (мини-квиз: предложение при «Далее» на шаге 4, если выбран «Пока не определился») ---
+    if (acceptMiniQuizBtn) {
+        acceptMiniQuizBtn.addEventListener('click', () => {
+            if (offerMiniQuizModal) offerMiniQuizModal.style.display = 'none';
+            if (miniQuizModal) {
+                miniQuizModal.style.display = 'block';
+                updateMiniQuizUI();
             }
+        });
+    }
+
+    if (declineMiniQuizBtn) {
+        declineMiniQuizBtn.addEventListener('click', () => {
+            if (offerMiniQuizModal) offerMiniQuizModal.style.display = 'none';
+            goToStep(currentStep + 1);
+        });
+    }
+
+    nextBtn.addEventListener('click', () => {
+        if (!validateStep(currentStep)) return;
+
+        if (currentStep === 4) {
+            const checkedStyle = document.querySelector('.quiz-container input[name="style"]:checked');
+            if (checkedStyle && checkedStyle.id === 'undecidedStyle' && !miniQuizCompleted) {
+                if (offerMiniQuizModal) {
+                    offerMiniQuizModal.style.display = 'block';
+                    return;
+                }
+            }
+        }
+
+        if (currentStep === totalSteps) {
+            submitForm();
+        } else {
+            goToStep(currentStep + 1);
         }
     });
 
@@ -175,6 +220,51 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function goToStep(step) {
+        if (step === 3) {
+            const selectedZones = Array.from(document.querySelectorAll('.quiz-container input[name="zones"]:checked')).map(c => c.value);
+            const sliderMinLabel = document.getElementById('sliderMinLabel');
+            const sliderMaxLabel = document.getElementById('sliderMaxLabel');
+            const sliderValDisplay = document.getElementById('sliderValue');
+            const aSlider = document.getElementById('areaSlider');
+            const step3Title = document.getElementById('step3Title');
+
+            if (selectedZones.length === 1 && selectedZones[0] === 'Кладовая') {
+                if (aSlider) {
+                    const currentVal = parseInt(aSlider.value, 10);
+                    aSlider.min = 1;
+                    aSlider.max = 20;
+                    aSlider.step = 1;
+                    if (currentVal > 20 || currentVal < 1 || currentVal === 5 || currentVal === 60) {
+                        aSlider.value = 2;
+                        if (sliderValDisplay) sliderValDisplay.textContent = 2;
+                    } else if (sliderValDisplay) {
+                        sliderValDisplay.textContent = aSlider.value;
+                    }
+                    updateSliderBackground(aSlider);
+                }
+                if (sliderMinLabel) sliderMinLabel.textContent = '1 м²';
+                if (sliderMaxLabel) sliderMaxLabel.textContent = '20 м²';
+                if (step3Title) step3Title.textContent = 'Укажите примерную площадь кладовой';
+            } else {
+                if (aSlider) {
+                    const currentVal = parseInt(aSlider.value, 10);
+                    aSlider.min = 20;
+                    aSlider.max = 300;
+                    aSlider.step = 5;
+                    if (currentVal < 20 || currentVal === 2) {
+                        aSlider.value = 60;
+                        if (sliderValDisplay) sliderValDisplay.textContent = 60;
+                    } else if (sliderValDisplay) {
+                        sliderValDisplay.textContent = aSlider.value;
+                    }
+                    updateSliderBackground(aSlider);
+                }
+                if (sliderMinLabel) sliderMinLabel.textContent = '20 м²';
+                if (sliderMaxLabel) sliderMaxLabel.textContent = '300 м²';
+                if (step3Title) step3Title.textContent = 'Укажите примерную площадь помещения';
+            }
+        }
+
         steps.forEach(s => s.classList.remove('active'));
         const target = document.querySelector(`.quiz-step[data-step="${step}"]`);
         if (target) target.classList.add('active');
@@ -236,14 +326,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function validateForm() {
         const name = document.getElementById('inputName').value.trim();
         const phone = document.getElementById('inputPhone').value.trim();
+        const email = document.getElementById('inputEmail').value.trim();
         const consent = document.getElementById('consentCheck').checked;
         let valid = true;
-        
+
         if (!name) {
             showToast('Пожалуйста, введите ваше имя');
             return false;
         }
-        
+
         const phoneErr = document.getElementById('phoneError');
         if (!phone || phone.length < 5) {
             phoneErr.classList.add('show');
@@ -252,16 +343,31 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             phoneErr.classList.remove('show');
         }
+
+        const emailErr = document.getElementById('emailError');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         
-        const consentErr = document.getElementById('consentError');
-        if (!consent) {
-            consentErr.classList.add('show');
-            showToast('Необходимо согласие на обработку персональных данных');
+        // Email теперь обязательный
+        if (!email) {
+            if (emailErr) emailErr.classList.add('show');
+            showToast('Пожалуйста, введите email');
+            valid = false;
+        } else if (email && !emailRegex.test(email)) {
+            if (emailErr) emailErr.classList.add('show');
+            showToast('Пожалуйста, введите корректный email');
             valid = false;
         } else {
-            consentErr.classList.remove('show');
+            if (emailErr) emailErr.classList.remove('show');
         }
-        
+
+        const consentErr = document.getElementById('consentError');
+        if (!consent) {
+            showToast('Пожалуйста, поставьте галочку согласия на обработку данных');
+            valid = false;
+        } else {
+            if (consentErr) consentErr.classList.remove('show');
+        }
+
         return valid;
     }
 
@@ -446,26 +552,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // ЛОГИКА МИНИ-КВИЗА (ВЫБОР СТИЛЯ)
     // ==========================================
-    const miniQuizModal = document.getElementById('miniQuizModal');
-    const closeMiniQuiz = document.getElementById('closeMiniQuiz');
-    const undecidedRadio = document.getElementById('undecidedStyle');
-    let currentMiniStep = 1;
-    const totalMiniSteps = 6;
-    const miniStepsList = document.querySelectorAll('.mini-quiz-step');
-    const nextMiniBtn = document.getElementById('nextMiniBtn');
-    const prevMiniBtn = document.getElementById('prevMiniBtn');
-    let miniQuizCompleted = false;
-
-    // Открываем мини-квиз при выборе "Пока не определился"
     document.querySelectorAll('.quiz-container input[name="style"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
-            if (e.target.id === 'undecidedStyle') {
-                if (!miniQuizCompleted) {
-                    miniQuizModal.style.display = 'block';
-                    updateMiniQuizUI();
-                }
-            } else {
-                // Сбрасываем плашку "Пока не определился", если пользователь передумал и выбрал конкретный стиль
+            if (e.target.id !== 'undecidedStyle') {
                 const undecidedLabel = document.querySelector('.style-image-card.wide .style-label');
                 if (undecidedLabel) undecidedLabel.textContent = 'Пока не определился';
                 if (undecidedRadio) undecidedRadio.value = 'Пока не определился';

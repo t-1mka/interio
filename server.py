@@ -3,10 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from pydantic import BaseModel
+from typing import Optional, List
 import sqlite3
-import hashlib
+import re
 import secrets
-from datetime import datetime
+import hashlib
+import datetime
 import time
 import uvicorn
 import os
@@ -49,7 +51,7 @@ class SessionRequest(BaseModel):
 class QuizSubmissionRequest(BaseModel):
     name: str
     phone: str
-    email: str = None
+    email: str  # Убрал Optional, теперь обязателен
     room_type: str
     zones: list
     area: int
@@ -368,17 +370,37 @@ async def submit_quiz(request: QuizSubmissionRequest, http_request: Request):
     """Сохранение заявки квиза в базу данных"""
     try:
         # Валидация обязательных полей
-        if not request.name or not request.phone:
-            raise HTTPException(status_code=400, detail="Имя и телефон обязательны")
+        if not request.name or not request.phone or not request.email:
+            raise HTTPException(status_code=400, detail="Имя, телефон и email обязательны")
         
-        if not request.room_type or not request.style or not request.budget:
-            raise HTTPException(status_code=400, detail="Необходимо выбрать тип помещения, стиль и бюджет")
-        
+        # Валидация формата email
+        email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_regex, request.email):
+            raise HTTPException(status_code=400, detail="Введите корректный email адрес")
+
+        missing = []
+        if not request.room_type:
+            missing.append("тип помещения")
+        if not request.zones:
+            missing.append("зоны помещения")
+        if not request.style:
+            missing.append("стиль")
+        if not request.budget:
+            missing.append("бюджет")
+
+        if missing:
+            if len(missing) == 1:
+                detail_msg = f"Необходимо выбрать {missing[0]}"
+            elif len(missing) == 2:
+                detail_msg = f"Необходимо выбрать {missing[0]} и {missing[1]}"
+            else:
+                detail_msg = f"Необходимо выбрать {', '.join(missing[:-1])} и {missing[-1]}"
+            raise HTTPException(status_code=400, detail=detail_msg)
+
         if not request.consent:
             raise HTTPException(status_code=400, detail="Необходимо согласие на обработку данных")
         
         # Проверка формата телефона
-        import re
         phone_clean = re.sub(r'[^\d]', '', request.phone)
         if len(phone_clean) != 11 or not phone_clean.startswith(('7', '8')):
             raise HTTPException(status_code=400, detail="Некорректный формат телефона")

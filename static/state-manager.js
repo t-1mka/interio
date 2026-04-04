@@ -1,3 +1,31 @@
+/** Fallback, если браузер блокирует localStorage (Tracking Prevention, приватный режим и т.д.) */
+const _storageMem = {};
+function storageGet(key) {
+    try {
+        const v = localStorage.getItem(key);
+        if (v != null) _storageMem[key] = v;
+        return v;
+    } catch {
+        return _storageMem[key] ?? null;
+    }
+}
+function storageSet(key, value) {
+    try {
+        localStorage.setItem(key, value);
+    } catch {
+        /* ignore */
+    }
+    _storageMem[key] = value;
+}
+function storageRemove(key) {
+    try {
+        localStorage.removeItem(key);
+    } catch {
+        /* ignore */
+    }
+    delete _storageMem[key];
+}
+
 class StateManager {
     constructor() {
         this.sessionId = null;
@@ -200,7 +228,7 @@ class StateManager {
             templates: this.templates,
             currentTemplateIndex: this.currentTemplateIndex
         };
-        localStorage.setItem('templateSession', JSON.stringify(sessionData));
+        storageSet('templateSession', JSON.stringify(sessionData));
     }
 
     // Удалить сессию
@@ -208,7 +236,7 @@ class StateManager {
         this.sessionId = null;
         this.templates = {};
         this.currentTemplateIndex = 0;
-        localStorage.removeItem('templateSession');
+        storageRemove('templateSession');
         if (!silent) {
             console.log('Сессия очищена');
         }
@@ -350,21 +378,21 @@ class StateManager {
 
     // --- Тема и доступность (общие ключи localStorage для главной и /quiz) ---
     applyThemeFromStorage() {
-        const t = localStorage.getItem('interio_theme') || 'dark';
+        const t = storageGet('interio_theme') || 'dark';
         document.documentElement.setAttribute('data-theme', t);
         return t;
     }
 
     setTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('interio_theme', theme);
+        storageSet('interio_theme', theme);
         return theme;
     }
 
     applyA11yAttrsFromStorage() {
-        const contrastOn = localStorage.getItem('interio_a11y_contrast') === 'true';
-        const buttonsOn = localStorage.getItem('interio_a11y_buttons') === 'true';
-        const textOn = localStorage.getItem('interio_a11y_text') === 'true';
+        const contrastOn = storageGet('interio_a11y_contrast') === 'true';
+        const buttonsOn = storageGet('interio_a11y_buttons') === 'true';
+        const textOn = storageGet('interio_a11y_text') === 'true';
         const root = document.documentElement;
         root.setAttribute('data-contrast', contrastOn ? 'high' : 'normal');
         root.setAttribute('data-large-buttons', buttonsOn ? 'true' : 'false');
@@ -372,9 +400,9 @@ class StateManager {
     }
 
     syncA11yCheckboxesFromStorage() {
-        const contrastOn = localStorage.getItem('interio_a11y_contrast') === 'true';
-        const buttonsOn = localStorage.getItem('interio_a11y_buttons') === 'true';
-        const textOn = localStorage.getItem('interio_a11y_text') === 'true';
+        const contrastOn = storageGet('interio_a11y_contrast') === 'true';
+        const buttonsOn = storageGet('interio_a11y_buttons') === 'true';
+        const textOn = storageGet('interio_a11y_text') === 'true';
         const hc = document.getElementById('highContrast');
         const lb = document.getElementById('largeButtons');
         const lt = document.getElementById('largeText');
@@ -390,23 +418,23 @@ class StateManager {
 
     setA11yContrast(checked) {
         document.documentElement.setAttribute('data-contrast', checked ? 'high' : 'normal');
-        localStorage.setItem('interio_a11y_contrast', checked ? 'true' : 'false');
+        storageSet('interio_a11y_contrast', checked ? 'true' : 'false');
     }
 
     setA11yLargeButtons(checked) {
         document.documentElement.setAttribute('data-large-buttons', checked ? 'true' : 'false');
-        localStorage.setItem('interio_a11y_buttons', checked ? 'true' : 'false');
+        storageSet('interio_a11y_buttons', checked ? 'true' : 'false');
     }
 
     setA11yLargeText(checked) {
         document.documentElement.setAttribute('data-large-text', checked ? 'true' : 'false');
-        localStorage.setItem('interio_a11y_text', checked ? 'true' : 'false');
+        storageSet('interio_a11y_text', checked ? 'true' : 'false');
     }
 
     /** Снимок профиля для мгновенного UI при переходе между страницами; источник истины — cookie + /api/auth/current-user */
     saveAuthSnapshot(user) {
         if (user && user.id != null && user.nickname != null) {
-            localStorage.setItem(
+            storageSet(
                 'interio_auth_user',
                 JSON.stringify({
                     id: user.id,
@@ -415,13 +443,13 @@ class StateManager {
                 })
             );
         } else {
-            localStorage.removeItem('interio_auth_user');
+            storageRemove('interio_auth_user');
         }
     }
 
     loadAuthSnapshot() {
         try {
-            const raw = localStorage.getItem('interio_auth_user');
+            const raw = storageGet('interio_auth_user');
             if (!raw) return null;
             const u = JSON.parse(raw);
             if (u && u.id != null && u.nickname != null) return u;
@@ -432,7 +460,7 @@ class StateManager {
     }
 
     clearAuthSnapshot() {
-        localStorage.removeItem('interio_auth_user');
+        storageRemove('interio_auth_user');
     }
 
     // --- Theme Toggle and A11y Event Handlers ---
@@ -463,10 +491,17 @@ class StateManager {
         const a11yPanel = document.getElementById('a11yPanel');
         const a11yClose = document.getElementById('a11yClose');
 
-        if (a11yToggle) {
-            a11yToggle.addEventListener('click', () => a11yPanel.classList.toggle('show'));
+        if (a11yToggle && a11yPanel) {
+            a11yToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const opening = !a11yPanel.classList.contains('show');
+                a11yPanel.classList.toggle('show');
+                if (opening) {
+                    this.syncA11yCheckboxesFromStorage();
+                }
+            });
         }
-        if (a11yClose) {
+        if (a11yClose && a11yPanel) {
             a11yClose.addEventListener('click', () => a11yPanel.classList.remove('show'));
         }
 
@@ -486,9 +521,9 @@ class StateManager {
         });
 
         document.addEventListener('click', (e) => {
-            if (a11yPanel && !a11yPanel.contains(e.target) && e.target !== a11yToggle) {
-                a11yPanel.classList.remove('show');
-            }
+            if (!a11yPanel || !a11yToggle) return;
+            if (a11yToggle.contains(e.target) || a11yPanel.contains(e.target)) return;
+            a11yPanel.classList.remove('show');
         });
     }
 

@@ -1,4 +1,16 @@
 // Auth Manager - управление авторизацией пользователей с SQLite backend
+function interioApiErrorMessage(data) {
+    if (!data || typeof data !== 'object') return null;
+    if (data.error) return data.error;
+    const d = data.detail;
+    if (d == null) return null;
+    if (typeof d === 'string') return d;
+    if (Array.isArray(d)) {
+        return d.map((x) => (x && typeof x === 'object' && x.msg ? x.msg : String(x))).join(' ');
+    }
+    return String(d);
+}
+
 if (typeof AuthManager === 'undefined') {
 class AuthManager {
     constructor() {
@@ -152,7 +164,7 @@ class AuthManager {
                     this.showRegisterStep();
                 }
             } else {
-                phoneError.textContent = data.error || 'Ошибка проверки телефона';
+                phoneError.textContent = interioApiErrorMessage(data) || 'Ошибка проверки телефона';
             }
         } catch (error) {
             phoneError.textContent = 'Ошибка соединения с сервером';
@@ -228,7 +240,7 @@ formatPhone(input) {
                 
                 console.log('Пользователь вошел:', data.user);
             } else {
-                passwordError.textContent = data.error || 'Ошибка входа';
+                passwordError.textContent = interioApiErrorMessage(data) || 'Ошибка входа';
             }
         } catch (error) {
             passwordError.textContent = 'Ошибка соединения с сервером';
@@ -289,12 +301,28 @@ formatPhone(input) {
                 
                 console.log('Пользователь зарегистрирован:', data.user);
             } else {
-                registerError.textContent = data.error || 'Ошибка регистрации';
+                // Проверяем конкретную ошибку 409 (конфликт)
+                if (response.status === 409) {
+                    if (data.detail && data.detail.includes('телефона')) {
+                        registerError.textContent = 'Этот номер телефона уже зарегистрирован. Попробуйте войти.';
+                    } else if (data.detail && data.detail.includes('никнейм')) {
+                        registerError.textContent = 'Этот никнейм уже занят. Выберите другой.';
+                    } else {
+                        registerError.textContent = 'Пользователь с такими данными уже существует.';
+                    }
+                } else {
+                    registerError.textContent = interioApiErrorMessage(data) || 'Ошибка регистрации';
+                }
             }
         } catch (error) {
             registerError.textContent = 'Ошибка соединения с сервером';
             console.error('Ошибка регистрации:', error);
         }
+    }
+
+    // Открыть модальное окно личного кабинета
+    openCabinetModal() {
+        this.showUserCabinet();
     }
 
     // Показать личный кабинет
