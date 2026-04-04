@@ -313,22 +313,17 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (response.ok && result.success) {
                 console.log('✅ Заявка успешно сохранена, ID:', result.submission_id);
-
+                
                 // Сохраняем ID заявки в localStorage для PDF
                 localStorage.setItem('interio_submission_id', result.submission_id);
-
-                // Перенаправляем на страницу результата
-                if (result.share_link) {
-                    window.location.href = '/result/' + result.share_link;
-                } else {
-                    // Fallback — показываем экран успеха
-                    steps.forEach(s => s.style.display = 'none');
-                    document.querySelector('.quiz-progress').style.display = 'none';
-                    quizNav.style.display = 'none';
-                    finishEarlyBtn.style.display = 'none';
-                    successScreen.classList.add('active');
-                    successScreen.style.display = 'block';
-                }
+                
+                // Показываем экран успеха
+                steps.forEach(s => s.style.display = 'none');
+                document.querySelector('.quiz-progress').style.display = 'none';
+                quizNav.style.display = 'none';
+                finishEarlyBtn.style.display = 'none';
+                successScreen.classList.add('active');
+                successScreen.style.display = 'block';
                 
             } else {
                 throw new Error(result.error || result.detail || 'Ошибка сервера');
@@ -348,6 +343,38 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('.quiz-step[data-step="6"]').scrollIntoView({ behavior: 'smooth' });
         }
     }
+
+    // --- Touch Gestures ---
+    function initTouchGestures() {
+        const quizContainer = document.getElementById('quizContainer');
+        if (!quizContainer || typeof Hammer === 'undefined') return;
+
+        const hammer = new Hammer(quizContainer);
+        
+        // Настройка распознавания свайпов
+        hammer.get('swipe').set({ direction: Hammer.DIRECTION_HORIZONTAL });
+
+        // Обработчик свайпа влево (вперед)
+        hammer.on('swipeleft', () => {
+            if (validateStep(currentStep)) {
+                if (currentStep === totalSteps) {
+                    submitForm();
+                } else {
+                    goToStep(currentStep + 1);
+                }
+            }
+        });
+
+        // Обработчик свайпа вправо (назад)
+        hammer.on('swiperight', () => {
+            if (currentStep > 1) {
+                goToStep(currentStep - 1);
+            }
+        });
+    }
+
+    // --- Initialize Touch Gestures ---
+    initTouchGestures();
 
     // --- PDF ---
     if (downloadPdfBtn) {
@@ -475,71 +502,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// ═══════════════════════════════════════════
-// ACCESSIBILITY FUNCTIONS
-// ═══════════════════════════════════════════
+// ═══ ACCESSIBILITY ═══
 function toggleA11y(checkbox, feature) {
     const html = document.documentElement;
-    const key = 'interio_a11y_' + feature;
-    if (checkbox.checked) {
-        html.setAttribute('data-' + feature, 'true');
-        localStorage.setItem(key, 'true');
-    } else {
-        html.removeAttribute('data-' + feature);
-        localStorage.removeItem(key);
-    }
+    if(checkbox.checked){html.setAttribute('data-'+feature,'true');localStorage.setItem('interio_a11y_'+feature,'true');}
+    else{html.removeAttribute('data-'+feature);localStorage.removeItem('interio_a11y_'+feature);}
 }
 
-// Restore A11y settings on load
-document.addEventListener('DOMContentLoaded', () => {
-    ['contrast', 'large-buttons', 'large-text', 'reduced-motion', 'focus-outline'].forEach(f => {
-        const val = localStorage.getItem('interio_a11y_' + f);
-        if (val === 'true') {
-            document.documentElement.setAttribute('data-' + f, 'true');
-            const cb = document.getElementById(
-                f === 'contrast' ? 'a11y_contrast' :
-                f === 'large-buttons' ? 'a11y_buttons' :
-                f === 'large-text' ? 'a11y_text' :
-                f === 'reduced-motion' ? 'a11y_motion' :
-                f === 'focus-outline' ? 'a11y_focus' : null
-            );
-            if (cb) cb.checked = true;
-        }
-    });
-});
-
-// Reduced motion style injection
-function applyReducedMotion() {
-    if (document.documentElement.getAttribute('data-reduced-motion') === 'true') {
-        let style = document.getElementById('a11y-motion-style');
-        if (!style) {
-            style = document.createElement('style');
-            style.id = 'a11y-motion-style';
-            document.head.appendChild(style);
-        }
-        style.textContent = '*, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }';
-    } else {
-        const style = document.getElementById('a11y-motion-style');
-        if (style) style.textContent = '';
-    }
+function showToast(msg, dur=3000) {
+    const t = document.getElementById('toastNotification');
+    const m = document.getElementById('toastMessage');
+    if(!t||!m) return;
+    m.textContent = msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), dur);
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    const motionCb = document.getElementById('a11y_motion');
-    if (motionCb) motionCb.addEventListener('change', applyReducedMotion);
-    applyReducedMotion();
-});
-
-// Focus outline
-document.addEventListener('DOMContentLoaded', () => {
-    const focusCb = document.getElementById('a11y_focus');
-    if (focusCb) {
-        focusCb.addEventListener('change', () => {
-            if (focusCb.checked) {
-                document.body.classList.add('a11y-focus-enabled');
-            } else {
-                document.body.classList.remove('a11y-focus-enabled');
-            }
-        });
-    }
-});

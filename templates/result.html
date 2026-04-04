@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Результат — Interio</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/a11y-3d.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 <body>
     <div class="bg-image"></div>
@@ -20,148 +23,174 @@
             <nav class="nav-links">
                 <a href="/" class="nav-link">Главная</a>
                 <a href="/quiz" class="nav-link">Квиз</a>
-                <a href="/gallery" class="nav-link">Галерея</a>
+                <a href="/portfolio" class="nav-link">Портфолио</a>
             </nav>
             <div class="header-actions">
-                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+                <button class="theme-toggle" id="themeToggle" title="Сменить тему"><i class="fas fa-moon"></i></button>
+                <button class="a11y-toggle" id="a11yToggle" title="Доступность"><i class="fas fa-eye"></i></button>
             </div>
         </div>
     </header>
 
-    <section style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:120px 24px 60px;">
-        <div id="resultCard" style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:32px;padding:60px 50px;max-width:600px;width:100%;text-align:center;box-shadow:var(--shadow-lg);">
-            <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:2.2rem;color:white;">
-                <i class="fas fa-check"></i>
-            </div>
-            <h2 style="font-family:var(--font-display);font-size:2rem;margin-bottom:12px;color:var(--text-main);">Спасибо! Заявка отправлена</h2>
-            <p style="color:var(--text-secondary);margin-bottom:32px;">Мы свяжемся с вами в ближайшее время для уточнения деталей.</p>
+    <!-- Accessibility Panel -->
+    <div id="a11yPanel" class="a11y-panel">
+        <button class="a11y-close" onclick="document.getElementById('a11yPanel').classList.remove('show')">&times;</button>
+        <h3><i class="fas fa-universal-access"></i> Доступность</h3>
+        <label class="a11y-option"><input type="checkbox" id="a11y_contrast" onchange="toggleA11y(this,'contrast')"><span class="checkmark">✓</span><span>Высокий контраст</span></label>
+        <label class="a11y-option"><input type="checkbox" id="a11y_buttons" onchange="toggleA11y(this,'large-buttons')"><span class="checkmark">✓</span><span>Крупные кнопки</span></label>
+        <label class="a11y-option"><input type="checkbox" id="a11y_text" onchange="toggleA11y(this,'large-text')"><span class="checkmark">✓</span><span>Увеличенный текст</span></label>
+        <label class="a11y-option"><input type="checkbox" id="a11y_motion" onchange="toggleA11y(this,'reduced-motion')"><span class="checkmark">✓</span><span>Без анимаций</span></label>
+    </div>
 
-            <!-- Share Link -->
-            <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;padding:20px;margin-bottom:24px;">
-                <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:8px;">Ваша ссылка на результат:</p>
-                <div style="display:flex;gap:8px;">
-                    <input id="shareLinkInput" type="text" readonly style="flex:1;padding:10px 16px;border-radius:12px;background:var(--bg-primary);border:1px solid var(--border-color);color:var(--text-main);font-size:.9rem;">
-                    <button onclick="copyShareLink()" style="padding:10px 20px;border-radius:12px;background:var(--accent);color:white;border:none;cursor:pointer;font-weight:600;">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                </div>
+    <section class="result-section" style="padding-top:100px;min-height:100vh;">
+        <div class="container">
+            <!-- Confetti message -->
+            <div id="successMsg" style="text-align:center;margin-bottom:32px;">
+                <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:2rem;color:white;">✓</div>
+                <h1 id="resultName" style="font-family:var(--font-display);font-size:2rem;color:var(--text-main);margin-bottom:8px;">Спасибо!</h1>
+                <p style="color:var(--text-secondary);">Ваша заявка принята. Мы свяжемся с вами в ближайшее время.</p>
             </div>
+
+            <!-- 3D Room -->
+            <div id="room3dContainer" style="width:100%;max-width:800px;height:400px;margin:0 auto 32px;border-radius:16px;overflow:hidden;border:1px solid var(--border-color);"></div>
+            <p style="text-align:center;color:var(--text-muted);font-size:.85rem;margin-bottom:24px;">🖱 Вращайте мышкой • Наведите на объект для деталей</p>
 
             <!-- Actions -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;">
-                <button onclick="downloadPDF()" style="padding:14px;border-radius:12px;background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-main);cursor:pointer;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <i class="fas fa-file-pdf" style="color:var(--accent-red);"></i> Скачать PDF
-                </button>
-                <button onclick="shareResult()" style="padding:14px;border-radius:12px;background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-main);cursor:pointer;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <i class="fas fa-share-alt" style="color:var(--accent);"></i> Поделиться
-                </button>
-                <a href="/gallery" style="padding:14px;border-radius:12px;background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-main);text-decoration:none;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <i class="fas fa-images" style="color:var(--accent-light);"></i> Галерея
-                </a>
-                <a href="/" style="padding:14px;border-radius:12px;background:var(--gradient-1);border:none;color:white;text-decoration:none;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <i class="fas fa-home"></i> На главную
-                </a>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;max-width:700px;margin:0 auto 32px;">
+                <button onclick="takeScreenshot()" class="btn-outline" style="padding:14px;"><i class="fas fa-camera"></i> Скриншот</button>
+                <button onclick="publishToPortfolio()" class="btn-outline" style="padding:14px;"><i class="fas fa-images"></i> В портфолио</button>
+                <button onclick="downloadPDF()" class="btn-outline" style="padding:14px;"><i class="fas fa-file-pdf"></i> PDF-бриф</button>
+                <button onclick="shareResult()" class="btn-outline" style="padding:14px;"><i class="fas fa-share-alt"></i> Поделиться</button>
+                <a href="/" class="btn-outline" style="padding:14px;text-align:center;text-decoration:none;"><i class="fas fa-home"></i> На главную</a>
+                <a href="/portfolio" class="btn-outline" style="padding:14px;text-align:center;text-decoration:none;"><i class="fas fa-images"></i> Портфолио</a>
+            </div>
+
+            <!-- QR Code -->
+            <div style="text-align:center;max-width:400px;margin:0 auto;">
+                <canvas id="qrCanvas"></canvas>
+                <p style="color:var(--text-muted);font-size:.8rem;margin-top:8px;">QR-код страницы результата</p>
             </div>
         </div>
     </section>
 
+    <div id="toastNotification" class="toast"><span id="toastMessage"></span></div>
+
+    <script src="/static/3d-room.js"></script>
+    <script src="/static/actions.js"></script>
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const shareLink = window.location.href;
-        document.getElementById('shareLinkInput').value = shareLink;
+    // Theme
+    const tt = document.getElementById('themeToggle');
+    const html = document.documentElement;
+    html.setAttribute('data-theme', localStorage.getItem('interio_theme') || 'dark');
+    tt.querySelector('i').className = html.getAttribute('data-theme') === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+    tt.onclick = () => {
+        const n = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', n); localStorage.setItem('interio_theme', n);
+        tt.querySelector('i').className = n === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+    };
 
-        // Confetti
-        if (typeof confetti === 'function') {
-            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    // A11y toggle
+    document.getElementById('a11yToggle')?.addEventListener('click', () => document.getElementById('a11yPanel').classList.toggle('show'));
+
+    // Restore A11y
+    ['contrast','large-buttons','large-text','reduced-motion'].forEach(f => {
+        if (localStorage.getItem('interio_a11y_'+f) === 'true') {
+            html.setAttribute('data-'+f,'true');
+            const cb = document.getElementById('a11y_'+f.replace('-','_').replace('large-buttons','buttons'));
+            if(cb) cb.checked = true;
         }
-
-        // Theme
-        const tt = document.getElementById('themeToggle');
-        const html = document.documentElement;
-        html.setAttribute('data-theme', localStorage.getItem('interio_theme') || 'dark');
-        tt.querySelector('i').className = html.getAttribute('data-theme') === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
-        tt.onclick = () => {
-            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', next);
-            localStorage.setItem('interio_theme', next);
-            tt.querySelector('i').className = next === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
-        };
     });
 
-    function copyShareLink() {
-        const input = document.getElementById('shareLinkInput');
-        input.select();
-        document.execCommand('copy');
-        alert('Ссылка скопирована!');
+    function toggleA11y(cb, f) {
+        if(cb.checked){html.setAttribute('data-'+f,'true');localStorage.setItem('interio_a11y_'+f,'true');}
+        else{html.removeAttribute('data-'+f);localStorage.removeItem('interio_a11y_'+f);}
     }
 
-    function shareResult() {
-        const url = window.location.href;
-        if (navigator.share) {
-            navigator.share({ title: 'Interio — Дизайн-проект', url });
-        } else {
-            copyShareLink();
+    // Confetti
+    if(typeof confetti==='function') confetti({particleCount:150,spread:70,origin:{y:0.6}});
+
+    // Load answers from localStorage
+    const answers = JSON.parse(localStorage.getItem('interio_quiz_answers') || '{}');
+    const name = answers.name || 'Друг';
+    document.getElementById('resultName').textContent = name + ', спасибо!';
+
+    // Generate QR
+    const shareUrl = window.location.href;
+    QRCode.toCanvas(document.getElementById('qrCanvas'), shareUrl, {width:180,margin:1}, err => {
+        if(err) console.error('QR error:', err);
+    });
+
+    // Init 3D Room
+    setTimeout(() => {
+        const container = document.getElementById('room3dContainer');
+        if(container && typeof Room3D !== 'undefined') {
+            Room3D.init(container);
+            Room3D.update({
+                room_type: answers.roomType,
+                zones: answers.zones || [],
+                area: parseInt(answers.area) || 60,
+                style: answers.style,
+                budget: answers.budget,
+                colors: answers.colors || []
+            });
         }
+    }, 500);
+
+    function takeScreenshot() {
+        if(typeof Room3D === 'undefined') return;
+        const dataUrl = Room3D.screenshot();
+        const a = document.createElement('a');
+        a.href = dataUrl; a.download = 'interio_3d_room.png'; a.click();
+        showToast('📸 Скриншот сохранён!');
+    }
+
+    async function publishToPortfolio() {
+        const title = prompt('Название дизайна:', (answers.style||'Стильный') + ' ' + (answers.roomType||'интерьер'));
+        if(!title) return;
+        const desc = prompt('Описание (необязательно):', '') || '';
+        try {
+            const screenshot = typeof Room3D !== 'undefined' ? Room3D.screenshot() : '';
+            const res = await fetch('/api/portfolio/publish', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({title, description: desc, scene_params: answers})
+            });
+            const data = await res.json();
+            if(data.success) { showToast('✅ Опубликовано в портфолио!'); }
+            else { showToast('❌ Ошибка публикации'); }
+        } catch(e) { showToast('❌ Ошибка: ' + e.message); }
     }
 
     async function downloadPDF() {
-        const answers = JSON.parse(localStorage.getItem('interio_quiz_answers') || '{}');
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const fetchFont = async (url) => {
-            const r = await fetch(url);
-            const b = await r.arrayBuffer();
-            let bin = '';
-            const bytes = new Uint8Array(b);
-            for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
-            return btoa(bin);
-        };
-        const [fontR, fontM] = await Promise.all([
+        const {jsPDF} = window.jspdf; const doc = new jsPDF();
+        const fetchFont = async url => {const r=await fetch(url);const b=await r.arrayBuffer();let s='';const u=new Uint8Array(b);for(let i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s);};
+        const [fr,fm] = await Promise.all([
             fetchFont('https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Regular.ttf'),
-            fetchFont('https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Medium.ttf'),
+            fetchFont('https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Medium.ttf')
         ]);
-        doc.addFileToVFS('Roboto-Regular.ttf', fontR);
-        doc.addFileToVFS('Roboto-Medium.ttf', fontM);
-        doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
-        doc.addFont('Roboto-Medium.ttf', 'Roboto', 'bold');
+        doc.addFileToVFS('Roboto-Regular.ttf',fr);doc.addFileToVFS('Roboto-Medium.ttf',fm);
+        doc.addFont('Roboto-Regular.ttf','Roboto','normal');doc.addFont('Roboto-Medium.ttf','Roboto','bold');
+        doc.setFillColor(74,108,247);doc.rect(0,0,210,40,'F');
+        doc.setTextColor(255,255,255);doc.setFontSize(24);doc.setFont('Roboto','bold');doc.text('Interio',20,22);
+        doc.setFontSize(12);doc.setFont('Roboto','normal');doc.text('Заявка на дизайн-проект',20,32);
+        let y=55;doc.setTextColor(30,30,30);
+        const addS=(t,v)=>{doc.setFontSize(11);doc.setFont('Roboto','bold');doc.setTextColor(74,108,247);doc.text(t,20,y);y+=7;doc.setFont('Roboto','normal');doc.setTextColor(50,50,50);if(Array.isArray(v))v.forEach(i=>{doc.text('• '+i,24,y);y+=6;});else{const ls=doc.splitTextToSize(String(v||'—'),170);doc.text(ls,20,y);y+=6*ls.length;}y+=4;};
+        addS('Тип:',answers.roomType);addS('Зоны:',answers.zones);addS('Площадь:',answers.area?answers.area+' м²':'—');
+        addS('Стиль:',answers.style);addS('Бюджет:',answers.budget);
+        y+=5;doc.setDrawColor(200,200,200);doc.line(20,y,190,y);y+=10;
+        addS('Имя:',answers.name);addS('Телефон:',answers.phone);addS('Email:',answers.email||'—');addS('Комментарий:',answers.comment||'—');
+        doc.setFontSize(9);doc.setTextColor(150,150,150);doc.text('Дата: '+new Date().toLocaleString('ru-RU'),20,y);
+        doc.save('Interio_brief_'+Date.now()+'.pdf');
+    }
 
-        doc.setFillColor(74, 108, 247);
-        doc.rect(0, 0, 210, 40, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(24);
-        doc.setFont('Roboto', 'bold');
-        doc.text('Interio', 20, 22);
-        doc.setFontSize(12);
-        doc.setFont('Roboto', 'normal');
-        doc.text('Заявка на дизайн-проект', 20, 32);
+    function shareResult() {
+        if(navigator.share) navigator.share({title:'Interio — Дизайн-проект',url:window.location.href});
+        else {navigator.clipboard.writeText(window.location.href);showToast('🔗 Ссылка скопирована!');}
+    }
 
-        let y = 55;
-        doc.setTextColor(30, 30, 30);
-        const addSection = (title, value) => {
-            doc.setFontSize(11);
-            doc.setFont('Roboto', 'bold');
-            doc.setTextColor(74, 108, 247);
-            doc.text(title, 20, y); y += 7;
-            doc.setFont('Roboto', 'normal');
-            doc.setTextColor(50, 50, 50);
-            if (Array.isArray(value)) { value.forEach(v => { doc.text('\u2022 ' + v, 24, y); y += 6; }); }
-            else { const lines = doc.splitTextToSize(String(value || '\u2014'), 170); doc.text(lines, 20, y); y += 6 * lines.length; }
-            y += 4;
-        };
-        addSection('Тип помещения:', answers.roomType);
-        addSection('Зоны:', answers.zones);
-        addSection('Площадь:', answers.area ? answers.area + ' м\u00B2' : '\u2014');
-        addSection('Стиль:', answers.style);
-        addSection('Бюджет:', answers.budget);
-        y += 5;
-        doc.setDrawColor(200, 200, 200);
-        doc.line(20, y, 190, y); y += 10;
-        addSection('Имя:', answers.name);
-        addSection('Телефон:', answers.phone);
-        addSection('Email:', answers.email || '\u2014');
-        addSection('Комментарий:', answers.comment || '\u2014');
-
-        doc.save('Interio_' + Date.now() + '.pdf');
+    function showToast(msg) {
+        const t = document.getElementById('toastNotification');
+        const m = document.getElementById('toastMessage');
+        if(t && m) {m.textContent = msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 3000);}
     }
     </script>
 </body>

@@ -273,7 +273,7 @@ formatPhone(input) {
     }
 
     // Показать личный кабинет
-    showUserCabinet() {
+    async showUserCabinet() {
         const cabinetContainer = document.querySelector('.cabinet-container');
         if (cabinetContainer && this.currentUser) {
             cabinetContainer.innerHTML = `
@@ -283,16 +283,97 @@ formatPhone(input) {
                     <p>Никнейм: <strong>${this.currentUser.nickname}</strong></p>
                     <p>Телефон: <strong>${this.currentUser.phone}</strong></p>
                     <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 16px;">
-                        Вы вошли в систему. Здесь будет отображаться история ваших заявок и настройки.
+                        ID: ${this.currentUser.id}
                     </p>
-                    <button class="logout-btn" onclick="window.authManager.logout()">
-                        <i class="fas fa-sign-out-alt"></i> Выйти
-                    </button>
+                </div>
+                
+                <div class="cabinet-section">
+                    <h4>История заявок</h4>
+                    <div id="userSubmissions" class="submissions-list">
+                        <div class="loading">Загрузка...</div>
+                    </div>
+                </div>
+                
+                <div class="cabinet-actions">
+                    <button class="logout-btn" onclick="window.authManager.logout()">Выйти</button>
                 </div>
             `;
         }
         // Показываем модальное окно
         document.getElementById('cabinetModal').style.display = 'block';
+        
+        // Загружаем историю заявок
+        await this.loadUserSubmissions();
+    }
+    
+    // Загрузка заявок пользователя
+    async loadUserSubmissions() {
+        try {
+            const response = await fetch('/api/quiz/user-submissions');
+            const data = await response.json();
+            
+            const submissionsContainer = document.getElementById('userSubmissions');
+            if (!submissionsContainer) return;
+            
+            if (data.success && data.submissions.length > 0) {
+                submissionsContainer.innerHTML = data.submissions.map(submission => this.renderSubmission(submission)).join('');
+            } else {
+                submissionsContainer.innerHTML = '<div class="no-submissions">У вас пока нет заявок</div>';
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки заявок:', error);
+            const submissionsContainer = document.getElementById('userSubmissions');
+            if (submissionsContainer) {
+                submissionsContainer.innerHTML = '<div class="error">Ошибка загрузки заявок</div>';
+            }
+        }
+    }
+    
+    // Рендер одной заявки
+    renderSubmission(submission) {
+        const createdDate = new Date(submission.created_at).toLocaleDateString('ru-RU');
+        const zones = submission.zones ? submission.zones.split(',').join(', ') : 'Не указано';
+        
+        return `
+            <div class="submission-item">
+                <div class="submission-header">
+                    <div class="submission-id">#${submission.id}</div>
+                    <div class="submission-date">${createdDate}</div>
+                </div>
+                <div class="submission-details">
+                    <div class="submission-row">
+                        <span class="label">Имя:</span>
+                        <span class="value">${submission.name}</span>
+                    </div>
+                    <div class="submission-row">
+                        <span class="label">Тип помещения:</span>
+                        <span class="value">${submission.room_type}</span>
+                    </div>
+                    <div class="submission-row">
+                        <span class="label">Зоны:</span>
+                        <span class="value">${zones}</span>
+                    </div>
+                    <div class="submission-row">
+                        <span class="label">Площадь:</span>
+                        <span class="value">${submission.area} м²</span>
+                    </div>
+                    <div class="submission-row">
+                        <span class="label">Стиль:</span>
+                        <span class="value">${submission.style}</span>
+                    </div>
+                    <div class="submission-row">
+                        <span class="label">Бюджет:</span>
+                        <span class="value">${submission.budget}</span>
+                    </div>
+                    ${submission.comment ? `
+                    <div class="submission-row">
+                        <span class="label">Комментарий:</span>
+                        <span class="value">${submission.comment}</span>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
     }
 
     // Закрыть модальное окно личного кабинета
