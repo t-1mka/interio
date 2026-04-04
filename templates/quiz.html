@@ -2,7 +2,6 @@
 <html lang="ru" data-theme="dark">
 
 <head>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="/static/state-manager.js"></script>
@@ -17,7 +16,6 @@
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
-    <link rel="stylesheet" href="/static/responsive.css">
 </head>
 
 <body class="quiz-body">
@@ -378,7 +376,8 @@
                             <label class="checkbox-label">
                                 <input type="checkbox" id="consentCheck">
                                 <div class="checkmark-custom"></div>
-                                <span>Я соглашаюсь на обработку персональных данных *</span>
+                                <span>Я соглашаюсь на обработку персональных данных <span
+                                        class="required">*</span></span>
                             </label>
                         </div>
                     </form>
@@ -716,29 +715,6 @@
     <script src="/static/session-integration.js"></script>
     <script src="/static/auth.js"></script>
     <script src="/static/quiz.js"></script>
-
-    <!-- GigaChat Button -->
-    <button id="gcFloatBtn" title="ИИ-советник" onclick="document.getElementById('gcModal').style.display='flex'" style="position:fixed;bottom:28px;right:28px;z-index:1000;width:64px;height:64px;border-radius:50%;border:none;background:linear-gradient(135deg,#2563eb,#e74c5e);color:white;font-size:1.6rem;cursor:pointer;box-shadow:0 4px 24px rgba(37,99,235,0.5);display:flex;align-items:center;justify-content:center;">🤖<span style="position:absolute;top:-2px;right:-2px;width:22px;height:22px;background:#22c55e;border-radius:50%;font-size:.65rem;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">AI</span></button>
-    <!-- GigaChat Modal -->
-    <div id="gcModal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);align-items:flex-end;justify-content:center;">
-        <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:24px 24px 0 0;width:100%;max-width:500px;max-height:80vh;display:flex;flex-direction:column;">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--border-color);">
-                <h3 style="margin:0;font-size:1.1rem;color:var(--text-main);">🤖 ИИ-советник</h3>
-                <button onclick="document.getElementById('gcModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:1.3rem;cursor:pointer;">&times;</button>
-            </div>
-            <div id="gcMsgs" style="flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:12px;">
-                <div style="padding:12px 16px;border-radius:16px 16px 16px 4px;background:var(--bg-card);color:var(--text-main);align-self:flex-start;max-width:85%;font-size:.9rem;line-height:1.5;">Привет! Я ИИ-советник. Спросите про стиль, бюджет, планировку. 🏠</div>
-            </div>
-            <div style="display:flex;gap:8px;padding:16px 24px;border-top:1px solid var(--border-color);">
-                <input id="gcInput" type="text" placeholder="Спросите о дизайне..." style="flex:1;padding:12px 16px;border-radius:12px;background:var(--bg-primary);border:1px solid var(--border-color);color:var(--text-main);font-size:.9rem;outline:none;">
-                <button onclick="sendGC()" style="padding:12px 20px;border-radius:12px;background:var(--accent);color:white;border:none;cursor:pointer;font-weight:600;">→</button>
-            </div>
-        </div>
-    </div>
-<p style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);font-size:0.45rem;color:rgba(128,128,128,0.15);pointer-events:none;"><a href="https://brainstorm-c0ap.onrender.com/" style="color:rgba(128,128,128,0.15);text-decoration:none;">brainstorm</a></p>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script src="/static/widgets.js"></script>
-<p style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);font-size:0.45rem;color:rgba(128,128,128,0.15);pointer-events:none;"><a href="https://brainstorm-c0ap.onrender.com/" style="color:rgba(128,128,128,0.15);text-decoration:none;">brainstorm</a></p>
 </body>
 
 </html>
