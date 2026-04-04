@@ -312,18 +312,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
             
             if (response.ok && result.success) {
-                console.log('✅ Заявка успешно сохранена, ID:', result.submission_id);
-                
-                // Сохраняем ID заявки в localStorage для PDF
+                console.log('✅ Заявка сохранена, ID:', result.submission_id);
                 localStorage.setItem('interio_submission_id', result.submission_id);
-                
-                // Показываем экран успеха
-                steps.forEach(s => s.style.display = 'none');
-                document.querySelector('.quiz-progress').style.display = 'none';
-                quizNav.style.display = 'none';
-                finishEarlyBtn.style.display = 'none';
-                successScreen.classList.add('active');
-                successScreen.style.display = 'block';
+                // Редирект на страницу результата с 3D-комнатой
+                window.location.href = '/result/' + result.share_link;
                 
             } else {
                 throw new Error(result.error || result.detail || 'Ошибка сервера');
