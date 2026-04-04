@@ -1,4 +1,5 @@
 services:
+  # ── Единый сервис: бэкенд + фронтенд ──
   - type: web
     name: interio
     env: python
@@ -12,11 +13,11 @@ services:
       - key: PYTHON_VERSION
         value: "3.11"
 
-      # GigaChat AI
+      # GigaChat ИИ-советник
       - key: GIGACHAT_AUTH_KEY
         sync: false
 
-      # Telegram Bot
+      # Telegram бот
       - key: TELEGRAM_BOT_TOKEN
         sync: false
       - key: TELEGRAM_ADMIN_CHAT_ID
@@ -33,7 +34,3 @@ services:
         sync: false
       - key: ADMIN_EMAIL
         sync: false
-
-      # App URL (change after first deploy)
-      - key: FRONTEND_URL
-        value: https://interio.onrender.com
