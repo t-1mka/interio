@@ -17,7 +17,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
-FRONTEND_URL = os.getenv("FRONTEND_URL", "https://interio.vercel.app")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "")  # HTTPS URL для Web App (опционально)
 GIGACHAT_AUTH_KEY = os.getenv("GIGACHAT_AUTH_KEY", "")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
@@ -37,14 +37,19 @@ class SupportState(StatesGroup):
 
 # ═══ Keyboards ═══
 def main_kb(url=FRONTEND_URL):
-    return InlineKeyboardMarkup(inline_keyboard=[
+    kb = [
         [InlineKeyboardButton(text="🏠 Пройти квиз", callback_data="quiz_start")],
-        [InlineKeyboardButton(text="🌐 Квиз в браузере", web_app=WebAppInfo(url=f"{url}/quiz"))],
+    ]
+    # Web App только если задан HTTPS URL
+    if url and url.startswith("https://"):
+        kb.append([InlineKeyboardButton(text="🌐 Квиз в браузере", web_app=WebAppInfo(url=f"{url}/quiz"))])
+    kb.extend([
         [InlineKeyboardButton(text="🤖 ИИ-советник", callback_data="support")],
         [InlineKeyboardButton(text="📋 Мои заявки", callback_data="my_requests")],
-        [InlineKeyboardButton(text="🖼 Портфолио", web_app=WebAppInfo(url=f"{url}/portfolio"))],
+        [InlineKeyboardButton(text="🖼 Портфолио", callback_data="portfolio_link")],
         [InlineKeyboardButton(text="ℹ️ О сервисе", callback_data="about")],
     ])
+    return InlineKeyboardMarkup(inline_keyboard=kb)
 
 def back_kb():
     return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="🔙 Главное меню", callback_data="back_to_start")]])
@@ -122,6 +127,11 @@ async def about(cb: CallbackQuery):
         "Сервис для создания персонального дизайн-проекта.\n\n"
         "✅ Квиз из 6 шагов\n🤖 ИИ-поддержка\n🎨 Генерация дизайна\n📄 PDF-бриф\n🖼 Портфолио\n\n"
         f"🌐 {FRONTEND_URL}", reply_markup=back_kb(), parse_mode="HTML")
+
+@dp.callback_query(F.data=="portfolio_link")
+async def portfolio_link_cb(cb: CallbackQuery):
+    url = FRONTEND_URL if FRONTEND_URL and FRONTEND_URL.startswith("https://") else "Фронтенд разворачивается..."
+    await cb.answer(f"🖼 Портфолио: {url}/portfolio", show_alert=False)
 
 @dp.callback_query(F.data=="help")
 async def help_cmd(cb: CallbackQuery):
