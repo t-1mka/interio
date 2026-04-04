@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/static/state-manager.js"></script>
+    <script>
+    try {
+        window.stateManager.applyThemeFromStorage();
+        window.stateManager.applyA11yAttrsFromStorage();
+    } catch (e) {}
+    </script>
     <title>Interio — Дизайн-проекты</title>
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="../static/state-manager.js"></script>
-    <script src="../static/auth.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
 </head>
 <body>
     <div class="bg-image"></div>
@@ -40,8 +46,8 @@
                     </div>
                 </div>
     <button class="login-btn" id="loginBtn" onclick="window.authManager.openModal()">
-        <i class="fas fa-user"></i> Войти
-    </button>
+                    <i class="fas fa-user"></i> Войти
+                </button>
             </div>
         </div>
     </header>
@@ -191,7 +197,7 @@
             <div id="phoneStep" class="auth-step">
                 <h2>Вход в личный кабинет</h2>
                 <p>Введите номер телефона</p>
-                <input type="tel" id="phoneInput" placeholder="+7 (999) 123-45-67" maxlength="18" oninput="window.authManager.formatPhone(this)">
+                <input type="tel" id="phoneInput" placeholder="+7 (999) 123-45-67" maxlength="18" oninput="window.authManager && window.authManager.formatPhone && window.authManager.formatPhone(this)">
                 <button onclick="window.authManager.checkPhone()">Далее</button>
                 <div id="phoneError" class="auth-error-message"></div>
             </div>
@@ -225,11 +231,30 @@
         <div class="cabinet-modal-content">
             <span class="cabinet-close" onclick="window.authManager.closeCabinetModal()">&times;</span>
             <div class="cabinet-container">
+                <div class="cabinet-header">
+                    <h2>Личный кабинет</h2>
+                    <div class="user-info">
+                        <div class="user-avatar" id="cabinetUserAvatar"></div>
+                        <div class="user-details">
+                            <div class="user-nickname" id="cabinetUserNickname"></div>
+                            <div class="user-phone" id="cabinetUserPhone"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="cabinet-section">
+                    <h3>История заявок</h3>
+                    <div id="userSubmissions" class="submissions-list">
+                        <div class="loading">Загрузка...</div>
+                    </div>
+                </div>
+                
                 <button class="logout-btn" onclick="window.authManager.logout()">Выйти</button>
             </div>
         </div>
     </div>
 
     <script src="/static/actions.js"></script>
+    <script src="/static/auth.js"></script>
 </body>
 </html>

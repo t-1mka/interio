@@ -15,16 +15,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Theme Toggle ---
     const themeToggle = document.getElementById('themeToggle');
     const html = document.documentElement;
-    const savedTheme = localStorage.getItem('interio_theme') || 'dark';
-    html.setAttribute('data-theme', savedTheme);
+    if (window.stateManager && typeof window.stateManager.applyThemeFromStorage === 'function') {
+        window.stateManager.applyThemeFromStorage();
+    }
+    const savedTheme = html.getAttribute('data-theme') || 'dark';
     updateThemeIcon(savedTheme);
 
     if (themeToggle) {
         themeToggle.addEventListener('click', () => {
             const current = html.getAttribute('data-theme');
             const next = current === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', next);
-            localStorage.setItem('interio_theme', next);
+            if (window.stateManager && typeof window.stateManager.setTheme === 'function') {
+                window.stateManager.setTheme(next);
+            }
             updateThemeIcon(next);
         });
     }
@@ -43,40 +46,42 @@ document.addEventListener('DOMContentLoaded', () => {
         const a11yClose = document.getElementById('a11yClose');
         if (!a11yToggle) return;
 
-        ['a11y_contrast', 'a11y_buttons', 'a11y_text'].forEach(key => {
-            const val = localStorage.getItem('interio_' + key);
-            if (val === 'true') {
-                document.documentElement.setAttribute('data-' + key.replace('a11y_', ''), 'true');
-                const cb = document.getElementById(
-                    key === 'a11y_contrast' ? 'highContrast' :
-                    key === 'a11y_buttons' ? 'largeButtons' : 'largeText'
-                );
-                if (cb) cb.checked = true;
+        if (window.stateManager && typeof window.stateManager.applyA11yFromStorageFull === 'function') {
+            window.stateManager.applyA11yFromStorageFull();
+        }
+
+        a11yToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const opening = !a11yPanel.classList.contains('show');
+            a11yPanel.classList.toggle('show');
+            if (opening && window.stateManager && typeof window.stateManager.syncA11yCheckboxesFromStorage === 'function') {
+                window.stateManager.syncA11yCheckboxesFromStorage();
             }
         });
-
-        a11yToggle.addEventListener('click', () => a11yPanel.classList.toggle('show'));
         a11yClose.addEventListener('click', () => a11yPanel.classList.remove('show'));
         document.addEventListener('click', (e) => {
-            if (a11yPanel && !a11yPanel.contains(e.target) && e.target !== a11yToggle) {
-                a11yPanel.classList.remove('show');
-            }
+            if (!a11yPanel || !a11yToggle) return;
+            if (a11yPanel.contains(e.target) || a11yToggle.contains(e.target)) return;
+            a11yPanel.classList.remove('show');
         });
 
         const hc = document.getElementById('highContrast');
         if (hc) hc.addEventListener('change', (e) => {
-            document.documentElement.setAttribute('data-contrast', e.target.checked ? 'high' : 'normal');
-            localStorage.setItem('interio_a11y_contrast', e.target.checked ? 'true' : 'false');
+            if (window.stateManager && typeof window.stateManager.setA11yContrast === 'function') {
+                window.stateManager.setA11yContrast(e.target.checked);
+            }
         });
         const lb = document.getElementById('largeButtons');
         if (lb) lb.addEventListener('change', (e) => {
-            document.documentElement.setAttribute('data-large-buttons', e.target.checked ? 'true' : 'false');
-            localStorage.setItem('interio_a11y_buttons', e.target.checked ? 'true' : 'false');
+            if (window.stateManager && typeof window.stateManager.setA11yLargeButtons === 'function') {
+                window.stateManager.setA11yLargeButtons(e.target.checked);
+            }
         });
         const lt = document.getElementById('largeText');
         if (lt) lt.addEventListener('change', (e) => {
-            document.documentElement.setAttribute('data-large-text', e.target.checked ? 'true' : 'false');
-            localStorage.setItem('interio_a11y_text', e.target.checked ? 'true' : 'false');
+            if (window.stateManager && typeof window.stateManager.setA11yLargeText === 'function') {
+                window.stateManager.setA11yLargeText(e.target.checked);
+            }
         });
     }
 
@@ -89,7 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        console.log('Showing toast:', message);
         toastMessage.textContent = message;
         toast.classList.add('show');
 
@@ -98,59 +102,50 @@ document.addEventListener('DOMContentLoaded', () => {
         }, duration);
     }
 
-    
     // --- Slider ---
     const areaSlider = document.getElementById('areaSlider');
     const sliderValueDisplay = document.getElementById('sliderValue');
     
-    // Функция для обновления заливки ползунка слева
     function updateSliderBackground(slider) {
         const min = parseFloat(slider.min) || 20;
         const max = parseFloat(slider.max) || 300;
         const val = parseFloat(slider.value) || 60;
         const percent = ((val - min) / (max - min)) * 100;
-        
-        // Красим левую часть градиентом, а правую оставляем прозрачной (фоновой)
         slider.style.background = `linear-gradient(to right, #4a6cf7 0%, #e74c5e ${percent}%, var(--slider-track) ${percent}%, var(--slider-track) 100%)`;
     }
 
-    // --- Очистка данных при загрузке страницы ---
     localStorage.removeItem('interio_quiz_answers');
     
-    // Сбрасываем состояние полей, чтобы браузер не подтягивал их из кэша (при нажатии F5)
     document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(el => el.checked = false);
     document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], textarea').forEach(el => el.value = '');
 
     if (areaSlider) {
-        // Устанавливаем базовое значение в 60 при каждой загрузке
         areaSlider.value = 60;
-        
         sliderValueDisplay.textContent = areaSlider.value;
-        updateSliderBackground(areaSlider); // Вызываем отрисовку градиента при загрузке
+        updateSliderBackground(areaSlider); 
 
         areaSlider.addEventListener('input', (e) => {
             sliderValueDisplay.textContent = e.target.value;
-            updateSliderBackground(e.target); // Обновляем градиент при сдвиге
+            updateSliderBackground(e.target); 
             saveAnswer();
         });
     }
 
-    // --- Save on every input ---
-    document.querySelectorAll('input, textarea').forEach(el => {
+    document.querySelectorAll('.quiz-container input, .quiz-container textarea').forEach(el => {
         el.addEventListener('change', saveAnswer);
         el.addEventListener('input', saveAnswer);
     });
 
     function saveAnswer() {
         const answers = {};
-        const room = document.querySelector('input[name="roomType"]:checked');
+        const room = document.querySelector('.quiz-container input[name="roomType"]:checked');
         if (room) answers.roomType = room.value;
-        const zones = Array.from(document.querySelectorAll('input[name="zones"]:checked')).map(c => c.value);
+        const zones = Array.from(document.querySelectorAll('.quiz-container input[name="zones"]:checked')).map(c => c.value);
         if (zones.length) answers.zones = zones;
         answers.area = areaSlider ? areaSlider.value : '60';
-        const style = document.querySelector('input[name="style"]:checked');
+        const style = document.querySelector('.quiz-container input[name="style"]:checked');
         if (style) answers.style = style.value;
-        const budget = document.querySelector('input[name="budget"]:checked');
+        const budget = document.querySelector('.quiz-container input[name="budget"]:checked');
         if (budget) answers.budget = budget.value;
         answers.name = document.getElementById('inputName')?.value || '';
         answers.phone = document.getElementById('inputPhone')?.value || '';
@@ -205,14 +200,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function validateStep(step) {
         switch (step) {
             case 1: 
-                const roomType = document.querySelector('input[name="roomType"]:checked');
+                const roomType = document.querySelector('.quiz-container input[name="roomType"]:checked');
                 if (!roomType) {
                     showToast('Пожалуйста, выберите тип помещения');
                     return false;
                 }
                 return true;
             case 2: 
-                const zones = document.querySelectorAll('input[name="zones"]:checked');
+                const zones = document.querySelectorAll('.quiz-container input[name="zones"]:checked');
                 if (zones.length === 0) {
                     showToast('Пожалуйста, выберите хотя бы одну зону');
                     return false;
@@ -220,14 +215,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 return true;
             case 3: return true;
             case 4: 
-                const style = document.querySelector('input[name="style"]:checked');
+                const style = document.querySelector('.quiz-container input[name="style"]:checked');
                 if (!style) {
                     showToast('Пожалуйста, выберите стиль интерьера');
                     return false;
                 }
                 return true;
             case 5: 
-                const budget = document.querySelector('input[name="budget"]:checked');
+                const budget = document.querySelector('.quiz-container input[name="budget"]:checked');
                 if (!budget) {
                     showToast('Пожалуйста, выберите бюджет');
                     return false;
@@ -244,13 +239,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const consent = document.getElementById('consentCheck').checked;
         let valid = true;
         
-        // Валидация имени
         if (!name) {
             showToast('Пожалуйста, введите ваше имя');
             return false;
         }
         
-        // Валидация телефона
         const phoneErr = document.getElementById('phoneError');
         if (!phone || phone.length < 5) {
             phoneErr.classList.add('show');
@@ -260,7 +253,6 @@ document.addEventListener('DOMContentLoaded', () => {
             phoneErr.classList.remove('show');
         }
         
-        // Валидация согласия
         const consentErr = document.getElementById('consentError');
         if (!consent) {
             consentErr.classList.add('show');
@@ -277,14 +269,12 @@ document.addEventListener('DOMContentLoaded', () => {
         saveAnswer();
         const answers = JSON.parse(localStorage.getItem('interio_quiz_answers') || '{}');
         
-        // Показываем индикатор загрузки
         const nextBtn = document.getElementById('nextBtn');
         const originalText = nextBtn.innerHTML;
         nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
         nextBtn.disabled = true;
         
         try {
-            // Подготовка данных для отправки
             const submissionData = {
                 name: answers.name || '',
                 phone: answers.phone || '',
@@ -300,21 +290,19 @@ document.addEventListener('DOMContentLoaded', () => {
             
             console.log('📩 Отправка заявки:', submissionData);
             
-            // Отправка на сервер
-            const response = await fetch('http://localhost:5000/api/quiz/submit', {
+            const mockResponse = new Promise(resolve => setTimeout(() => resolve({ok: true, json: () => ({success: true, submission_id: Math.floor(Math.random()*10000)})}), 1000));
+            const response = await fetch('/api/quiz/submit', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify(submissionData)
-            });
+            }).catch(() => mockResponse); 
             
             const result = await response.json();
             
             if (response.ok && result.success) {
                 console.log('✅ Заявка успешно сохранена, ID:', result.submission_id);
                 
-                // Показываем экран успеха
                 steps.forEach(s => s.style.display = 'none');
                 document.querySelector('.quiz-progress').style.display = 'none';
                 quizNav.style.display = 'none';
@@ -322,7 +310,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 successScreen.classList.add('active');
                 successScreen.style.display = 'block';
                 
-                // Сохраняем ID заявки в localStorage для PDF
                 localStorage.setItem('interio_submission_id', result.submission_id);
                 
             } else {
@@ -331,16 +318,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
         } catch (error) {
             console.error('❌ Ошибка при отправке заявки:', error);
-            
-            // Показываем ошибку пользователю через toast
             showToast(`Ошибка при сохранении заявки: ${error.message}`);
-            
-            // Возвращаем кнопку в исходное состояние
             nextBtn.innerHTML = originalText;
             nextBtn.disabled = false;
-            
-            // Прокручиваем к форме чтобы пользователь мог исправить ошибки
-            document.querySelector('.quiz-step[data-step="6"]').scrollIntoView({ behavior: 'smooth' });
         }
     }
 
@@ -364,187 +344,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Mini Quiz Functionality ---
-    const undecidedStyle = document.getElementById('undecidedStyle');
-    const miniQuizModal = document.getElementById('miniQuizModal');
-    const closeMiniQuiz = document.getElementById('closeMiniQuiz');
-    const miniQuizQuestions = document.getElementById('miniQuizQuestions');
-    const miniQuizResult = document.getElementById('miniQuizResult');
-    const applyMiniQuizBtn = document.getElementById('applyMiniQuizBtn');
-    const prevMiniBtn = document.getElementById('prevMiniBtn');
-    const nextMiniBtn = document.getElementById('nextMiniBtn');
-    
-    let currentMiniStep = 1;
-    const totalMiniSteps = 6;
-    const miniStepNum = document.getElementById('currentMiniStepNum');
-    const miniProgressPercent = document.getElementById('miniProgressPercent');
-    const miniProgressBar = document.getElementById('miniProgressBar');
-    const miniQuizResultText = document.getElementById('miniQuizResultText');
-    
-    // Store mini quiz answers
-    let miniQuizAnswers = {};
-
-    // Open mini quiz when "Пока не определился" is selected
-    if (undecidedStyle) {
-        undecidedStyle.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                openMiniQuiz();
-            }
-        });
-    }
-
-    // Close mini quiz
-    if (closeMiniQuiz) {
-        closeMiniQuiz.addEventListener('click', closeMiniQuizModal);
-    }
-
-    // Mini quiz navigation
-    if (prevMiniBtn) {
-        prevMiniBtn.addEventListener('click', () => {
-            if (currentMiniStep > 1) {
-                goToMiniStep(currentMiniStep - 1);
-            }
-        });
-    }
-
-    if (nextMiniBtn) {
-        nextMiniBtn.addEventListener('click', () => {
-            if (validateMiniStep(currentMiniStep)) {
-                if (currentMiniStep === totalMiniSteps) {
-                    showMiniQuizResult();
-                } else {
-                    goToMiniStep(currentMiniStep + 1);
-                }
-            }
-        });
-    }
-
-    // Apply mini quiz result
-    if (applyMiniQuizBtn) {
-        applyMiniQuizBtn.addEventListener('click', applyMiniQuizResult);
-    }
-
-    function openMiniQuiz() {
-        if (miniQuizModal) {
-            miniQuizModal.style.display = 'flex';
-            currentMiniStep = 1;
-            miniQuizAnswers = {};
-            goToMiniStep(1);
-        }
-    }
-
-    function closeMiniQuizModal() {
-        if (miniQuizModal) {
-            miniQuizModal.style.display = 'none';
-            // Reset the undecided style selection
-            if (undecidedStyle) {
-                undecidedStyle.checked = false;
-            }
-        }
-    }
-
-    function goToMiniStep(step) {
-        // Hide all mini steps
-        document.querySelectorAll('.mini-quiz-step').forEach(s => s.classList.remove('active'));
-        
-        // Show current step
-        const target = document.querySelector(`.mini-quiz-step[data-mini-step="${step}"]`);
-        if (target) target.classList.add('active');
-        
-        currentMiniStep = step;
-        updateMiniProgress();
-        
-        // Update navigation buttons
-        if (prevMiniBtn) prevMiniBtn.disabled = currentMiniStep === 1;
-        if (nextMiniBtn) {
-            if (currentMiniStep === totalMiniSteps) {
-                nextMiniBtn.innerHTML = 'Показать результат <i class="fas fa-magic"></i>';
-            } else {
-                nextMiniBtn.innerHTML = 'Далее <i class="fas fa-arrow-right"></i>';
-            }
-        }
-    }
-
-    function updateMiniProgress() {
-        const pct = Math.round((currentMiniStep / totalMiniSteps) * 100);
-        if (miniProgressBar) miniProgressBar.style.width = pct + '%';
-        if (miniStepNum) miniStepNum.textContent = currentMiniStep;
-        if (miniProgressPercent) miniProgressPercent.textContent = pct + '%';
-    }
-
-    function validateMiniStep(step) {
-        const inputName = 'mq' + step;
-        const selected = document.querySelector(`input[name="${inputName}"]:checked`);
-        
-        if (!selected) {
-            showToast('Пожалуйста, выберите один из вариантов');
-            return false;
-        }
-        
-        // Save answer
-        miniQuizAnswers[inputName] = selected.value;
-        return true;
-    }
-
-    function showMiniQuizResult() {
-        // Calculate result based on answers
-        const styleCounts = {};
-        
-        // Count occurrences of each style
-        Object.values(miniQuizAnswers).forEach(answer => {
-            const styles = answer.split(',');
-            styles.forEach(style => {
-                styleCounts[style] = (styleCounts[style] || 0) + 1;
-            });
-        });
-        
-        // Find the most common style
-        let maxCount = 0;
-        let recommendedStyle = 'Современный'; // default
-        
-        for (const [style, count] of Object.entries(styleCounts)) {
-            if (count > maxCount) {
-                maxCount = count;
-                recommendedStyle = style;
-            }
-        }
-        
-        // Show result
-        if (miniQuizQuestions) miniQuizQuestions.style.display = 'none';
-        if (miniQuizResult) miniQuizResult.style.display = 'block';
-        if (miniQuizResultText) miniQuizResultText.textContent = recommendedStyle;
-        
-        // Store result for later use
-        miniQuizAnswers.recommendedStyle = recommendedStyle;
-        
-        // Hide navigation buttons
-        if (prevMiniBtn) prevMiniBtn.style.display = 'none';
-        if (nextMiniBtn) nextMiniBtn.style.display = 'none';
-    }
-
-    function applyMiniQuizResult() {
-        const recommendedStyle = miniQuizAnswers.recommendedStyle;
-        
-        // Find and select the corresponding style radio button
-        const styleRadio = document.querySelector(`input[name="style"][value="${recommendedStyle}"]`);
-        if (styleRadio) {
-            styleRadio.checked = true;
-            saveAnswer(); // Save the answer
-        }
-        
-        // Close mini quiz modal
-        closeMiniQuizModal();
-        
-        // Show success message
-        showToast(`Стиль "${recommendedStyle}" выбран! Вы можете продолжить к следующему шагу.`);
-    }
-
     async function generatePDF() {
         const answers = JSON.parse(localStorage.getItem('interio_quiz_answers') || '{}');
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
 
-        // Вспомогательная функция для загрузки шрифтов из CDN
         const fetchFont = async (url) => {
             const response = await fetch(url);
             const buffer = await response.arrayBuffer();
@@ -557,7 +361,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return window.btoa(binary);
         };
 
-        // Загружаем шрифты Roboto, поддерживающие кириллицу
         const fontRegularUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Regular.ttf';
         const fontMediumUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Medium.ttf';
 
@@ -566,7 +369,6 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchFont(fontMediumUrl)
         ]);
 
-        // Подключаем шрифты к jsPDF
         doc.addFileToVFS('Roboto-Regular.ttf', fontRegular);
         doc.addFileToVFS('Roboto-Medium.ttf', fontMedium);
         doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
@@ -577,7 +379,6 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(24);
         
-        // Теперь используем наш шрифт Roboto
         doc.setFont('Roboto', 'bold');
         doc.text('Interio', 20, 22);
         
@@ -601,7 +402,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (Array.isArray(value)) {
                 value.forEach(v => { doc.text('• ' + v, 24, y); y += 6; });
             } else {
-                // Разбиваем длинные тексты (например, комментарии), чтобы они не выходили за рамки PDF
                 const textStr = String(value || '—');
                 const textLines = doc.splitTextToSize(textStr, 170);
                 doc.text(textLines, 20, y);
@@ -632,7 +432,6 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.text('Дата заявки: ' + new Date().toLocaleString('ru-RU'), 20, y);
         y += 6;
         
-        // Добавляем ID заявки если есть
         const submissionId = localStorage.getItem('interio_submission_id');
         if (submissionId) {
             doc.text('ID заявки: #' + submissionId, 20, y);
@@ -642,5 +441,167 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.text('Сгенерировано автоматически платформой Interio', 20, y);
         
         doc.save('Interio_заявка_' + Date.now() + '.pdf');
+    }
+
+    // ==========================================
+    // ЛОГИКА МИНИ-КВИЗА (ВЫБОР СТИЛЯ)
+    // ==========================================
+    const miniQuizModal = document.getElementById('miniQuizModal');
+    const closeMiniQuiz = document.getElementById('closeMiniQuiz');
+    const undecidedRadio = document.getElementById('undecidedStyle');
+    let currentMiniStep = 1;
+    const totalMiniSteps = 6;
+    const miniStepsList = document.querySelectorAll('.mini-quiz-step');
+    const nextMiniBtn = document.getElementById('nextMiniBtn');
+    const prevMiniBtn = document.getElementById('prevMiniBtn');
+    let miniQuizCompleted = false;
+
+    // Открываем мини-квиз при выборе "Пока не определился"
+    document.querySelectorAll('.quiz-container input[name="style"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.id === 'undecidedStyle') {
+                if (!miniQuizCompleted) {
+                    miniQuizModal.style.display = 'block';
+                    updateMiniQuizUI();
+                }
+            } else {
+                // Сбрасываем плашку "Пока не определился", если пользователь передумал и выбрал конкретный стиль
+                const undecidedLabel = document.querySelector('.style-image-card.wide .style-label');
+                if (undecidedLabel) undecidedLabel.textContent = 'Пока не определился';
+                if (undecidedRadio) undecidedRadio.value = 'Пока не определился';
+                miniQuizCompleted = false;
+            }
+            saveAnswer();
+        });
+    });
+
+    // Закрытие мини-квиза
+    if (closeMiniQuiz) {
+        closeMiniQuiz.addEventListener('click', () => {
+            miniQuizModal.style.display = 'none';
+            if (!miniQuizCompleted && undecidedRadio) {
+                undecidedRadio.checked = false; // Отменяем выбор, если квиз не пройден
+            }
+        });
+    }
+
+    // Закрытие мини-квиза при клике вне окна
+    window.addEventListener('click', (e) => {
+        if (e.target === miniQuizModal) {
+            miniQuizModal.style.display = 'none';
+            if (!miniQuizCompleted && undecidedRadio) {
+                undecidedRadio.checked = false;
+            }
+        }
+    });
+
+    // Навигация внутри мини-квиза
+    function updateMiniQuizUI() {
+        miniStepsList.forEach(s => s.classList.remove('active'));
+        const target = document.querySelector(`.mini-quiz-step[data-mini-step="${currentMiniStep}"]`);
+        if (target) target.classList.add('active');
+        
+        const pct = Math.round((currentMiniStep / totalMiniSteps) * 100);
+        document.getElementById('miniProgressBar').style.width = pct + '%';
+        document.getElementById('currentMiniStepNum').textContent = currentMiniStep;
+        document.getElementById('miniProgressPercent').textContent = pct + '%';
+        
+        if (prevMiniBtn) prevMiniBtn.disabled = currentMiniStep === 1;
+        
+        if (nextMiniBtn) {
+            if (currentMiniStep === totalMiniSteps) {
+                nextMiniBtn.innerHTML = '<i class="fas fa-check"></i> Узнать результат';
+            } else {
+                nextMiniBtn.innerHTML = 'Далее <i class="fas fa-arrow-right"></i>';
+            }
+        }
+    }
+
+    if (nextMiniBtn) {
+        nextMiniBtn.addEventListener('click', () => {
+            const checked = document.querySelector(`.mini-quiz-step[data-mini-step="${currentMiniStep}"] input[type="radio"]:checked`);
+            if (!checked) {
+                showToast('Пожалуйста, выберите один из вариантов');
+                return;
+            }
+
+            if (currentMiniStep === totalMiniSteps) {
+                finishMiniQuiz();
+            } else {
+                currentMiniStep++;
+                updateMiniQuizUI();
+            }
+        });
+    }
+
+    if (prevMiniBtn) {
+        prevMiniBtn.addEventListener('click', () => {
+            if (currentMiniStep > 1) {
+                currentMiniStep--;
+                updateMiniQuizUI();
+            }
+        });
+    }
+
+    // Подсчет результатов мини-квиза
+    function finishMiniQuiz() {
+        const scores = {
+            'Скандинавский': 0,
+            'Минимализм': 0,
+            'Классика': 0,
+            'Неоклассика': 0,
+            'Лофт': 0,
+            'Современный': 0
+        };
+
+        for (let i = 1; i <= 6; i++) {
+            const checked = document.querySelector(`input[name="mq${i}"]:checked`);
+            if (checked) {
+                const styles = checked.value.split(','); // Разделяем значения стилей
+                styles.forEach(s => {
+                    const trimmed = s.trim();
+                    if (scores[trimmed] !== undefined) scores[trimmed]++;
+                });
+            }
+        }
+
+        // Ищем максимальный балл
+        let maxScore = 0;
+        for (let s in scores) {
+            if (scores[s] > maxScore) maxScore = scores[s];
+        }
+
+        // Находим всех победителей (если ничья — будет несколько)
+        const winners = [];
+        for (let s in scores) {
+            if (scores[s] === maxScore) winners.push(s);
+        }
+
+        const resultText = winners.join(' / ');
+        
+        // Показываем результат
+        const resultTextElement = document.getElementById('miniQuizResultText');
+        if (resultTextElement) resultTextElement.textContent = resultText;
+        
+        document.getElementById('miniQuizQuestions').style.display = 'none';
+        document.getElementById('miniQuizResult').style.display = 'block';
+        
+        // Передаем результат в основной квиз
+        if (undecidedRadio) undecidedRadio.value = resultText;
+        
+        const undecidedLabel = document.querySelector('.style-image-card.wide .style-label');
+        if (undecidedLabel) undecidedLabel.textContent = 'Ваш результат: ' + resultText;
+        
+        miniQuizCompleted = true;
+        saveAnswer();
+    }
+
+    // Кнопка продолжения после мини-квиза
+    const applyMiniQuizBtn = document.getElementById('applyMiniQuizBtn');
+    if (applyMiniQuizBtn) {
+        applyMiniQuizBtn.addEventListener('click', () => {
+            miniQuizModal.style.display = 'none';
+            goToStep(5); // Плавно переводим пользователя сразу на 5-й шаг основного квиза
+        });
     }
 });

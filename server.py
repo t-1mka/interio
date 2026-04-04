@@ -7,6 +7,7 @@ import sqlite3
 import hashlib
 import secrets
 from datetime import datetime
+import time
 import uvicorn
 import os
 
@@ -79,6 +80,16 @@ def init_db():
     ''')
     
     cursor.execute('''
+        CREATE TABLE IF NOT EXISTS sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_token TEXT UNIQUE NOT NULL,
+            user_id INTEGER NOT NULL,
+            expires_at INTEGER NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    
+    cursor.execute('''
         CREATE TABLE IF NOT EXISTS quiz_submissions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -121,6 +132,26 @@ def validate_password(password: str) -> str:
 def hash_password(password):
     """Хеширование пароля"""
     return hashlib.sha256(password.encode()).hexdigest()
+
+def create_user_session(cursor, user_id: int) -> str:
+    """Создаёт запись сессии и возвращает токен для cookie."""
+    token = secrets.token_hex(16)
+    expires_at = int(time.time()) + 3600 * 24 * 7
+    cursor.execute(
+        'INSERT INTO sessions (session_token, user_id, expires_at) VALUES (?, ?, ?)',
+        (token, user_id, expires_at),
+    )
+    return token
+
+def set_session_cookie(response: Response, session_token: str) -> None:
+    response.set_cookie(
+        key="session_id",
+        value=session_token,
+        max_age=3600 * 24 * 7,
+        httponly=True,
+        samesite="lax",
+        path="/",
+    )
 
 @app.on_event("startup")
 async def startup_event():
@@ -167,21 +198,12 @@ async def login(request: LoginRequest, response: Response):
             (phone, hash_password(password))
         )
         user = cursor.fetchone()
-        conn.close()
         
         if user:
-            # Создаем сессию через cookie
-            session_id = secrets.token_hex(16)
-            response.set_cookie(
-                key="session_id",
-                value=session_id,
-                max_age=3600*24*7,  # 7 дней
-                httponly=True,
-                samesite="lax"
-            )
-            
-            # Здесь можно сохранить сессию в Redis или базу данных
-            # Для простоты используем cookie
+            session_token = create_user_session(cursor, user["id"])
+            conn.commit()
+            conn.close()
+            set_session_cookie(response, session_token)
             
             return {
                 "success": True,
@@ -191,8 +213,8 @@ async def login(request: LoginRequest, response: Response):
                     "nickname": user["nickname"]
                 }
             }
-        else:
-            raise HTTPException(status_code=401, detail="Неверный пароль")
+        conn.close()
+        raise HTTPException(status_code=401, detail="Неверный пароль")
             
     except HTTPException:
         raise
@@ -217,8 +239,11 @@ async def register(request: RegisterRequest, response: Response):
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Проверка уникальности телефона и никнейма
-        cursor.execute('SELECT id FROM users WHERE phone = ? OR nickname = ?', (phone, nickname))
+        # Проверка уникальности телефона и никнейма (нужны колонки phone/nickname для ответа об ошибке)
+        cursor.execute(
+            'SELECT id, phone, nickname FROM users WHERE phone = ? OR nickname = ?',
+            (phone, nickname),
+        )
         existing_user = cursor.fetchone()
         
         if existing_user:
@@ -235,18 +260,10 @@ async def register(request: RegisterRequest, response: Response):
         )
         
         user_id = cursor.lastrowid
+        session_token = create_user_session(cursor, user_id)
         conn.commit()
         conn.close()
-        
-        # Автоматический вход
-        session_id = secrets.token_hex(16)
-        response.set_cookie(
-            key="session_id",
-            value=session_id,
-            max_age=3600*24*7,  # 7 дней
-            httponly=True,
-            samesite="lax"
-        )
+        set_session_cookie(response, session_token)
         
         return {
             "success": True,
@@ -263,28 +280,45 @@ async def register(request: RegisterRequest, response: Response):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/auth/logout")
-async def logout(response: Response):
+async def logout(request: Request, response: Response):
     """Выход пользователя"""
-    response.delete_cookie(key="session_id")
+    session_token = request.cookies.get("session_id")
+    if session_token:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM sessions WHERE session_token = ?', (session_token,))
+        conn.commit()
+        conn.close()
+    response.delete_cookie(key="session_id", path="/")
     return {"success": True}
 
 @app.get("/api/auth/current-user")
 async def current_user(request: Request):
-    """Получение текущего пользователя"""
-    session_id = request.cookies.get("session_id")
-    
-    if session_id:
-        # Здесь можно проверить сессию в Redis или базе данных
-        # Для простоты вернем заглушку - в реальном приложении нужна проверка
+    """Получение текущего пользователя по cookie-сессии"""
+    session_token = request.cookies.get("session_id")
+    if not session_token:
+        return {"success": False, "user": None}
+    now = int(time.time())
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        '''SELECT u.id, u.phone, u.nickname FROM sessions s
+           JOIN users u ON s.user_id = u.id
+           WHERE s.session_token = ? AND s.expires_at > ?''',
+        (session_token, now),
+    )
+    row = cursor.fetchone()
+    conn.close()
+    if row:
         return {
-            "success": False,
-            "user": None
+            "success": True,
+            "user": {
+                "id": row["id"],
+                "phone": row["phone"],
+                "nickname": row["nickname"],
+            },
         }
-    else:
-        return {
-            "success": False,
-            "user": None
-        }
+    return {"success": False, "user": None}
 
 @app.get("/api/auth/users")
 async def get_users():

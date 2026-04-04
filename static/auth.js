@@ -1,9 +1,20 @@
 // Auth Manager - управление авторизацией пользователей с SQLite backend
+if (typeof AuthManager === 'undefined') {
 class AuthManager {
     constructor() {
         this.currentUser = null;
         this.currentPhone = '';
-        this.apiBaseUrl = 'http://localhost:5000/api/auth';
+        this.apiBaseUrl = '/api/auth';
+        this.fetchOptions = { credentials: 'include' };
+        
+        // Try to load auth snapshot if stateManager is available
+        if (window.stateManager && typeof window.stateManager.loadAuthSnapshot === 'function') {
+            this.currentUser = window.stateManager.loadAuthSnapshot();
+            if (this.currentUser) {
+                this.updateLoginButton();
+            }
+        }
+        
         this.init();
     }
 
@@ -25,15 +36,24 @@ class AuthManager {
     // Проверка текущего пользователя
     async checkCurrentUser() {
         try {
-            const response = await fetch(`${this.apiBaseUrl}/current-user`);
+            const response = await fetch(`${this.apiBaseUrl}/current-user`, this.fetchOptions);
             const data = await response.json();
             
-            if (data.success && data.user) {
+            if (response.ok && data.success && data.user) {
                 this.currentUser = data.user;
+                if (window.stateManager && typeof window.stateManager.saveAuthSnapshot === 'function') {
+                    window.stateManager.saveAuthSnapshot(data.user);
+                }
+                this.updateLoginButton();
+            } else {
+                this.currentUser = null;
+                if (window.stateManager && typeof window.stateManager.clearAuthSnapshot === 'function') {
+                    window.stateManager.clearAuthSnapshot();
+                }
                 this.updateLoginButton();
             }
         } catch (error) {
-            console.log('Пользователь не авторизован');
+            console.log('Проверка сессии: сервер недоступен, оставляем локальный снимок профиля при наличии');
         }
     }
 
@@ -101,7 +121,7 @@ class AuthManager {
         const phoneError = document.getElementById('phoneError');
         
         // Используем валидацию из StateManager
-        if (!window.stateManager.validatePhone(phone)) {
+        if (!window.stateManager || typeof window.stateManager.validatePhone !== 'function' || !window.stateManager.validatePhone(phone)) {
             phoneError.textContent = 'Введите корректный российский номер телефона (например: +7 (999) 123-45-67)';
             return;
         }
@@ -109,7 +129,9 @@ class AuthManager {
         this.currentPhone = window.stateManager.normalizePhone(phone);
         
         // Сохраняем валидный телефон в StateManager
-        window.stateManager.saveValidatedPhone(phone);
+        if (typeof window.stateManager.saveValidatedPhone === 'function') {
+            window.stateManager.saveValidatedPhone(phone);
+        }
         
         try {
             const response = await fetch(`${this.apiBaseUrl}/check-phone`, {
@@ -117,6 +139,7 @@ class AuthManager {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({ phone: this.currentPhone })
             });
             
@@ -140,7 +163,7 @@ class AuthManager {
 // Форматирование телефона при вводе
 formatPhone(input) {
     // Используем форматирование из StateManager
-    if (window.stateManager) {
+    if (window.stateManager && typeof window.stateManager.formatPhone === 'function') {
         window.stateManager.formatPhone(input);
     }
 }
@@ -185,6 +208,7 @@ formatPhone(input) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     phone: this.currentPhone,
                     password: password
@@ -244,6 +268,7 @@ formatPhone(input) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     phone: this.currentPhone,
                     nickname: nickname,
@@ -304,13 +329,17 @@ formatPhone(input) {
     async logout() {
         try {
             await fetch(`${this.apiBaseUrl}/logout`, {
-                method: 'POST'
+                method: 'POST',
+                credentials: 'include',
             });
         } catch (error) {
             console.error('Ошибка выхода:', error);
         }
         
         this.currentUser = null;
+        if (window.stateManager && typeof window.stateManager.clearAuthSnapshot === 'function') {
+            window.stateManager.clearAuthSnapshot();
+        }
         this.updateLoginButton();
         
         // Сбрасываем StateManager сессию
@@ -368,7 +397,8 @@ formatPhone(input) {
 
     // Обновление сессии в StateManager
     updateStateManagerSession() {
-        if (window.stateManager && this.currentUser) {
+        if (window.stateManager && this.currentUser && typeof window.stateManager.saveAuthSnapshot === 'function') {
+            window.stateManager.saveAuthSnapshot(this.currentUser);
             const sessionData = {
                 user: this.currentUser,
                 phone: this.currentPhone,
@@ -377,19 +407,23 @@ formatPhone(input) {
             };
             
             // Сохраняем данные авторизации в текущем шаблоне
-            const currentTemplate = window.stateManager.getCurrentTemplate();
-            if (currentTemplate) {
-                window.stateManager.saveTemplateState(currentTemplate, sessionData);
+            if (typeof window.stateManager.getCurrentTemplate === 'function' && typeof window.stateManager.saveTemplateState === 'function') {
+                const currentTemplate = window.stateManager.getCurrentTemplate();
+                if (currentTemplate) {
+                    window.stateManager.saveTemplateState(currentTemplate, sessionData);
+                }
             }
             
             // Синхронизируем с сервером
-            window.stateManager.syncSessionWithServer();
+            if (typeof window.stateManager.syncSessionWithServer === 'function') {
+                window.stateManager.syncSessionWithServer();
+            }
         }
     }
 
     // Сброс сессии через StateManager
     resetStateManagerSession() {
-        if (window.stateManager) {
+        if (window.stateManager && typeof window.stateManager.createSession === 'function') {
             // Создаем новую сессию
             window.stateManager.createSession();
             console.log('Сессия сброшена через StateManager');
@@ -401,7 +435,6 @@ formatPhone(input) {
 document.addEventListener('DOMContentLoaded', () => {
     if (!window.authManager) {
         window.authManager = new AuthManager();
-    } else {
-        console.log('AuthManager instance already exists, reusing existing instance');
     }
 });
+}

@@ -347,14 +347,162 @@ class StateManager {
         }
         return null;
     }
+
+    // --- Тема и доступность (общие ключи localStorage для главной и /quiz) ---
+    applyThemeFromStorage() {
+        const t = localStorage.getItem('interio_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+        return t;
+    }
+
+    setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('interio_theme', theme);
+        return theme;
+    }
+
+    applyA11yAttrsFromStorage() {
+        const contrastOn = localStorage.getItem('interio_a11y_contrast') === 'true';
+        const buttonsOn = localStorage.getItem('interio_a11y_buttons') === 'true';
+        const textOn = localStorage.getItem('interio_a11y_text') === 'true';
+        const root = document.documentElement;
+        root.setAttribute('data-contrast', contrastOn ? 'high' : 'normal');
+        root.setAttribute('data-large-buttons', buttonsOn ? 'true' : 'false');
+        root.setAttribute('data-large-text', textOn ? 'true' : 'false');
+    }
+
+    syncA11yCheckboxesFromStorage() {
+        const contrastOn = localStorage.getItem('interio_a11y_contrast') === 'true';
+        const buttonsOn = localStorage.getItem('interio_a11y_buttons') === 'true';
+        const textOn = localStorage.getItem('interio_a11y_text') === 'true';
+        const hc = document.getElementById('highContrast');
+        const lb = document.getElementById('largeButtons');
+        const lt = document.getElementById('largeText');
+        if (hc) hc.checked = contrastOn;
+        if (lb) lb.checked = buttonsOn;
+        if (lt) lt.checked = textOn;
+    }
+
+    applyA11yFromStorageFull() {
+        this.applyA11yAttrsFromStorage();
+        this.syncA11yCheckboxesFromStorage();
+    }
+
+    setA11yContrast(checked) {
+        document.documentElement.setAttribute('data-contrast', checked ? 'high' : 'normal');
+        localStorage.setItem('interio_a11y_contrast', checked ? 'true' : 'false');
+    }
+
+    setA11yLargeButtons(checked) {
+        document.documentElement.setAttribute('data-large-buttons', checked ? 'true' : 'false');
+        localStorage.setItem('interio_a11y_buttons', checked ? 'true' : 'false');
+    }
+
+    setA11yLargeText(checked) {
+        document.documentElement.setAttribute('data-large-text', checked ? 'true' : 'false');
+        localStorage.setItem('interio_a11y_text', checked ? 'true' : 'false');
+    }
+
+    /** Снимок профиля для мгновенного UI при переходе между страницами; источник истины — cookie + /api/auth/current-user */
+    saveAuthSnapshot(user) {
+        if (user && user.id != null && user.nickname != null) {
+            localStorage.setItem(
+                'interio_auth_user',
+                JSON.stringify({
+                    id: user.id,
+                    phone: user.phone,
+                    nickname: user.nickname,
+                })
+            );
+        } else {
+            localStorage.removeItem('interio_auth_user');
+        }
+    }
+
+    loadAuthSnapshot() {
+        try {
+            const raw = localStorage.getItem('interio_auth_user');
+            if (!raw) return null;
+            const u = JSON.parse(raw);
+            if (u && u.id != null && u.nickname != null) return u;
+            return null;
+        } catch {
+            return null;
+        }
+    }
+
+    clearAuthSnapshot() {
+        localStorage.removeItem('interio_auth_user');
+    }
+
+    // --- Theme Toggle and A11y Event Handlers ---
+    initThemeToggle() {
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                const current = document.documentElement.getAttribute('data-theme');
+                const next = current === 'dark' ? 'light' : 'dark';
+                this.setTheme(next);
+                this.updateThemeIcon(next);
+            });
+        }
+    }
+
+    updateThemeIcon(theme) {
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            const icon = themeToggle.querySelector('i');
+            if (icon) {
+                icon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+            }
+        }
+    }
+
+    initA11yPanel() {
+        const a11yToggle = document.getElementById('a11yToggle');
+        const a11yPanel = document.getElementById('a11yPanel');
+        const a11yClose = document.getElementById('a11yClose');
+
+        if (a11yToggle) {
+            a11yToggle.addEventListener('click', () => a11yPanel.classList.toggle('show'));
+        }
+        if (a11yClose) {
+            a11yClose.addEventListener('click', () => a11yPanel.classList.remove('show'));
+        }
+
+        const hcCb = document.getElementById('highContrast');
+        if (hcCb) hcCb.addEventListener('change', (e) => {
+            this.setA11yContrast(e.target.checked);
+        });
+
+        const lbCb = document.getElementById('largeButtons');
+        if (lbCb) lbCb.addEventListener('change', (e) => {
+            this.setA11yLargeButtons(e.target.checked);
+        });
+
+        const ltCb = document.getElementById('largeText');
+        if (ltCb) ltCb.addEventListener('change', (e) => {
+            this.setA11yLargeText(e.target.checked);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (a11yPanel && !a11yPanel.contains(e.target) && e.target !== a11yToggle) {
+                a11yPanel.classList.remove('show');
+            }
+        });
+    }
+
+    // --- Initialize all UI components ---
+    initUI() {
+        this.applyThemeFromStorage();
+        this.updateThemeIcon(document.documentElement.getAttribute('data-theme') || 'dark');
+        this.applyA11yFromStorageFull();
+        this.initThemeToggle();
+        this.initA11yPanel();
+    }
 }
 
-// Singleton pattern for StateManager
-if (!window.stateManager) {
-    window.stateManager = new StateManager();
-} else {
-    console.log('StateManager instance already exists, reusing existing instance');
-}
+window.stateManager = new StateManager();
 
 // window.stateManager.createSession() - создать сессию
 // window.stateManager.showTemplate('template1') - показать шаблон 1
@@ -368,3 +516,10 @@ if (!window.stateManager) {
 // window.stateManager.saveValidatedPhone(phone) - сохранение валидного телефона в сессию
 // window.stateManager.syncSessionWithServer() - синхронизация сессии с сервером
 // window.stateManager.getSessionFromServer() - получение данных сессии с сервера
+// Тема / a11y: applyThemeFromStorage, setTheme, applyA11yAttrsFromStorage, syncA11yCheckboxesFromStorage, applyA11yFromStorageFull, setA11yContrast, setA11yLargeButtons, setA11yLargeText
+// Авторизация UI: saveAuthSnapshot, loadAuthSnapshot, clearAuthSnapshot
+// UI Initialization: initThemeToggle, updateThemeIcon, initA11yPanel, initUI
+
+document.addEventListener('DOMContentLoaded', () => {
+    window.stateManager.initUI();
+});
