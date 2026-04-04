@@ -1,6 +1,6 @@
 """
 Interio Telegram Bot — Webhook на Render
-Полная интеграция: Mini App, GigaChat AI, рассылки, уведомления
+Полная интеграция: Mini App, GigaChat AI, уведомления
 """
 import os
 import asyncio
@@ -28,14 +28,7 @@ BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8781630278:AAH4LqIzaQBRY7tOsOZkwbuj
 ADMIN_CHAT = os.getenv("TELEGRAM_ADMIN_CHAT_ID", "")
 GIGACHAT_KEY = os.getenv("GIGACHAT_AUTH_KEY", "")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://interio-y5lf.onrender.com")
-QUIZ_URL = os.getenv("QUIZ_URL", "https://interio-y5lf.onrender.com/quiz")
 WEBHOOK_URL = os.getenv("WEBHOOK_URL", "https://interio-bsw3.onrender.com")
-
-# SMTP для рассылки
-SMTP_HOST = "smtp.gmail.com"
-SMTP_PORT = 465
-SMTP_USER = os.getenv("SMTP_USER", "interiopersonal@gmail.com")
-SMTP_PASS = os.getenv("SMTP_PASS", "pcjloityrxwuotht")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 
@@ -61,9 +54,8 @@ class SupportState(StatesGroup):
 # Клавиатуры
 # ═══════════════════════════════════════════
 def main_kb():
-    """Главное меню бота"""
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🏠 Пройти квиз", web_app=WebAppInfo(url=QUIZ_URL))],
+        [InlineKeyboardButton(text="🏠 Пройти квиз", web_app=WebAppInfo(url=FRONTEND_URL))],
         [InlineKeyboardButton(text="🤖 ИИ-советник (GigaChat)", callback_data="support")],
         [InlineKeyboardButton(text="📋 Мои заявки", callback_data="my_requests")],
         [InlineKeyboardButton(text="ℹ️ О сервисе", callback_data="about")],
@@ -129,7 +121,6 @@ def is_design(text):
     return any(w in text.lower() for w in DESIGN_WORDS)
 
 async def ask_gc(question):
-    """Задаёт вопрос GigaChat из бота"""
     if not is_design(question):
         return (
             "🏠 Я помогаю только с вопросами по дизайну интерьера!\n\n"
@@ -144,14 +135,14 @@ async def ask_gc(question):
     if not tok:
         return "🤖 ИИ временно недоступен. Попробуйте позже."
     try:
-        async with httpx.AsyncClient(verify=False, timeout=20) as c:
+        async with httpx.AsyncClient(verify=False, timeout=30) as c:
             r = await c.post(
                 "https://gigachat.devices.sberbank.ru/api/v1/chat/completions",
                 headers={"Authorization": f"Bearer {tok}"},
                 json={
                     "model": "GigaChat",
                     "messages": [{"role": "user", "content": f"Ты — дизайнер интерьера. Кратко (2-3 предложения): {question}"}],
-                    "max_tokens": 300,
+                    "max_tokens": 400,
                     "temperature": 0.7
                 }
             )
@@ -160,48 +151,7 @@ async def ask_gc(question):
         return "⚠️ Ошибка ИИ. Попробуйте ещё раз."
 
 # ═══════════════════════════════════════════
-# Рассылка по email
-# ═══════════════════════════════════════════
-async def send_email(subject, body, to_email):
-    """Отправка email через Gmail"""
-    try:
-        import aiosmtplib
-        from email.message import EmailMessage
-        msg = EmailMessage()
-        msg["Subject"] = subject
-        msg["From"] = SMTP_USER
-        msg["To"] = to_email
-        msg.set_content(body)
-        async with aiosmtplib.SMTP(hostname=SMTP_HOST, port=SMTP_PORT, use_tls=True) as smtp:
-            await smtp.login(SMTP_USER, SMTP_PASS)
-            await smtp.send_message(msg)
-        logging.info(f"Email sent to {to_email}")
-    except Exception as e:
-        logging.error(f"Email error: {e}")
-
-async def notify_user_about_request(phone, request_data):
-    """Уведомляет ТОЛЬКО автора заявки"""
-    # Уведомление через бот (если пользователь есть в боте)
-    # Через email
-    email = request_data.get("email", "")
-    if email:
-        await send_email(
-            subject="Ваша заявка Interio принята!",
-            body=(
-                f"Здравствуйте, {request_data.get('name', '')}!\n\n"
-                f"Ваша заявка принята.\n\n"
-                f"Тип помещения: {request_data.get('room_type', '')}\n"
-                f"Стиль: {request_data.get('style', '')}\n"
-                f"Бюджет: {request_data.get('budget', '')}\n"
-                f"Площадь: {request_data.get('area', '')} м²\n\n"
-                f"Наш менеджер свяжется с вами в ближайшее время.\n\n"
-                f"Результат: {FRONTEND_URL}/result/{request_data.get('share_link', '')}"
-            ),
-            to_email=email
-        )
-
-# ═══════════════════════════════════════════
-# Handlers — Главное меню
+# Handlers
 # ═══════════════════════════════════════════
 @dp.message(CommandStart())
 async def cmd_start(m: Message, s: FSMContext):
@@ -213,7 +163,7 @@ async def cmd_start(m: Message, s: FSMContext):
         f"• ИИ-советник на базе GigaChat\n"
         f"• PDF-бриф с результатом\n"
         f"• Портфолио работ\n\n"
-        f"Нажмите «🏠 Пройти квиз» чтобы начать!",
+        f"🌐 {FRONTEND_URL}",
         reply_markup=main_kb(),
         parse_mode="HTML"
     )
@@ -245,32 +195,22 @@ async def go_about(cb: CallbackQuery):
 
 @dp.callback_query(F.data == "my_requests")
 async def my_requests(cb: CallbackQuery):
-    """Показывает заявку ТОЛЬКО её автору"""
-    # В Telegram нет привязки к phone по умолчанию,
-    # поэтому отправляем ссылку на сайт где пользователь видит СВОИ заявки
     await cb.message.edit_text(
         "📋 <b>Мои заявки</b>\n\n"
-        "Для просмотра ваших заявок откройте личный кабинет на сайте. "
-        "Там вы увидите все ваши заявки и их статусы.",
+        "Для просмотра ваших заявок откройте сайт:",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="🌐 Открыть кабинет", web_app=WebAppInfo(url=f"{FRONTEND_URL}/cabinet"))],
+            [InlineKeyboardButton(text="🌐 Открыть сайт", web_app=WebAppInfo(url=FRONTEND_URL))],
             [InlineKeyboardButton(text="🔙 Назад", callback_data="back")]
         ]),
         parse_mode="HTML"
     )
 
-# ═══════════════════════════════════════════
-# Handlers — Текстовый квиз в чате
-# ═══════════════════════════════════════════
+# Текстовый квиз
 @dp.message(Command("quiz"))
 async def cmd_quiz(m: Message, s: FSMContext):
-    """Запускает текстовый квиз в чате"""
     await s.clear()
     await s.set_state(QuizState.name)
-    await m.answer(
-        "👤 <b>Шаг 1/6</b>\n\nВаше имя:",
-        parse_mode="HTML"
-    )
+    await m.answer("👤 <b>Шаг 1/6</b>\n\nВаше имя:", parse_mode="HTML")
 
 @dp.message(QuizState.name)
 async def quiz_name(m: Message, s: FSMContext):
@@ -315,16 +255,16 @@ async def quiz_comment(m: Message, s: FSMContext):
     budget = d.get("budget", "")
     room = d.get("room_type", "")
 
-    # Уведомление ТОЛЬКО автору заявки
-    await notify_user_about_request(phone, {
-        "name": name,
-        "email": "",
-        "room_type": room,
-        "style": style,
-        "budget": budget,
-        "area": 60,
-        "share_link": ""
-    })
+    txt = (
+        f"🆕 <b>Новая заявка!</b>\n\n"
+        f"👤 {name}\n📱 {phone}\n🎨 {style}\n💰 {budget}\n🏢 {room}\n"
+        f"💬 {comment or '—'}"
+    )
+    # Уведомление менеджеру
+    if ADMIN_CHAT:
+        try:
+            await bot.send_message(ADMIN_CHAT, txt, parse_mode="HTML")
+        except: pass
 
     await m.answer(
         f"🎉 <b>Заявка отправлена!</b>\n\n"
@@ -336,15 +276,12 @@ async def quiz_comment(m: Message, s: FSMContext):
     )
     await s.clear()
 
-# ═══════════════════════════════════════════
-# Handlers — GigaChat ИИ-советник
-# ═══════════════════════════════════════════
+# GigaChat
 @dp.message(Command("support"))
 @dp.callback_query(F.data == "support")
 async def cmd_support(ev, s: FSMContext):
     msg = ev.message if hasattr(ev, 'message') else ev
-    if hasattr(ev, 'answer'):
-        await ev.answer()
+    if hasattr(ev, 'answer'): await ev.answer()
     await s.set_state(SupportState.waiting)
     await msg.answer(
         "🤖 <b>ИИ-советник GigaChat</b>\n\n"
@@ -364,16 +301,11 @@ async def support_msg(m: Message, s: FSMContext):
     await thinking.delete()
     await m.answer(answer, reply_markup=back_kb())
 
-# ═══════════════════════════════════════════
-# Unknown commands
-# ═══════════════════════════════════════════
 @dp.message()
 async def unknown(m: Message):
     await m.answer("🤔 Введите /start для меню", reply_markup=main_kb())
 
-# ═══════════════════════════════════════════
-# FastAPI — Webhook + Health
-# ═══════════════════════════════════════════
+# FastAPI
 @app.on_event("startup")
 async def startup():
     if BOT_TOKEN:
