@@ -1,0 +1,6 @@
+# Telegram Bot Dependencies
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+aiogram>=3.4.0
+httpx>=0.27.0
+python-dotenv>=1.0.0

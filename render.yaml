@@ -1,5 +1,5 @@
 services:
-  # ── Единый сервис: бэкенд + фронтенд ──
+  # ── Бэкенд + Фронтенд ──
   - type: web
     name: interio
     env: python
@@ -12,22 +12,14 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.11"
-
-      # Database (SQLite by default)
       - key: DATABASE_URL
         value: "sqlite:///./data.db"
-
-      # GigaChat ИИ-советник
       - key: GIGACHAT_AUTH_KEY
         sync: false
-
-      # Telegram бот
       - key: TELEGRAM_BOT_TOKEN
         sync: false
       - key: TELEGRAM_ADMIN_CHAT_ID
         sync: false
-
-      # Email SMTP
       - key: SMTP_HOST
         value: "smtp.yandex.ru"
       - key: SMTP_PORT
@@ -38,3 +30,29 @@ services:
         sync: false
       - key: ADMIN_EMAIL
         sync: false
+      - key: FRONTEND_URL
+        value: "https://interio-y5lf.onrender.com"
+
+  # ── Telegram Bot ──
+  - type: web
+    name: interio-bot
+    env: python
+    region: frankfurt
+    plan: free
+    buildCommand: pip install --no-cache-dir -r bot-requirements.txt
+    startCommand: uvicorn bot.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_ADMIN_CHAT_ID
+        sync: false
+      - key: GIGACHAT_AUTH_KEY
+        sync: false
+      - key: FRONTEND_URL
+        value: "https://interio-y5lf.onrender.com"
+      - key: WEBHOOK_URL
+        value: "https://interio-bsw3.onrender.com"
