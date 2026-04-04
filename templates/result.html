@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результат — Interio</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+
+    <header class="header">
+        <div class="header-container">
+            <div class="logo"><a href="/">Interio</a></div>
+            <nav class="nav-links">
+                <a href="/" class="nav-link">Главная</a>
+                <a href="/quiz" class="nav-link">Квиз</a>
+                <a href="/gallery" class="nav-link">Галерея</a>
+            </nav>
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <section style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:120px 24px 60px;">
+        <div id="resultCard" style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:32px;padding:60px 50px;max-width:600px;width:100%;text-align:center;box-shadow:var(--shadow-lg);">
+            <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:2.2rem;color:white;">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2 style="font-family:var(--font-display);font-size:2rem;margin-bottom:12px;color:var(--text-main);">Спасибо! Заявка отправлена</h2>
+            <p style="color:var(--text-secondary);margin-bottom:32px;">Мы свяжемся с вами в ближайшее время для уточнения деталей.</p>
+
+            <!-- Share Link -->
+            <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;padding:20px;margin-bottom:24px;">
+                <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:8px;">Ваша ссылка на результат:</p>
+                <div style="display:flex;gap:8px;">
+                    <input id="shareLinkInput" type="text" readonly style="flex:1;padding:10px 16px;border-radius:12px;background:var(--bg-primary);border:1px solid var(--border-color);color:var(--text-main);font-size:.9rem;">
+                    <button onclick="copyShareLink()" style="padding:10px 20px;border-radius:12px;background:var(--accent);color:white;border:none;cursor:pointer;font-weight:600;">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;">
+                <button onclick="downloadPDF()" style="padding:14px;border-radius:12px;background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-main);cursor:pointer;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fas fa-file-pdf" style="color:var(--accent-red);"></i> Скачать PDF
+                </button>
+                <button onclick="shareResult()" style="padding:14px;border-radius:12px;background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-main);cursor:pointer;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fas fa-share-alt" style="color:var(--accent);"></i> Поделиться
+                </button>
+                <a href="/gallery" style="padding:14px;border-radius:12px;background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-main);text-decoration:none;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fas fa-images" style="color:var(--accent-light);"></i> Галерея
+                </a>
+                <a href="/" style="padding:14px;border-radius:12px;background:var(--gradient-1);border:none;color:white;text-decoration:none;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fas fa-home"></i> На главную
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const shareLink = window.location.href;
+        document.getElementById('shareLinkInput').value = shareLink;
+
+        // Confetti
+        if (typeof confetti === 'function') {
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        }
+
+        // Theme
+        const tt = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        html.setAttribute('data-theme', localStorage.getItem('interio_theme') || 'dark');
+        tt.querySelector('i').className = html.getAttribute('data-theme') === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+        tt.onclick = () => {
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('interio_theme', next);
+            tt.querySelector('i').className = next === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+        };
+    });
+
+    function copyShareLink() {
+        const input = document.getElementById('shareLinkInput');
+        input.select();
+        document.execCommand('copy');
+        alert('Ссылка скопирована!');
+    }
+
+    function shareResult() {
+        const url = window.location.href;
+        if (navigator.share) {
+            navigator.share({ title: 'Interio — Дизайн-проект', url });
+        } else {
+            copyShareLink();
+        }
+    }
+
+    async function downloadPDF() {
+        const answers = JSON.parse(localStorage.getItem('interio_quiz_answers') || '{}');
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const fetchFont = async (url) => {
+            const r = await fetch(url);
+            const b = await r.arrayBuffer();
+            let bin = '';
+            const bytes = new Uint8Array(b);
+            for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
+            return btoa(bin);
+        };
+        const [fontR, fontM] = await Promise.all([
+            fetchFont('https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Regular.ttf'),
+            fetchFont('https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Medium.ttf'),
+        ]);
+        doc.addFileToVFS('Roboto-Regular.ttf', fontR);
+        doc.addFileToVFS('Roboto-Medium.ttf', fontM);
+        doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
+        doc.addFont('Roboto-Medium.ttf', 'Roboto', 'bold');
+
+        doc.setFillColor(74, 108, 247);
+        doc.rect(0, 0, 210, 40, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(24);
+        doc.setFont('Roboto', 'bold');
+        doc.text('Interio', 20, 22);
+        doc.setFontSize(12);
+        doc.setFont('Roboto', 'normal');
+        doc.text('Заявка на дизайн-проект', 20, 32);
+
+        let y = 55;
+        doc.setTextColor(30, 30, 30);
+        const addSection = (title, value) => {
+            doc.setFontSize(11);
+            doc.setFont('Roboto', 'bold');
+            doc.setTextColor(74, 108, 247);
+            doc.text(title, 20, y); y += 7;
+            doc.setFont('Roboto', 'normal');
+            doc.setTextColor(50, 50, 50);
+            if (Array.isArray(value)) { value.forEach(v => { doc.text('\u2022 ' + v, 24, y); y += 6; }); }
+            else { const lines = doc.splitTextToSize(String(value || '\u2014'), 170); doc.text(lines, 20, y); y += 6 * lines.length; }
+            y += 4;
+        };
+        addSection('Тип помещения:', answers.roomType);
+        addSection('Зоны:', answers.zones);
+        addSection('Площадь:', answers.area ? answers.area + ' м\u00B2' : '\u2014');
+        addSection('Стиль:', answers.style);
+        addSection('Бюджет:', answers.budget);
+        y += 5;
+        doc.setDrawColor(200, 200, 200);
+        doc.line(20, y, 190, y); y += 10;
+        addSection('Имя:', answers.name);
+        addSection('Телефон:', answers.phone);
+        addSection('Email:', answers.email || '\u2014');
+        addSection('Комментарий:', answers.comment || '\u2014');
+
+        doc.save('Interio_' + Date.now() + '.pdf');
+    }
+    </script>
+</body>
+</html>

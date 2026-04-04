@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interio — Дизайн-проекты</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/static/state-manager.js"></script>
+    <script src="/static/auth.js"></script>
+</head>
+<body>
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+
+    <!-- Header -->
+    <header class="header" id="mainHeader">
+        <div class="header-container">
+            <div class="logo">
+                <a href="#hero">Interio</a>
+            </div>
+            <nav class="nav-links">
+                <a href="#about" class="nav-link">О платформе</a>
+                <a href="/quiz" class="nav-link">Пройти тест</a>
+                <a href="#contacts" class="nav-link">Контакты</a>
+            </nav>
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle" title="Сменить тему">
+                    <i class="fas fa-sun"></i>
+                </button>
+                <button class="a11y-toggle" id="a11yToggle" title="Режим для слабовидящих">
+                    <i class="fas fa-eye"></i>
+                </button>
+                
+                <!-- Блок профиля / авторизации -->
+                <div class="user-profile-container" id="userProfileContainer">
+                    <button class="login-btn" id="loginBtn" onclick="window.authManager.openModal()">
+                        <i class="fas fa-user"></i> Войти
+                    </button>
+                    <div class="user-profile" id="userProfile" style="display: none;" onclick="window.authManager.openCabinetModal()">
+                        <div class="user-avatar" id="userAvatar"></div>
+                        <span class="user-nickname" id="userNicknameDisplay"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <div class="hero-card">
+            <div class="hero-badge"><i class="fas fa-star"></i> Профессиональный дизайн</div>
+            <h1 class="hero-title">Платформа дизайн-проектов</h1>
+            <h2 class="hero-subtitle">Создавайте идеальные интерьеры вместе с нами</h2>
+            <p class="hero-description">Ответьте на вопросы и получите персональное предложение с рекомендацией стиля и ориентировочной стоимостью.</p>
+            <a href="/quiz" class="btn-primary-hero">
+                <i class="fas fa-rocket"></i> Начать тест
+            </a>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number">500+</span>
+                    <span class="stat-label">Проектов</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <span class="stat-number">4.9</span>
+                    <span class="stat-label">Рейтинг</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">Гарантия</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">О платформе</span>
+                <h2>Как мы работаем</h2>
+                <p>Простой путь к вашему идеальному интерьеру</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-icon"><i class="fas fa-clipboard-list"></i></div>
+                    <span class="step-number">01</span>
+                    <h3>Пройдите тест</h3>
+                    <p>Ответьте на 6 простых вопросов о вашем помещении, стиле и бюджете.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-icon"><i class="fas fa-pencil-ruler"></i></div>
+                    <span class="step-number">02</span>
+                    <h3>Получите расчёт</h3>
+                    <p>Мы подготовим персональное коммерческое предложение с рекомендациями.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-icon"><i class="fas fa-home"></i></div>
+                    <span class="step-number">03</span>
+                    <h3>Наслаждайтесь результатом</h3>
+                    <p>Реализуем дизайн-проект под ключ, от концепции до воплощения.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contacts -->
+    <section id="contacts" class="contacts-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Контакты</span>
+                <h2>Свяжитесь с нами</h2>
+            </div>
+            <div class="contacts-grid">
+                <div class="contact-card">
+                    <div class="contact-icon"><i class="fas fa-phone"></i></div>
+                    <h3>Телефон</h3>
+                    <p>+7 (999) 666-66-66</p>
+                    <small>Пн-Пт 10:00 – 17:00</small>
+                </div>
+                <div class="contact-card">
+                    <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                    <h3>Email</h3>
+                    <p>info@interio.ru</p>
+                    <small>Ответим в течение 24ч</small>
+                </div>
+                <div class="contact-card">
+                    <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <h3>Адрес</h3>
+                    <p>Москва</p>
+                    <small>ул. Дизайнерская, 52</small>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">Interio</div>
+                    <p>Создаем пространство, в котором хочется жить.</p>
+                </div>
+                <div class="footer-links">
+                    <a href="#">Политика конфиденциальности</a>
+                    <a href="#">Оферта</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 Interio. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div class="toast-notification" id="toastNotification">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="toastMessage">Ошибка</span>
+    </div>
+
+    <!-- A11y Panel -->
+    <div class="a11y-panel" id="a11yPanel">
+        <button class="a11y-close" id="a11yClose"><i class="fas fa-times"></i></button>
+        <h3>Настройки для слабовидящих</h3>
+        <label class="a11y-option">
+            <input type="checkbox" id="highContrast">
+            <div class="checkmark"></div>
+            <span>Высокий контраст</span>
+        </label>
+        <label class="a11y-option">
+            <input type="checkbox" id="largeButtons">
+            <div class="checkmark"></div>
+            <span>Крупные кнопки</span>
+        </label>
+        <label class="a11y-option">
+            <input type="checkbox" id="largeText">
+            <div class="checkmark"></div>
+            <span>Увеличенный текст</span>
+        </label>
+    </div>
+
+    <!-- Модальное окно авторизации -->
+    <div id="authModal" class="auth-modal">
+        <div class="auth-modal-content">
+            <span class="auth-close" onclick="window.authManager.closeModal()">&times;</span>
+            
+            <!-- Шаг 1: Ввод номера телефона -->
+            <div id="phoneStep" class="auth-step">
+                <h2>Вход в личный кабинет</h2>
+                <p>Введите номер телефона</p>
+                <input type="tel" id="phoneInput" placeholder="+7 (999) 123-45-67" maxlength="18" oninput="window.authManager.formatPhone(this)">
+                <button onclick="window.authManager.checkPhone()">Далее</button>
+                <div id="phoneError" class="auth-error-message"></div>
+            </div>
+
+            <!-- Шаг 2а: Ввод пароля (существующий пользователь) -->
+            <div id="passwordStep" class="auth-step" style="display: none;">
+                <h2>Вход в личный кабинет</h2>
+                <p id="userPhone"></p>
+                <input type="password" id="passwordInput" placeholder="Введите пароль">
+                <button onclick="window.authManager.login()">Войти</button>
+                <button onclick="window.authManager.backToPhone()" class="secondary">Назад</button>
+                <div id="passwordError" class="auth-error-message"></div>
+            </div>
+
+            <!-- Шаг 2б: Регистрация нового пользователя -->
+            <div id="registerStep" class="auth-step" style="display: none;">
+                <h2>Регистрация</h2>
+                <p id="newUserPhone"></p>
+                <input type="text" id="nicknameInput" placeholder="Введите никнейм">
+                <input type="password" id="newPasswordInput" placeholder="Введите пароль">
+                <input type="password" id="confirmPasswordInput" placeholder="Подтвердите пароль">
+                <button onclick="window.authManager.register()">Зарегистрироваться</button>
+                <button onclick="window.authManager.backToPhone()" class="secondary">Назад</button>
+                <div id="registerError" class="auth-error-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно личного кабинета -->
+    <div id="cabinetModal" class="cabinet-modal">
+        <div class="cabinet-modal-content">
+            <span class="cabinet-close" onclick="window.authManager.closeCabinetModal()">&times;</span>
+            <div class="cabinet-container">
+                <button class="logout-btn" onclick="window.authManager.logout()">Выйти</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/actions.js"></script>
+</body>
+</html>
