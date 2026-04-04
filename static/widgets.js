@@ -1,7 +1,7 @@
 /**
  * widgets.js — Все виджеты Interio
- * 1. GigaChat (круглая кнопка ❓)
- * 2. Голосовой ввод 🎙️
+ * 1. GigaChat (круглая кнопка ❓) — Enter + кнопка отправки
+ * 2. Голосовой ввод 🎙️ (КРОМЕ формы регистрации/авторизации)
  * 3. Звуки кликов
  */
 
@@ -49,11 +49,10 @@
     // 2. GIGACHAT — КРУГЛАЯ КНОПКА + МОДАЛКА
     // ══════════════════════════════════════
     if (!document.getElementById('gcFloatBtn')) {
-        // Создаём кнопку
         var btn = document.createElement('button');
         btn.id = 'gcFloatBtn';
         btn.title = 'ИИ-советник';
-        btn.innerHTML = '\u2753'; // ❓
+        btn.innerHTML = '\u2753';
         btn.setAttribute('style',
             'position:fixed !important;' +
             'bottom:28px !important;' +
@@ -77,7 +76,6 @@
         btn.addEventListener('mouseleave', function() { btn.style.transform = 'scale(1)'; });
         document.body.appendChild(btn);
 
-        // Создаём модалку
         var modal = document.createElement('div');
         modal.id = 'gcModal';
         modal.setAttribute('style',
@@ -115,19 +113,14 @@
             '</div>';
         document.body.appendChild(modal);
 
-        // Обработчики
-        btn.addEventListener('click', function() {
-            modal.style.display = 'flex';
-        });
-        document.getElementById('gcClose').addEventListener('click', function() {
-            modal.style.display = 'none';
-        });
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) modal.style.display = 'none';
-        });
+        btn.addEventListener('click', function() { modal.style.display = 'flex'; });
+        document.getElementById('gcClose').addEventListener('click', function() { modal.style.display = 'none'; });
+        modal.addEventListener('click', function(e) { if (e.target === modal) modal.style.display = 'none'; });
     }
 
-    // Функция отправки (глобальная)
+    // ══════════════════════════════════════
+    // Функция отправки — Enter ИЛИ стрелка
+    // ══════════════════════════════════════
     window.sendGC = function() {
         var inp = document.getElementById('gcInput');
         var btn = document.getElementById('gcSendBtn');
@@ -171,23 +164,47 @@
     // Enter для отправки
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && document.activeElement.id === 'gcInput') {
+            e.preventDefault();
             sendGC();
         }
     });
 
-    function escHtml(s) {
-        var d = document.createElement('div');
-        d.textContent = s;
-        return d.innerHTML;
+    // Кнопка-стрелка тоже вызывает sendGC
+    var sendBtn = document.getElementById('gcSendBtn');
+    if (sendBtn) {
+        sendBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            sendGC();
+        });
     }
 
+    function escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
     // ══════════════════════════════════════
-    // 3. ГОЛОСОВОЙ ВВОД 🎙️
+    // 3. ГОЛОСОВОЙ ВВОД 🎙️ (КРОМЕ АВТОРИЗАЦИИ/РЕГИСТРАЦИИ)
     // ══════════════════════════════════════
     var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SR) {
+        function isAuthField(input) {
+            var el = input;
+            while (el) {
+                if (el.id === 'authModal' || el.id === 'phoneStep' ||
+                    el.id === 'passwordStep' || el.id === 'registerStep' ||
+                    el.classList.contains('auth-modal') || el.classList.contains('auth-step') ||
+                    el.id === 'phoneInput' || el.id === 'passwordInput' ||
+                    el.id === 'nicknameInput' || el.id === 'newPasswordInput' ||
+                    el.id === 'confirmPasswordInput') {
+                    return true;
+                }
+                el = el.parentElement;
+            }
+            return false;
+        }
+
         function addVoiceBtn(input) {
             if (input.dataset._voiceAdded) return;
+            if (isAuthField(input)) return;
+
             input.dataset._voiceAdded = '1';
 
             var wrap = document.createElement('div');
@@ -238,7 +255,6 @@
             });
         }
 
-        // Добавляем ко всем текстовым полям
         function addAll() {
             document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], textarea')
                 .forEach(addVoiceBtn);
@@ -249,9 +265,8 @@
         } else {
             addAll();
         }
-        // Наблюдатель за динамическим контентом
         new MutationObserver(addAll).observe(document.body, { childList: true, subtree: true });
     }
 
-    console.log('\u2705 Widgets loaded: GigaChat (circle), Voice, Sounds');
+    console.log('\u2705 Widgets loaded: GigaChat (circle, Enter+btn), Voice (no auth), Sounds');
 })();

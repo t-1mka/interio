@@ -11,10 +11,12 @@
     .privacy-page { padding-top: 100px; min-height: 100vh; }
     .privacy-container { max-width: 800px; margin: 0 auto; padding: 0 24px; }
     .privacy-container h1 { font-size: 2rem; color: var(--text-main); margin-bottom: 24px; }
-    .privacy-container h2 { font-size: 1.3rem; color: var(--text-main); margin: 24px 0 12px; }
-    .privacy-container p { color: var(--text-secondary); line-height: 1.7; margin-bottom: 12px; }
-    .privacy-container ul { color: var(--text-secondary); margin-bottom: 12px; padding-left: 20px; }
-    .privacy-container li { margin-bottom: 6px; }
+    .privacy-container h2 { font-size: 1.3rem; color: var(--text-main); margin: 28px 0 12px; border-bottom: 2px solid var(--border-color); padding-bottom: 8px; }
+    .privacy-container h3 { font-size: 1.1rem; color: var(--accent); margin: 20px 0 8px; }
+    .privacy-container p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .privacy-container ul { color: var(--text-secondary); margin-bottom: 16px; padding-left: 24px; }
+    .privacy-container li { margin-bottom: 8px; line-height: 1.6; }
+    .privacy-container .highlight { background: var(--bg-card); padding: 16px; border-radius: 12px; border-left: 4px solid var(--accent); margin: 20px 0; }
     </style>
 </head>
 <body class="privacy-page">
@@ -28,87 +30,97 @@
     </header>
     <div class="privacy-container">
         <h1>Политика конфиденциальности</h1>
-        <p><b>Дата вступления в силу:</b> 04.04.2026</p>
-        
+        <p><b>Дата вступления в силу:</b> 04 апреля 2026 г.</p>
+        <p><b>Последнее обновление:</b> 04 апреля 2026 г.</p>
+
+        <div class="highlight">
+            <p><b>Кратко:</b> Мы уважаем вашу приватность. Мы собираем только те данные, которые нужны для создания дизайн-проекта, и не передаём их третьим лицам без вашего согласия.</p>
+        </div>
+
         <h2>1. Общие положения</h2>
-        <p>Настоящая Политика конфиденциальности определяет порядок обработки и защиты персональных данных пользователей платформы Interio (далее — «Платформа»).</p>
-        <p>Используя Платформу, вы соглашаетесь с условиями настоящей Политики.</p>
+        <p>Настоящая Политика конфиденциальности (далее — «Политика») определяет порядок сбора, хранения, обработки и защиты персональных данных пользователей онлайн-студии дизайна интерьеров Interio (далее — «Платформа», «Сервис»).</p>
+        <p>Платформа принадлежит Interio (далее — «Оператор»). Используя Сервис, вы соглашаетесь с условиями настоящей Политики.</p>
+        <p>Оператор обрабатывает данные на основании Федерального закона Российской Федерации от 27.07.2006 № 152-ФЗ «О персональных данных».</p>
 
         <h2>2. Какие данные мы собираем</h2>
+
+        <h3>2.1. Данные, которые вы предоставляете самостоятельно</h3>
         <ul>
-            <li>Имя и фамилия</li>
-            <li>Номер телефона</li>
-            <li>Адрес электронной почты</li>
-            <li>Данные о помещении (тип, площадь, стиль, бюджет)</li>
-            <li>Загруженные фотографии помещения</li>
-            <li>IP-адрес и данные о сессии</li>
+            <li><b>Имя и фамилия</b> — для персонализации обращения и связи с вами</li>
+            <li><b>Номер телефона</b> — для связи менеджером и отправки результатов</li>
+            <li><b>Электронная почта (email)</b> — для отправки дизайн-брифа и уведомлений</li>
+            <li><b>Фотографии помещения</b> — для более точной оценки и рекомендаций дизайнера</li>
+            <li><b>Параметры помещения</b> (тип, площадь, стиль, бюджет) — для формирования дизайн-проекта</li>
+        </ul>
+
+        <h3>2.2. Данные, собираемые автоматически</h3>
+        <ul>
+            <li><b>IP-адрес</b> — для безопасности и предотвращения мошенничества</li>
+            <li><b>Данные о сессии</b> (cookie, session_id) — для сохранения прогресса в квизе</li>
+            <li><b>Данные об устройстве</b> (тип браузера, ОС) — для оптимизации работы сайта</li>
         </ul>
 
         <h2>3. Цели обработки данных</h2>
+        <p>Мы используем ваши данные исключительно для следующих целей:</p>
         <ul>
-            <li>Обработка заявок на дизайн-проект</li>
-            <li>Связь с пользователем для уточнения деталей</li>
-            <li>Улучшение качества сервиса</li>
-            <li>Отправка уведомлений о статусе заявки</li>
+            <li>Обработка заявок на создание дизайн-проекта</li>
+            <li>Связь с вами для уточнения деталей проекта</li>
+            <li>Отправка персонального предложения и PDF-брифа</li>
+            <li>Улучшение качества сервиса и пользовательского опыта</li>
+            <li>Отправка уведомлений о статусе заявки (с вашего согласия)</li>
+            <li>Формирование портфолио (только с вашего отдельного согласия)</li>
         </ul>
 
         <h2>4. Защита данных</h2>
-        <p>Мы принимаем необходимые организационные и технические меры для защиты ваших персональных данных от несанкционированного доступа, утраты, изменения и распространения.</p>
+        <p>Оператор принимает необходимые организационные и технические меры для защиты ваших персональных данных от:</p>
+        <ul>
+            <li>Несанкционированного доступа</li>
+            <li>Утраты, уничтожения или повреждения</li>
+            <li>Незаконного копирования или распространения</li>
+            <li>Иных противоправных действий</li>
+        </ul>
+        <p>Данные передаются по защищённому протоколу HTTPS. Пароли хранятся в зашифрованном виде (SHA-256).</p>
 
         <h2>5. Передача данных третьим лицам</h2>
-        <p>Мы не передаём ваши персональные данные третьим лицам, за исключением случаев, предусмотренных законодательством РФ.</p>
+        <p>Мы <b>не передаём</b> ваши персональные данные третьим лицам, за исключением:</p>
+        <ul>
+            <li>Случаев, предусмотренных законодательством РФ</li>
+            <li>Ваших явных согласий на передачу данных конкретному получателю</li>
+            <li>Обезличенных (анонимизированных) данных для аналитики и статистики</li>
+        </ul>
 
-        <h2>6. Хранение и удаление</h2>
-        <p>Персональные данные хранятся в течение срока, необходимого для достижения целей обработки. Вы можете запросить удаление ваших данных, обратившись к нам.</p>
+        <h2>6. Хранение и удаление данных</h2>
+        <p>Персональные данные хранятся в течение срока, необходимого для достижения целей обработки, но не более 3 (трёх) лет с момента последнего взаимодействия с Платформой.</p>
+        <p>Вы имеете право запросить удаление всех ваших данных, направив запрос на электронную почту <a href="mailto:interiopersonal@gmail.com" style="color:var(--accent)">interiopersonal@gmail.com</a>. Данные будут удалены в течение 30 (тридцати) рабочих дней.</p>
 
-        <h2>7. Контакты</h2>
-        <p>По вопросам, связанным с обработкой персональных данных, обращайтесь: <a href="mailto:info@interio.ru" style="color:var(--accent)">info@interio.ru</a></p>
+        <h2>7. Файлы cookie</h2>
+        <p>Платформа использует файлы cookie для:</p>
+        <ul>
+            <li>Сохранения сессии авторизации</li>
+            <li>Сохранения выбранной темы оформления (светлая/тёмная)</li>
+            <li>Сохранения настроек доступности</li>
+        </ul>
+        <p>Вы можете отключить cookie в настройках браузера, однако это может повлиять на работоспособность некоторых функций.</p>
 
-        <a href="/" class="btn-outline" style="display:inline-flex;margin-top:24px;"><i class="fas fa-arrow-left"></i> На главную</a>
+        <h2>8. Права пользователя</h2>
+        <p>В соответствии с законодательством РФ, вы имеете право:</p>
+        <ul>
+            <li>Получить информацию о том, какие ваши данные обрабатываются</li>
+            <li>Запросить копию ваших персональных данных</li>
+            <li>Потребовать исправления неточных данных</li>
+            <li>Потребовать удаления ваших данных</li>
+            <li>Отозвать согласие на обработку данных</li>
+        </ul>
+
+        <h2>9. Контактная информация</h2>
+        <p>По всем вопросам, связанным с обработкой персональных данных, обращайтесь:</p>
+        <ul>
+            <li><b>Email:</b> <a href="mailto:interiopersonal@gmail.com" style="color:var(--accent)">interiopersonal@gmail.com</a></li>
+            <li><b>Telegram:</b> <a href="https://t.me/mystylequizybot" style="color:var(--accent)">@mystylequizybot</a></li>
+        </ul>
+
+        <a href="/" class="btn-outline" style="display:inline-flex;margin-top:32px;"><i class="fas fa-arrow-left"></i> На главную</a>
     </div>
-
-    
-
-<p style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);font-size:0.45rem;color:rgba(128,128,128,0.12);pointer-events:none;z-index:1;"><a href="https://brainstorm-c0ap.onrender.com/" style="color:rgba(128,128,128,0.12);text-decoration:none;">brainstorm</a></p>
-
-    <script>
-    // Voice input for all textareas and inputs
-    (function(){
-        var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SR) return;
-        function addVoiceBtn(input) {
-            if (input.dataset.voiceAdded) return;
-            input.dataset.voiceAdded = 'true';
-            var btn = document.createElement('button');
-            btn.type = 'button';
-            btn.innerHTML = '&#127908;';
-            btn.title = 'Голосовой ввод';
-            btn.style.cssText = 'position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:1.1rem;cursor:pointer;opacity:0.6;z-index:10;';
-            btn.addEventListener('click', function() {
-                var rec = new SR();
-                rec.lang = 'ru-RU';
-                rec.onresult = function(ev) { input.value = ev.results[0][0].transcript; };
-                btn.style.opacity = '1';
-                rec.start();
-                setTimeout(function(){ btn.style.opacity = '0.6'; }, 3000);
-            });
-            var wrap = document.createElement('div');
-            wrap.style.cssText = 'position:relative;display:inline-block;width:100%;';
-            input.parentNode.insertBefore(wrap, input);
-            wrap.appendChild(input);
-            wrap.appendChild(btn);
-        }
-        document.querySelectorAll('input[type="text"], input[type="email"], textarea').forEach(addVoiceBtn);
-        // Re-check on dynamic content
-        var obs = new MutationObserver(function(){
-            document.querySelectorAll('input[type="text"], input[type="email"], textarea').forEach(addVoiceBtn);
-        });
-        obs.observe(document.body, {childList:true, subtree:true});
-    })();
-    </script>
-
-    <script src="/static/voice.js"></script>
-
     <script src="/static/widgets.js"></script>
 </body>
 </html>
