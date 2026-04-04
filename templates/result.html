@@ -37,6 +37,7 @@
         <div class="header-container">
             <a href="/" class="logo"><span>Interio</span></a>
             <div class="header-actions">
+                <a href="/admin" class="btn-outline btn-small"><i class="fas fa-cog"></i> Админ</a>
                 <a href="/" class="btn-outline btn-small"><i class="fas fa-home"></i> На главную</a>
             </div>
         </div>
@@ -55,29 +56,34 @@
             <button onclick="window.location.href='/quiz'"><i class="fas fa-redo"></i> Пройти снова</button>
         </div>
         <div class="result-card">
-            <h3><i class="fas fa-qrcode"></i> QR-код</h3>
+            <h3><i class="fas fa-qrcode"></i> QR-код заявки</h3>
             <canvas id="qrCanvas"></canvas>
-            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">Сохраните QR для возврата</p>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">Отсканируйте QR для возврата к заявке</p>
         </div>
         <div class="result-card">
-            <h3><i class="fas fa-share-alt"></i> Поделиться результатом</h3>
+            <h3><i class="fas fa-share-alt"></i> Поделиться заявкой</h3>
+            <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:12px;">Отправьте ссылку друзьям или менеджеру</p>
             <div class="share-box">
                 <input id="shareUrl" readonly>
-                <button onclick="copyShare()"><i class="fas fa-copy"></i></button>
+                <button onclick="copyShare()"><i class="fas fa-copy"></i> Копировать</button>
             </div>
             <div class="share-icons">
                 <a href="#" onclick="shareTg()" title="Telegram"><i class="fab fa-telegram-plane"></i></a>
                 <a href="#" onclick="shareWa()" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                 <a href="#" onclick="shareVk()" title="VK"><i class="fab fa-vk"></i></a>
+                <a href="#" onclick="shareEmail()" title="Email"><i class="fas fa-envelope"></i></a>
             </div>
         </div>
     </div>
     <script>
+    // Load answers from localStorage
     var answers = JSON.parse(localStorage.getItem('interio_quiz_answers')||'{}');
     var shareUrl = window.location.href;
     document.getElementById('shareUrl').value = shareUrl;
     var name = answers.name || 'Друг';
     document.getElementById('resultTitle').textContent = name + ', спасибо!';
+
+    // Display answers
     var details = [
         {label:'Помещение',val:answers.roomType||answers.room_type||'—'},
         {label:'Зоны',val:(answers.zones||[]).join(', ')||'—'},
@@ -89,8 +95,11 @@
     document.getElementById('resultDetails').innerHTML = details.map(function(d){
         return '<div class="result-detail"><div class="label">'+d.label+'</div><div class="value">'+d.val+'</div></div>';
     }).join('');
+
+    // Generate QR code
     QRCode.toCanvas(document.getElementById('qrCanvas'), shareUrl, {width:160,margin:1}, function(e){if(e)console.error(e);});
-    // Confetti
+
+    // Confetti animation
     (function(){
         if(typeof confetti==='undefined') return;
         var dur=3000,end=Date.now()+dur;
@@ -101,12 +110,16 @@
         })();
         setTimeout(function(){confetti({particleCount:150,spread:100,origin:{y:0.6},colors:['#2563eb','#e74c5e','#f39c12','#22c55e']});},500);
     })();
-    function copyShare(){navigator.clipboard.writeText(shareUrl);showToast('Ссылка скопирована');}
-    function shareTg(){window.open('https://t.me/share/url?url='+encodeURIComponent(shareUrl),'_blank');}
-    function shareWa(){window.open('https://wa.me/?text='+encodeURIComponent(shareUrl),'_blank');}
+
+    // Share functions
+    function copyShare(){navigator.clipboard.writeText(shareUrl);showToast('Ссылка скопирована!');}
+    function shareTg(){window.open('https://t.me/share/url?url='+encodeURIComponent(shareUrl)+'&text=Моя заявка Interio','_blank');}
+    function shareWa(){window.open('https://wa.me/?text='+encodeURIComponent('Моя заявка Interio: '+shareUrl),'_blank');}
     function shareVk(){window.open('https://vk.com/share.php?url='+encodeURIComponent(shareUrl),'_blank');}
+    function shareEmail(){window.location.href='mailto:?subject=Моя заявка Interio&body='+encodeURIComponent(shareUrl);}
     function showToast(m){var t=document.createElement('div');t.style.cssText='position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--error);color:white;padding:12px 24px;border-radius:50px;z-index:9999;';t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove();},3000);}
-    // PDF
+
+    // PDF download
     document.getElementById('downloadPdf').addEventListener('click',async function(){
         var a=JSON.parse(localStorage.getItem('interio_quiz_answers')||'{}');
         var jsPDF=window.jspdf.jsPDF;
@@ -120,7 +133,5 @@
         doc.save('Interio_'+Date.now()+'.pdf');
     });
     </script>
-<p style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);font-size:0.45rem;color:rgba(128,128,128,0.15);pointer-events:none;"><a href="https://brainstorm-c0ap.onrender.com/" style="color:rgba(128,128,128,0.15);text-decoration:none;">brainstorm</a></p>
-<p style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);font-size:0.45rem;color:rgba(128,128,128,0.15);pointer-events:none;"><a href="https://brainstorm-c0ap.onrender.com/" style="color:rgba(128,128,128,0.15);text-decoration:none;">brainstorm</a></p>
 </body>
 </html>
