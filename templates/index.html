@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="ru" data-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="/static/state-manager.js"></script>
     <script src="/static/session-state-manager.js"></script>
     <script>
-    try {
-        window.stateManager.applyThemeFromStorage();
-        window.stateManager.applyA11yAttrsFromStorage();
-    } catch (e) {}
+        try {
+            window.stateManager.applyThemeFromStorage();
+            window.stateManager.applyA11yAttrsFromStorage();
+        } catch (e) { }
     </script>
     <title>Interio — Дизайн-проекты</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/responsive.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
 </head>
+
 <body>
     <div class="bg-image"></div>
     <div class="bg-overlay"></div>
@@ -38,18 +40,16 @@
                 <button class="a11y-toggle" id="a11yToggle" title="Режим для слабовидящих">
                     <i class="fas fa-eye"></i>
                 </button>
-                <button class="admin-btn" id="adminBtn" onclick="window.adminAuth.openModal()" title="Админ панель">
-                    <i class="fas fa-ban"></i>
-                </button>
-                
+
                 <!-- Блок профиля / авторизации -->
                 <div class="user-profile-container" id="userProfileContainer">
-                    <div class="user-profile" id="userProfile" style="display: none;" onclick="window.authManager.openCabinetModal()">
+                    <div class="user-profile" id="userProfile" style="display: none;"
+                        onclick="window.authManager.openCabinetModal()">
                         <div class="user-avatar" id="userAvatar"></div>
                         <span class="user-nickname" id="userNicknameDisplay"></span>
                     </div>
                 </div>
-    <button class="login-btn" id="loginBtn" onclick="window.authManager.openModal()">
+                <button class="login-btn" id="loginBtn" onclick="window.authManager.openModal()">
                     <i class="fas fa-user"></i> Войти
                 </button>
             </div>
@@ -62,26 +62,11 @@
             <div class="hero-badge"><i class="fas fa-star"></i> Профессиональный дизайн</div>
             <h1 class="hero-title">Платформа дизайн-проектов</h1>
             <h2 class="hero-subtitle">Создавайте идеальные интерьеры вместе с нами</h2>
-            <p class="hero-description">Ответьте на вопросы и получите персональное предложение с рекомендацией стиля и ориентировочной стоимостью.</p>
+            <p class="hero-description">Ответьте на вопросы и получите персональное предложение с рекомендацией стиля и
+                ориентировочной стоимостью.</p>
             <a href="/quiz" class="btn-primary-hero">
                 <i class="fas fa-rocket"></i> Начать тест
             </a>
-            <div class="hero-stats">
-                <div class="stat">
-                    <span class="stat-number">500+</span>
-                    <span class="stat-label">Проектов</span>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat">
-                    <span class="stat-number">4.9</span>
-                    <span class="stat-label">Рейтинг</span>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat">
-                    <span class="stat-number">100%</span>
-                    <span class="stat-label">Гарантия</span>
-                </div>
-            </div>
         </div>
     </section>
 
@@ -125,10 +110,10 @@
             </div>
             <div class="contacts-grid">
                 <div class="contact-card">
-                    <div class="contact-icon"><i class="fas fa-phone"></i></div>
-                    <h3>Телефон</h3>
-                    <p>+7 (999) 666-66-66</p>
-                    <small>Пн-Пт 10:00 – 17:00</small>
+                    <div class="contact-icon"><i class="fab fa-telegram-plane"></i></div>
+                    <h3>Telegram-бот</h3>
+                    <p><a href="https://t.me/mystylequizybot" target="_blank" style="color:var(--accent-light);text-decoration:none;">@mystylequizybot</a></p>
+                    <small>Квиз, ИИ-советник, заявки</small>
                 </div>
                 <div class="contact-card">
                     <div class="contact-icon"><i class="fas fa-envelope"></i></div>
@@ -155,8 +140,8 @@
                     <p>Создаем пространство, в котором хочется жить.</p>
                 </div>
                 <div class="footer-links">
-                    <a href="https://vk.com/video7266823_78234740">Политика конфиденциальности</a>
-                    <a href="https://vk.com/video7266823_78234740">Оферта</a>
+                    <a href="#">Политика конфиденциальности</a>
+                    <a href="#">Оферта</a>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -192,60 +177,17 @@
         </label>
     </div>
 
-    <!-- Модальное окно админ авторизации -->
-    <div id="adminAuthModal" class="auth-modal">
-        <div class="admin-auth-modal-content">
-            <div class="admin-auth-header">
-                <div class="admin-auth-icon">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <h2>Админ панель</h2>
-                <p>Введите код для доступа к управлению</p>
-            </div>
-            
-            <div class="admin-auth-form">
-                <div class="admin-input-group">
-                    <label for="adminCodeInput">Код доступа</label>
-                    <div class="admin-input-wrapper">
-                        <i class="fas fa-key"></i>
-                        <input type="password" id="adminCodeInput" placeholder="••••••••" maxlength="20">
-                        <button type="button" class="admin-toggle-password" onclick="window.adminAuth.togglePassword()">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <button class="admin-auth-btn" onclick="window.adminAuth.login()">
-                    <i class="fas fa-sign-in-alt"></i>
-                    Войти в админ панель
-                </button>
-                
-                <div id="adminError" class="admin-error-message">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span></span>
-                </div>
-            </div>
-            
-            <div class="admin-auth-footer">
-                <small>Доступ только для авторизованных пользователей</small>
-            </div>
-            
-            <span class="admin-auth-close" onclick="window.adminAuth.closeModal()">
-                <i class="fas fa-times"></i>
-            </span>
-        </div>
-    </div>
-
     <!-- Модальное окно авторизации -->
     <div id="authModal" class="auth-modal">
         <div class="auth-modal-content">
             <span class="auth-close" onclick="window.authManager.closeModal()">&times;</span>
-            
+
             <!-- Шаг 1: Ввод номера телефона -->
             <div id="phoneStep" class="auth-step">
                 <h2>Вход в личный кабинет</h2>
                 <p>Введите номер телефона</p>
-                <input type="tel" id="phoneInput" placeholder="+7 (999) 123-45-67" maxlength="18" oninput="window.authManager && window.authManager.formatPhone && window.authManager.formatPhone(this)">
+                <input type="tel" id="phoneInput" placeholder="+7 (999) 123-45-67" maxlength="18"
+                    oninput="window.authManager.formatPhone(this)">
                 <button onclick="window.authManager.checkPhone()">Далее</button>
                 <div id="phoneError" class="auth-error-message"></div>
             </div>
@@ -279,32 +221,65 @@
         <div class="cabinet-modal-content">
             <span class="cabinet-close" onclick="window.authManager.closeCabinetModal()">&times;</span>
             <div class="cabinet-container">
-                <div class="cabinet-header">
-                    <h2>Личный кабинет</h2>
-                    <div class="user-info">
-                        <div class="user-avatar" id="cabinetUserAvatar"></div>
-                        <div class="user-details">
-                            <div class="user-nickname" id="cabinetUserNickname"></div>
-                            <div class="user-phone" id="cabinetUserPhone"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="cabinet-section">
-                    <h3>История заявок</h3>
-                    <div id="userSubmissions" class="submissions-list">
-                        <div class="loading">Загрузка...</div>
-                    </div>
-                </div>
-                
                 <button class="logout-btn" onclick="window.authManager.logout()">Выйти</button>
             </div>
         </div>
     </div>
 
+    <!-- GigaChat Button -->
+    <button id="gcFloatBtn" title="ИИ-советник по дизайну"
+        onclick="document.getElementById('gcModal').classList.add('show')"
+        style="position:fixed;bottom:28px;right:28px;z-index:1000;width:64px;height:64px;border-radius:50%;border:none;background:linear-gradient(135deg,#2563eb,#e74c5e);color:white;font-size:1.6rem;cursor:pointer;box-shadow:0 4px 24px rgba(37,99,235,0.5);transition:all .3s;display:flex;align-items:center;justify-content:center;">
+        🤖<span
+            style="position:absolute;top:-2px;right:-2px;width:22px;height:22px;background:#22c55e;border-radius:50%;font-size:.65rem;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;box-shadow:0 2px 8px rgba(34,197,94,0.5);">AI</span>
+    </button>
+
+    <!-- GigaChat Modal -->
+    <div id="gcModal"
+        style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);align-items:flex-end;justify-content:center;">
+        <div
+            style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:24px 24px 0 0;width:100%;max-width:500px;max-height:80vh;display:flex;flex-direction:column;">
+            <div
+                style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--border-color);">
+                <h3 style="margin:0;font-size:1.1rem;color:var(--text-main);">🤖 ИИ-советник</h3>
+                <button id="gcClose"
+                    style="background:none;border:none;color:var(--text-muted);font-size:1.3rem;cursor:pointer;">&times;</button>
+            </div>
+            <div id="gcMsgs"
+                style="flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:12px;">
+                <div
+                    style="padding:12px 16px;border-radius:16px 16px 16px 4px;background:var(--bg-card);color:var(--text-main);align-self:flex-start;max-width:85%;font-size:.9rem;line-height:1.5;">
+                    Привет! Я ИИ-советник по дизайну интерьера. Спросите про стиль, бюджет, планировку, размеры
+                    помещений или материалы. 🏠</div>
+            </div>
+            <div
+                style="display:flex;gap:8px;padding:16px 24px;border-top:1px solid var(--border-color);">
+                <input id="gcInput" type="text" placeholder="Спросите о дизайне..."
+                    style="flex:1;padding:12px 16px;border-radius:12px;background:var(--bg-primary);border:1px solid var(--border-color);color:var(--text-main);font-size:.9rem;outline:none;"
+                    onkeydown="if(event.key==='Enter')sendGC()">
+                <button id="gcSendBtn" onclick="sendGC()"
+                    style="padding:12px 20px;border-radius:12px;background:var(--accent);color:white;border:none;cursor:pointer;font-weight:600;">→</button>
+            </div>
+        </div>
+    </div>
+
     <script src="/static/actions.js"></script>
-    <script src="/static/session-integration.js"></script>
-    <script src="/static/auth.js"></script>
-    <script src="/static/admin-auth.js"></script>
+    <script>
+    // GigaChat
+    document.getElementById('gcFloatBtn').addEventListener('click', function () { document.getElementById('gcModal').style.display = 'flex'; });
+    document.getElementById('gcClose').addEventListener('click', function () { document.getElementById('gcModal').style.display = 'none'; });
+    document.getElementById('gcModal').addEventListener('click', function (e) { if (e.target === this) this.style.display = 'none'; });
+    async function sendGC() {
+        var inp = document.getElementById('gcInput'), btn = document.getElementById('gcSendBtn'), msgs = document.getElementById('gcMsgs');
+        var q = inp.value.trim(); if (!q) return;
+        msgs.innerHTML += '<div style="padding:12px 16px;border-radius:16px 16px 4px 16px;background:var(--accent);color:white;align-self:flex-end;max-width:85%;font-size:.9rem;line-height:1.5;">' + esc(q) + '</div>';
+        inp.value = ''; btn.disabled = true; msgs.scrollTop = msgs.scrollHeight;
+        try { var r = await fetch('/api/support', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: q }) }); var d = await r.json(); msgs.innerHTML += '<div style="padding:12px 16px;border-radius:16px 16px 16px 4px;background:var(--bg-card);color:var(--text-main);align-self:flex-start;max-width:85%;font-size:.9rem;line-height:1.5;">' + esc(d.answer || 'Ошибка') + '</div>'; }
+        catch (e) { msgs.innerHTML += '<div style="padding:12px 16px;border-radius:16px 16px 16px 4px;background:var(--bg-card);color:var(--text-main);align-self:flex-start;max-width:85%;font-size:.9rem;line-height:1.5;">⚠️ Ошибка соединения</div>'; }
+        btn.disabled = false; msgs.scrollTop = msgs.scrollHeight;
+    }
+    function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    </script>
 </body>
+
 </html>
