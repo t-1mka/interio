@@ -3,85 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin — Interio</title>
+    <title>Админ панель - Interio</title>
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/static/state-manager.js"></script>
+    <script>
+    try {
+        window.stateManager.applyThemeFromStorage();
+        window.stateManager.applyA11yAttrsFromStorage();
+    } catch (e) {}
+    </script>
     <style>
-    .admin-page { padding-top: 100px; min-height: 100vh; }
-    .admin-container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-    .admin-header { text-align: center; margin-bottom: 32px; }
-    .admin-header h1 { font-family: var(--font-display); font-size: 2rem; color: var(--text-main); }
-    .admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
-    .admin-stat { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; text-align: center; }
-    .admin-stat .number { font-size: 2rem; font-weight: 700; color: var(--accent-light); }
-    .admin-stat .label { font-size: 0.85rem; color: var(--text-muted); }
-    .admin-section { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
-    .admin-section h2 { font-size: 1.2rem; margin-bottom: 16px; color: var(--text-main); }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; }
-    th { color: var(--text-muted); font-weight: 600; }
-    td { color: var(--text-main); }
-    .admin-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-    .admin-tab { padding: 10px 20px; border-radius: 50px; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; font-size: 0.85rem; }
-    .admin-tab:hover, .admin-tab.active { border-color: var(--accent); background: rgba(37,99,235,0.1); color: var(--accent); }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .admin-header {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+        .admin-title {
+            font-size: 2rem;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .submissions-table {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .table-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+        }
+        .search-box input {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            outline: none;
+            width: 200px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background: var(--bg-secondary);
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border);
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .status-new {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+        .status-contacted {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+        .status-in_progress {
+            background: rgba(236, 72, 153, 0.2);
+            color: #ec4899;
+        }
+        .status-completed {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+        .status-cancelled {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-small {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+        .btn-view {
+            background: var(--accent);
+            color: white;
+        }
+        .btn-view:hover {
+            background: var(--accent-hover);
+        }
+        .status-select {
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 0.8rem;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .submission-details {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        .detail-row {
+            display: flex;
+            margin-bottom: 8px;
+        }
+        .detail-label {
+            font-weight: 600;
+            min-width: 120px;
+            color: var(--text-secondary);
+        }
+        .detail-value {
+            color: var(--text-primary);
+        }
+        .back-btn {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .back-btn:hover {
+            background: var(--bg-secondary);
+        }
     </style>
 </head>
-<body class="admin-page">
-    <header class="header header-minimal"><div class="header-container"><a href="/" class="logo"><span>Interio</span></a><div class="header-actions"><a href="/" class="btn-outline btn-small"><i class="fas fa-home"></i> На главную</a></div></div></header>
+<body>
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+    
     <div class="admin-container">
-        <div class="admin-header"><h1><i class="fas fa-cog"></i> Админ-панель</h1></div>
-        <div class="admin-stats">
-            <div class="admin-stat"><div class="number" id="statUsers">—</div><div class="label">Пользователи</div></div>
-            <div class="admin-stat"><div class="number" id="statSubmissions">—</div><div class="label">Заявки</div></div>
-            <div class="admin-stat"><div class="number" id="statDesigns">—</div><div class="label">Дизайны</div></div>
-            <div class="admin-stat"><div class="number" id="statStatus">—</div><div class="label">Статус</div></div>
+        <div class="admin-header">
+            <h1 class="admin-title">Админ панель</h1>
+            <p style="color: var(--text-secondary);">Управление заявками</p>
         </div>
-        <div class="admin-tabs">
-            <button class="admin-tab active" onclick="showTab('submissions',this)">Заявки</button>
-            <button class="admin-tab" onclick="showTab('users',this)">Пользователи</button>
-            <button class="admin-tab" onclick="showTab('portfolio',this)">Портфолио</button>
-            <button class="admin-tab" onclick="showTab('logs',this)">Логи</button>
+        
+        <div id="adminError" class="error" style="display: none;"></div>
+        
+        <div class="admin-stats" id="adminStats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalSubmissions">-</div>
+                <div class="stat-label">Всего заявок</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="newSubmissions">-</div>
+                <div class="stat-label">Новых</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completedSubmissions">-</div>
+                <div class="stat-label">Обработано</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="todaySubmissions">-</div>
+                <div class="stat-label">За сегодня</div>
+            </div>
         </div>
-        <div class="tab-content active" id="tab-submissions">
-            <div class="admin-section"><h2><i class="fas fa-clipboard-list"></i> Все заявки</h2><div style="overflow-x:auto;"><table><thead><tr><th>ID</th><th>Имя</th><th>Телефон</th><th>Помещение</th><th>Стиль</th><th>Бюджет</th><th>Дата</th></tr></thead><tbody id="submissionsTable"></tbody></table></div></div>
-        </div>
-        <div class="tab-content" id="tab-users">
-            <div class="admin-section"><h2><i class="fas fa-users"></i> Пользователи</h2><div style="overflow-x:auto;"><table><thead><tr><th>ID</th><th>Телефон</th><th>Никнейм</th><th>Дата</th></tr></thead><tbody id="usersTable"></tbody></table></div></div>
-        </div>
-        <div class="tab-content" id="tab-portfolio">
-            <div class="admin-section"><h2><i class="fas fa-images"></i> Портфолио</h2><div style="overflow-x:auto;"><table><thead><tr><th>ID</th><th>Название</th><th>Стиль</th><th>Лайки</th><th>Просмотры</th></tr></thead><tbody id="portfolioTable"></tbody></table></div></div>
-        </div>
-        <div class="tab-content" id="tab-logs">
-            <div class="admin-section"><h2><i class="fas fa-terminal"></i> Статус сервера</h2><pre id="serverLogs" style="background:var(--bg-primary);padding:16px;border-radius:8px;font-size:0.8rem;color:var(--text-muted);max-height:400px;overflow-y:auto;">Загрузка...</pre></div>
+        
+        <div class="submissions-table">
+            <div class="table-header">
+                <h2 style="color: var(--text-primary); margin: 0;">Заявки</h2>
+                <div class="search-box">
+                    <i class="fas fa-search" style="color: var(--text-secondary);"></i>
+                    <input type="text" id="searchInput" placeholder="Поиск по имени или телефону...">
+                </div>
+            </div>
+            
+            <div id="submissionsContent">
+                <div class="loading">Загрузка заявок...</div>
+            </div>
         </div>
     </div>
-    <script>
-    function showTab(name, btn) {
-        document.querySelectorAll('.tab-content').forEach(function(t){t.classList.remove('active');});
-        document.querySelectorAll('.admin-tab').forEach(function(t){t.classList.remove('active');});
-        document.getElementById('tab-'+name).classList.add('active');
-        if(btn) btn.classList.add('active');
-        loadData();
-    }
-    async function loadData() {
-        try {
-            var users = await fetch('/api/auth/users').then(function(r){return r.json();});
-            var subs = await fetch('/api/quiz/submissions').then(function(r){return r.json();});
-            var designs = await fetch('/api/portfolio').then(function(r){return r.json();});
-            document.getElementById('statUsers').textContent = (users.users||[]).length;
-            document.getElementById('statSubmissions').textContent = (subs.submissions||[]).length;
-            document.getElementById('statDesigns').textContent = (designs.designs||[]).length;
-            document.getElementById('statStatus').innerHTML = '<span style="color:#22c55e;">OK</span>';
-            document.getElementById('submissionsTable').innerHTML = (subs.submissions||[]).map(function(s){return '<tr><td>'+s.id+'</td><td>'+s.name+'</td><td>'+s.phone+'</td><td>'+s.room_type+'</td><td>'+s.style+'</td><td>'+s.budget+'</td><td>'+new Date(s.created_at).toLocaleDateString('ru-RU')+'</td></tr>';}).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">Нет заявок</td></tr>';
-            document.getElementById('usersTable').innerHTML = (users.users||[]).map(function(u){return '<tr><td>'+u.id+'</td><td>'+u.phone+'</td><td>'+u.nickname+'</td><td>'+new Date(u.created_at).toLocaleDateString('ru-RU')+'</td></tr>';}).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">Нет пользователей</td></tr>';
-            document.getElementById('portfolioTable').innerHTML = (designs.designs||[]).map(function(d){return '<tr><td>'+d.id+'</td><td>'+d.title+'</td><td>'+(d.style||'—')+'</td><td>'+(d.likes_count||0)+'</td><td>'+(d.views_count||0)+'</td></tr>';}).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--text-muted)">Нет дизайнов</td></tr>';
-            document.getElementById('serverLogs').textContent = '✅ Сервер работает\n📊 Пользователей: '+(users.users||[]).length+'\n📋 Заявок: '+(subs.submissions||[]).length+'\n🎨 Дизайнов: '+(designs.designs||[]).length;
-        } catch(e) { document.getElementById('serverLogs').textContent = '❌ Ошибка: '+e.message; }
-    }
-    loadData();
-    setInterval(loadData, 30000);
-    </script>
+    
+    <script src="/static/admin.js"></script>
 </body>
 </html>

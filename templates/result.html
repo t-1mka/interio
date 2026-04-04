@@ -12,9 +12,9 @@
     <style>
     .result-page { padding-top: 100px; min-height: 100vh; }
     .result-container { max-width: 700px; margin: 0 auto; padding: 0 24px; text-align: center; }
-    .result-header h1 { font-family: var(--font-display); font-size: 2.2rem; color: var(--text-main); margin-bottom: 8px; }
+    .result-header h1 { font-size: 2rem; color: var(--text-main); margin-bottom: 8px; }
     .result-header p { color: var(--text-secondary); margin-bottom: 32px; }
-    .result-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 32px; margin-bottom: 24px; }
+    .result-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 32px; margin-bottom: 24px; }
     .result-card h3 { margin: 0 0 16px; color: var(--text-main); }
     .result-details { text-align: left; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .result-detail { background: var(--bg-primary); border-radius: 8px; padding: 12px; }
@@ -32,16 +32,44 @@
     </style>
 </head>
 <body class="result-page">
-    <header class="header header-minimal"><div class="header-container"><a href="/" class="logo"><span>Interio</span></a><div class="header-actions"><a href="/" class="btn-outline btn-small"><i class="fas fa-home"></i> На главную</a></div></div></header>
+    <header class="header header-minimal">
+        <div class="header-container">
+            <a href="/" class="logo"><span>Interio</span></a>
+            <div class="header-actions">
+                <a href="/" class="btn-outline btn-small"><i class="fas fa-home"></i> На главную</a>
+            </div>
+        </div>
+    </header>
     <div class="result-container">
-        <div class="result-header"><h1 id="resultTitle">Спасибо за заявку!</h1><p id="resultSubtitle">Мы свяжемся с вами в ближайшее время</p></div>
-        <div class="result-card"><h3><i class="fas fa-clipboard-list"></i> Ваши ответы</h3><div class="result-details" id="resultDetails"></div></div>
+        <div class="result-header">
+            <h1 id="resultTitle">Спасибо за заявку!</h1>
+            <p id="resultSubtitle">Мы свяжемся с вами в ближайшее время</p>
+        </div>
+        <div class="result-card">
+            <h3><i class="fas fa-clipboard-list"></i> Ваши ответы</h3>
+            <div class="result-details" id="resultDetails"></div>
+        </div>
         <div class="result-actions">
             <button id="downloadPdf"><i class="fas fa-file-pdf"></i> Скачать PDF</button>
             <button onclick="window.location.href='/quiz'"><i class="fas fa-redo"></i> Пройти снова</button>
         </div>
-        <div class="result-card"><h3><i class="fas fa-qrcode"></i> QR-код</h3><canvas id="qrCanvas"></canvas><p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">Сохраните QR для возврата</p></div>
-        <div class="result-card"><h3><i class="fas fa-share-alt"></i> Поделиться</h3><div class="share-box"><input id="shareUrl" readonly><button onclick="copyShare()"><i class="fas fa-copy"></i></button></div><div class="share-icons"><a href="#" onclick="shareTg()" title="Telegram"><i class="fab fa-telegram-plane"></i></a><a href="#" onclick="shareWa()" title="WhatsApp"><i class="fab fa-whatsapp"></i></a><a href="#" onclick="shareVk()" title="VK"><i class="fab fa-vk"></i></a></div></div>
+        <div class="result-card">
+            <h3><i class="fas fa-qrcode"></i> QR-код</h3>
+            <canvas id="qrCanvas"></canvas>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">Сохраните QR для возврата</p>
+        </div>
+        <div class="result-card">
+            <h3><i class="fas fa-share-alt"></i> Поделиться результатом</h3>
+            <div class="share-box">
+                <input id="shareUrl" readonly>
+                <button onclick="copyShare()"><i class="fas fa-copy"></i></button>
+            </div>
+            <div class="share-icons">
+                <a href="#" onclick="shareTg()" title="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                <a href="#" onclick="shareWa()" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                <a href="#" onclick="shareVk()" title="VK"><i class="fab fa-vk"></i></a>
+            </div>
+        </div>
     </div>
     <script>
     var answers = JSON.parse(localStorage.getItem('interio_quiz_answers')||'{}');
@@ -49,11 +77,29 @@
     document.getElementById('shareUrl').value = shareUrl;
     var name = answers.name || 'Друг';
     document.getElementById('resultTitle').textContent = name + ', спасибо!';
-    var details = [{label:'Помещение',val:answers.roomType||answers.room_type||'—'},{label:'Зоны',val:(answers.zones||[]).join(', ')||'—'},{label:'Площадь',val:answers.area?answers.area+' м²':'—'},{label:'Стиль',val:answers.style||'—'},{label:'Бюджет',val:answers.budget||'—'},{label:'Телефон',val:answers.phone||'—'}];
-    document.getElementById('resultDetails').innerHTML = details.map(function(d){return '<div class="result-detail"><div class="label">'+d.label+'</div><div class="value">'+d.val+'</div></div>';}).join('');
+    var details = [
+        {label:'Помещение',val:answers.roomType||answers.room_type||'—'},
+        {label:'Зоны',val:(answers.zones||[]).join(', ')||'—'},
+        {label:'Площадь',val:answers.area?answers.area+' м²':'—'},
+        {label:'Стиль',val:answers.style||'—'},
+        {label:'Бюджет',val:answers.budget||'—'},
+        {label:'Телефон',val:answers.phone||'—'}
+    ];
+    document.getElementById('resultDetails').innerHTML = details.map(function(d){
+        return '<div class="result-detail"><div class="label">'+d.label+'</div><div class="value">'+d.val+'</div></div>';
+    }).join('');
     QRCode.toCanvas(document.getElementById('qrCanvas'), shareUrl, {width:160,margin:1}, function(e){if(e)console.error(e);});
     // Confetti
-    (function(){if(typeof confetti==='undefined') return;var dur=3000,end=Date.now()+dur;(function frame(){confetti({particleCount:5,angle:60,spread:55,origin:{x:0},colors:['#2563eb','#e74c5e','#f39c12','#22c55e']});confetti({particleCount:5,angle:120,spread:55,origin:{x:1},colors:['#2563eb','#e74c5e','#f39c12','#22c55e']});if(Date.now()<end)requestAnimationFrame(frame);})();setTimeout(function(){confetti({particleCount:150,spread:100,origin:{y:0.6},colors:['#2563eb','#e74c5e','#f39c12','#22c55e']});},500);})();
+    (function(){
+        if(typeof confetti==='undefined') return;
+        var dur=3000,end=Date.now()+dur;
+        (function frame(){
+            confetti({particleCount:5,angle:60,spread:55,origin:{x:0},colors:['#2563eb','#e74c5e','#f39c12','#22c55e']});
+            confetti({particleCount:5,angle:120,spread:55,origin:{x:1},colors:['#2563eb','#e74c5e','#f39c12','#22c55e']});
+            if(Date.now()<end) requestAnimationFrame(frame);
+        })();
+        setTimeout(function(){confetti({particleCount:150,spread:100,origin:{y:0.6},colors:['#2563eb','#e74c5e','#f39c12','#22c55e']});},500);
+    })();
     function copyShare(){navigator.clipboard.writeText(shareUrl);showToast('Ссылка скопирована');}
     function shareTg(){window.open('https://t.me/share/url?url='+encodeURIComponent(shareUrl),'_blank');}
     function shareWa(){window.open('https://wa.me/?text='+encodeURIComponent(shareUrl),'_blank');}
@@ -61,13 +107,17 @@
     function showToast(m){var t=document.createElement('div');t.style.cssText='position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--error);color:white;padding:12px 24px;border-radius:50px;z-index:9999;';t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove();},3000);}
     // PDF
     document.getElementById('downloadPdf').addEventListener('click',async function(){
-        var a=JSON.parse(localStorage.getItem('interio_quiz_answers')||'{}');var jsPDF=window.jspdf.jsPDF;var doc=new jsPDF();
-        doc.setFillColor(37,99,235);doc.rect(0,0,210,40,'F');doc.setTextColor(255,255,255);doc.setFontSize(24);doc.text('Interio',20,22);doc.setFontSize(12);doc.text('Заявка на дизайн-проект',20,32);
+        var a=JSON.parse(localStorage.getItem('interio_quiz_answers')||'{}');
+        var jsPDF=window.jspdf.jsPDF;
+        var doc=new jsPDF();
+        doc.setFillColor(37,99,235);doc.rect(0,0,210,40,'F');doc.setTextColor(255,255,255);doc.setFontSize(24);doc.text('Interio',20,22);
+        doc.setFontSize(12);doc.text('Заявка на дизайн-проект',20,32);
         var y=55;doc.setTextColor(30,30,30);
         var sec=function(t,v){doc.setFontSize(11);doc.setTextColor(37,99,235);doc.text(t,20,y);y+=7;doc.setTextColor(50,50,50);if(Array.isArray(v))v.forEach(function(x){doc.text('• '+x,24,y);y+=6;});else{var lines=doc.splitTextToSize(String(v||'—'),170);doc.text(lines,20,y);y+=6*lines.length;}y+=4;};
-        sec('Помещение:',a.roomType);sec('Зоны:',a.zones);sec('Площадь:',a.area?a.area+' м²':'—');sec('Стиль:',a.style);sec('Бюджет:',a.budget);y+=5;doc.line(20,y,190,y);y+=10;sec('Имя:',a.name);sec('Телефон:',a.phone);sec('Email:',a.email||'—');sec('Комментарий:',a.comment||'—');doc.save('Interio_'+Date.now()+'.pdf');
+        sec('Помещение:',a.roomType);sec('Зоны:',a.zones);sec('Площадь:',a.area?a.area+' м²':'—');sec('Стиль:',a.style);sec('Бюджет:',a.budget);
+        y+=5;doc.line(20,y,190,y);y+=10;sec('Имя:',a.name);sec('Телефон:',a.phone);sec('Email:',a.email||'—');sec('Комментарий:',a.comment||'—');
+        doc.save('Interio_'+Date.now()+'.pdf');
     });
-    fetch('/api/analytics',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event_type:'quiz_success'})});
     </script>
 </body>
 </html>

@@ -1,127 +1,96 @@
-/*
- * actions.js — Тема + Доступность + Звуки
- * Работает на ВСЕХ страницах
- */
+document.addEventListener('DOMContentLoaded', () => {
+    // Тема и панель a11y обрабатывает только state-manager.js (initUI), без дублирования обработчиков.
 
-document.addEventListener('DOMContentLoaded', function () {
-
-    // ══════════════════════════════════════
-    // СМЕНА ТЕМЫ
-    // ══════════════════════════════════════
-    var btn = document.getElementById('themeToggle');
-    var html = document.documentElement;
-
-    // Восстановить сохранённую тему
-    var saved = localStorage.getItem('interio_theme') || 'dark';
-    html.setAttribute('data-theme', saved);
-
-    // Обновить иконку
-    function updateIcon() {
-        var icon = btn ? btn.querySelector('i') : null;
-        if (icon) {
-            icon.className = html.getAttribute('data-theme') === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+    window.showToast = function(message, duration = 3000) {
+        const toast = document.getElementById('toastNotification');
+        const toastMessage = document.getElementById('toastMessage');
+        if (!toast || !toastMessage) {
+            console.error('Toast elements not found:', { toast, toastMessage });
+            return;
         }
-    }
-    updateIcon();
 
-    // По клику — переключить
-    if (btn) {
-        btn.addEventListener('click', function () {
-            var current = html.getAttribute('data-theme');
-            var next = current === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', next);
-            localStorage.setItem('interio_theme', next);
-            updateIcon();
+        toastMessage.textContent = message;
+        toast.classList.add('show');
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, duration);
+    };
+
+    // --- Touch Gestures (Swipe Navigation for Main Page) ---
+    function initTouchGestures() {
+        if (typeof Hammer === 'undefined') {
+            console.warn('Hammer.js not loaded, swipe gestures disabled');
+            return;
+        }
+
+        const body = document.body;
+        const hammer = new Hammer(body, {
+            recognizers: [
+                [Hammer.Swipe, { direction: Hammer.DIRECTION_VERTICAL }]
+            ]
         });
-    }
 
-    // ══════════════════════════════════════
-    // ДОСТУПНОСТЬ (слабовидящие)
-    // ══════════════════════════════════════
-    var a11yBtn = document.getElementById('a11yToggle');
-    var a11yPanel = document.getElementById('a11yPanel');
-    var a11yClose = document.getElementById('a11yClose');
+        // Define sections in order
+        const sections = [
+            { id: 'hero', name: 'hero' },
+            { id: 'about', name: 'about' },
+            { id: 'contacts', name: 'contacts' }
+        ];
 
-    // Восстановить настройки
-    function restoreA11y() {
-        if (localStorage.getItem('interio_a11y_contrast') === 'true') {
-            html.setAttribute('data-contrast', 'high');
-            var cb = document.getElementById('highContrast');
-            if (cb) cb.checked = true;
-        }
-        if (localStorage.getItem('interio_a11y_large-buttons') === 'true') {
-            html.setAttribute('data-large-buttons', 'true');
-            var cb = document.getElementById('largeButtons');
-            if (cb) cb.checked = true;
-        }
-        if (localStorage.getItem('interio_a11y_large-text') === 'true') {
-            html.setAttribute('data-large-text', 'true');
-            var cb = document.getElementById('largeText');
-            if (cb) cb.checked = true;
-        }
-    }
-    restoreA11y();
-
-    // Открыть/закрыть панель
-    if (a11yBtn && a11yPanel) {
-        a11yBtn.addEventListener('click', function () {
-            a11yPanel.classList.toggle('show');
+        hammer.on('swipeup', () => {
+            // Swipe up = go to next section
+            const currentScroll = window.pageYOffset;
+            const windowHeight = window.innerHeight;
+            
+            for (let i = 0; i < sections.length; i++) {
+                const section = document.getElementById(sections[i].id);
+                if (section) {
+                    const sectionTop = section.offsetTop;
+                    const sectionBottom = sectionTop + section.offsetHeight;
+                    
+                    // If current scroll is in this section and there's a next section
+                    if (currentScroll >= sectionTop - 100 && currentScroll < sectionBottom - 100 && i < sections.length - 1) {
+                        const nextSection = document.getElementById(sections[i + 1].id);
+                        if (nextSection) {
+                            nextSection.scrollIntoView({ behavior: 'smooth' });
+                            break;
+                        }
+                    }
+                }
+            }
         });
-    }
-    if (a11yClose && a11yPanel) {
-        a11yClose.addEventListener('click', function () {
-            a11yPanel.classList.remove('show');
-        });
-    }
 
-    // Закрыть при клике вне панели
-    document.addEventListener('click', function (e) {
-        if (a11yPanel && !a11yPanel.contains(e.target) && e.target !== a11yBtn) {
-            a11yPanel.classList.remove('show');
-        }
-    });
-
-    // Чекбокс: высокий контраст
-    var hc = document.getElementById('highContrast');
-    if (hc) {
-        hc.addEventListener('change', function () {
-            if (this.checked) {
-                html.setAttribute('data-contrast', 'high');
-                localStorage.setItem('interio_a11y_contrast', 'true');
-            } else {
-                html.removeAttribute('data-contrast');
-                localStorage.removeItem('interio_a11y_contrast');
+        hammer.on('swipedown', () => {
+            // Swipe down = go to previous section
+            const currentScroll = window.pageYOffset;
+            
+            for (let i = sections.length - 1; i >= 0; i--) {
+                const section = document.getElementById(sections[i].id);
+                if (section) {
+                    const sectionTop = section.offsetTop;
+                    
+                    // If current scroll is below this section and there's a previous section
+                    if (currentScroll > sectionTop + 100 && i > 0) {
+                        const prevSection = document.getElementById(sections[i - 1].id);
+                        if (prevSection) {
+                            prevSection.scrollIntoView({ behavior: 'smooth' });
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // If at top, scroll to hero
+            if (currentScroll < 100) {
+                const heroSection = document.getElementById('hero');
+                if (heroSection) {
+                    heroSection.scrollIntoView({ behavior: 'smooth' });
+                }
             }
         });
     }
 
-    // Чекбокс: крупные кнопки
-    var lb = document.getElementById('largeButtons');
-    if (lb) {
-        lb.addEventListener('change', function () {
-            if (this.checked) {
-                html.setAttribute('data-large-buttons', 'true');
-                localStorage.setItem('interio_a11y_large-buttons', 'true');
-            } else {
-                html.removeAttribute('data-large-buttons');
-                localStorage.removeItem('interio_a11y_large-buttons');
-            }
-        });
-    }
-
-    // Чекбокс: крупный текст
-    var lt = document.getElementById('largeText');
-    if (lt) {
-        lt.addEventListener('change', function () {
-            if (this.checked) {
-                html.setAttribute('data-large-text', 'true');
-                localStorage.setItem('interio_a11y_large-text', 'true');
-            } else {
-                html.removeAttribute('data-large-text');
-                localStorage.removeItem('interio_a11y_large-text');
-            }
-        });
-    }
-
-    console.log('✅ Тема и доступность загружены');
+    // Initialize touch gestures
+    initTouchGestures();
 });

@@ -1,0 +1,125 @@
+/* Light Theme Fix — мягкая светлая тема, не режет глаза */
+[data-theme="light"] {
+    --bg-primary: #f5f3f0;
+    --bg-secondary: rgba(255, 255, 255, 0.92);
+    --bg-card: rgba(0, 0, 0, 0.02);
+    --bg-card-hover: rgba(0, 0, 0, 0.04);
+    --text-main: #2d2d2d;
+    --text-secondary: rgba(45, 45, 45, 0.65);
+    --text-muted: rgba(45, 45, 45, 0.4);
+    --border-color: rgba(0, 0, 0, 0.06);
+    --accent: #3b6fc4;
+    --accent-light: #4a7fd4;
+    --accent-glow: rgba(59, 111, 196, 0.15);
+}
+
+[data-theme="light"] .bg-overlay {
+    opacity: 0.15;
+}
+
+[data-theme="light"] .header {
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .quiz-container {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .option-content {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .option-content:hover {
+    background: rgba(255, 255, 255, 0.95);
+}
+
+[data-theme="light"] .option-card input:checked + .option-content {
+    background: rgba(59, 111, 196, 0.08);
+    border-color: #3b6fc4;
+}
+
+[data-theme="light"] .form-group input,
+[data-theme="light"] .form-group textarea {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #2d2d2d;
+}
+
+[data-theme="light"] .form-group input:focus,
+[data-theme="light"] .form-group textarea:focus {
+    border-color: #3b6fc4;
+    box-shadow: 0 0 0 3px rgba(59, 111, 196, 0.1);
+}
+
+[data-theme="light"] .slider-container {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .style-image-card .style-card-content {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .style-label {
+    background: rgba(0, 0, 0, 0.02);
+    border-top-color: rgba(0, 0, 0, 0.06);
+    color: #2d2d2d;
+}
+
+[data-theme="light"] .photo-drop-zone {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .btn-back {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.08);
+    color: #555;
+}
+
+[data-theme="light"] .toast-notification {
+    background: #dc3545;
+}
+
+/* GigaChat modal light theme */
+[data-theme="light"] #gcModal > div {
+    background: #f5f3f0 !important;
+    border-color: rgba(0,0,0,0.08) !important;
+}
+
+[data-theme="light"] #gcInput {
+    background: #fff !important;
+    border-color: rgba(0,0,0,0.1) !important;
+    color: #2d2d2d !important;
+}
+
+[data-theme="light"] #gcMsgs > div {
+    background: rgba(0,0,0,0.03) !important;
+    color: #2d2d2d !important;
+}
+
+[data-theme="light"] .voice-btn {
+    border-color: rgba(0,0,0,0.1);
+    background: rgba(255,255,255,0.8);
+    color: #888;
+}
+
+[data-theme="light"] .voice-btn:hover {
+    background: #3b6fc4;
+    color: white;
+    border-color: #3b6fc4;
+}
+
+/* Budget chart light */
+[data-theme="light"] .budget-calc {
+    background: rgba(255,255,255,0.9);
+    border-color: rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .budget-item {
+    background: rgba(255,255,255,0.8);
+}
