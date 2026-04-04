@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi import FastAPI, HTTPException, Request, Response, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
@@ -12,6 +12,8 @@ import datetime
 import time
 import uvicorn
 import os
+import smtplib
+from email.message import EmailMessage
 
 app = FastAPI(title="Auth API", version="1.0.0")
 
@@ -31,6 +33,12 @@ app.add_middleware(
 
 # Путь к базе данных
 DB_PATH = 'data.db'
+
+# Настройки SMTP для автоматической рассылки
+SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", 465))
+SMTP_USERNAME = os.environ.get("SMTP_USERNAME", "interiopersonal@gmail.com")
+SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "pcjloityrxwuotht")
 
 # Pydantic модели
 class PhoneCheckRequest(BaseModel):
@@ -68,6 +76,56 @@ class UserResponse(BaseModel):
     phone: str
     nickname: str
     created_at: str
+
+def send_quiz_email(recipient_email: str, data: QuizSubmissionRequest):
+    """Генерация текстового файла и отправка письма"""
+    if not recipient_email:
+        return
+        
+    try:
+        # Формируем текст файла
+        content = f"Заявка на дизайн-проект\n"
+        content += f"========================\n\n"
+        content += f"Имя: {data.name}\n"
+        content += f"Телефон: {data.phone}\n"
+        content += f"Email: {data.email}\n"
+        content += f"Тип помещения: {data.room_type}\n"
+        content += f"Зоны: {', '.join(data.zones) if data.zones else 'Не указаны'}\n"
+        content += f"Площадь: {data.area} м²\n"
+        content += f"Стиль: {data.style}\n"
+        content += f"Бюджет: {data.budget}\n"
+        if data.comment:
+            content += f"Комментарий: {data.comment}\n"
+            
+        # Создаем письмо
+        msg = EmailMessage()
+        msg['Subject'] = 'Ваши ответы на квиз Interio'
+        msg['From'] = SMTP_USERNAME
+        msg['To'] = recipient_email
+        msg.set_content(
+            f"Здравствуйте, {data.name}!\n\n"
+            "Спасибо за заполнение формы на разработку вашего дизайн-проекта. \n"
+            "Во вложении вы найдете текстовый файл с вашими ответами.\n\n"
+            "Мы ознакомимся с вашей заявкой и свяжемся с вами в ближайшее время для обсуждения деталей!\n\n"
+            "С уважением,\nКоманда Interio"
+        )
+        
+        # Прикрепляем файл
+        msg.add_attachment(
+            content.encode('utf-8'),
+            maintype='text',
+            subtype='plain',
+            filename='interio_preferences.txt'
+        )
+        
+        # Отправляем письмо через SMTP
+        with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT) as server:
+            server.login(SMTP_USERNAME, SMTP_PASSWORD)
+            server.send_message(msg)
+            
+        print(f"Письмо успешно отправлено на {recipient_email}")
+    except Exception as e:
+        print(f"Ошибка при отправке письма: {e}")
 
 def init_db():
     """Инициализация базы данных"""
@@ -452,8 +510,8 @@ async def save_session_data(request: SessionRequest, http_request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/quiz/submit")
-async def submit_quiz(request: QuizSubmissionRequest, http_request: Request):
-    """Сохранение заявки квиза в базу данных"""
+async def submit_quiz(request: QuizSubmissionRequest, http_request: Request, background_tasks: BackgroundTasks):
+    """Сохранение заявки квиза в базу данных и отправка письма"""
     try:
         # Валидация обязательных полей
         if not request.name or not request.phone or not request.email:
@@ -526,6 +584,10 @@ async def submit_quiz(request: QuizSubmissionRequest, http_request: Request):
         conn.close()
         
         print(f"Заявка квиза #{submission_id} успешно сохранена")
+        
+        # Запускаем отправку файла на почту в фоновом режиме
+        if request.email:
+            background_tasks.add_task(send_quiz_email, request.email, request)
         
         return {
             "success": True,
