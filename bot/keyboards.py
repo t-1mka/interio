@@ -1,10 +1,14 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
+"""
+Клавиатуры для Telegram-бота «Интерио».
+"""
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
-def main_menu_kb() -> InlineKeyboardMarkup:
+def main_menu_kb(frontend_url: str = "http://localhost:3002") -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🏠 Пройти квиз", callback_data="quiz_start")],
-        [InlineKeyboardButton(text="🖼 Галерея дизайнов", url="http://localhost:3000/gallery")],
+        [InlineKeyboardButton(text="🌐 Квиз в браузере", web_app=WebAppInfo(url=f"{frontend_url}/quiz"))],
+        [InlineKeyboardButton(text="🤖 ИИ-поддержка", callback_data="support")],
         [InlineKeyboardButton(text="📋 Мои заявки", callback_data="my_requests")],
         [InlineKeyboardButton(text="ℹ️ О сервисе", callback_data="about")],
     ])
@@ -17,7 +21,10 @@ def quiz_rooms_kb() -> InlineKeyboardMarkup:
 
 
 def quiz_styles_kb() -> InlineKeyboardMarkup:
-    styles = ["Современный", "Минимализм", "Скандинавский", "Классический", "Лофт", "Японский", "Арт-деко"]
+    styles = [
+        "Современный", "Минимализм", "Скандинавский",
+        "Классический", "Лофт", "Японский", "Арт-деко",
+    ]
     buttons = [[InlineKeyboardButton(text=s, callback_data=f"quiz_style:{s}")] for s in styles]
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
@@ -44,7 +51,17 @@ def quiz_colors_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
+def support_kb() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🔙 В главное меню", callback_data="back_to_start")]
+    ])
+
+
 def back_to_start_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🔙 В главное меню", callback_data="back_to_start")]
     ])
+
+
+# Для WebApp кнопки
+from aiogram.types import WebAppInfo  # noqa: E402, F401
