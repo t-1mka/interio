@@ -1,0 +1,12 @@
+{
+  "name": "СвойСтиль",
+  "short_name": "СвойСтиль",
+  "description": "Смарт-квиз для дизайна интерьера с ИИ",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#e94560",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

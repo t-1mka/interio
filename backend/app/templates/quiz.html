@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interio — Пройти тест</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/static/state-manager.js"></script>
+    <script src="/static/auth.js"></script>
+</head>
+<body class="quiz-body">
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+
+    <!-- Header -->
+    <header class="header header-minimal">
+        <div class="header-container">
+            <a href="/" class="logo"><span>Interio</span></a>
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle" title="Сменить тему">
+                    <i class="fas fa-sun"></i>
+                </button>
+                <button class="a11y-toggle" id="a11yToggle" title="Режим для слабовидящих">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="login-btn" onclick="window.authManager.openModal()">
+                    <i class="fas fa-user"></i> Войти
+                </button>
+                <a href="/" class="btn-outline btn-small">
+                    <i class="fas fa-arrow-left"></i> На главную
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Quiz Section -->
+    <section class="quiz-section">
+        <div class="quiz-wrapper">
+            <div class="quiz-container" id="quizContainer">
+
+                <!-- Progress -->
+                <div class="quiz-progress">
+                    <div class="progress-header">
+                        <span class="progress-step">Шаг <span id="currentStepNum">1</span> из 6</span>
+                        <span class="progress-percent" id="progressPercent">17%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progressBar" style="width:17%"></div>
+                    </div>
+                </div>
+
+                <!-- Step 1 -->
+                <div class="quiz-step active" data-step="1">
+                    <div class="step-header">
+                        <span class="step-label">Шаг 1</span>
+                        <h2 class="step-question">Какое помещение вы планируете оформить?</h2>
+                    </div>
+                    <div class="options-grid">
+                        <label class="option-card">
+                            <input type="radio" name="roomType" value="Квартира">
+                            <div class="option-content">
+                                <div class="option-icon"><i class="fas fa-building"></i></div>
+                                <span>Квартира</span>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="roomType" value="Частный дом">
+                            <div class="option-content">
+                                <div class="option-icon"><i class="fas fa-home"></i></div>
+                                <span>Частный дом</span>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="roomType" value="Офис">
+                            <div class="option-content">
+                                <div class="option-icon"><i class="fas fa-briefcase"></i></div>
+                                <span>Офис</span>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="roomType" value="Коммерческое">
+                            <div class="option-content">
+                                <div class="option-icon"><i class="fas fa-store"></i></div>
+                                <span>Коммерческое</span>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="roomType" value="Студия">
+                            <div class="option-content">
+                                <div class="option-icon"><i class="fas fa-camera-retro"></i></div>
+                                <span>Студия</span>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="roomType" value="Другое">
+                            <div class="option-content">
+                                <div class="option-icon"><i class="fas fa-question"></i></div>
+                                <span>Другое</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="quiz-step" data-step="2">
+                    <div class="step-header">
+                        <span class="step-label">Шаг 2</span>
+                        <h2 class="step-question">Какие зоны нужно включить в дизайн-проект?</h2>
+                        <p class="step-hint">Можно выбрать несколько вариантов</p>
+                    </div>
+                    <div class="options-grid">
+                        <label class="option-card">
+                            <input type="checkbox" name="zones" value="Кухня">
+                            <div class="option-content">
+                                <div class="option-icon"><i class="fas fa-utensils"></i></div>
+                                <span>Кухня</span>
+                                <div class="check-indicator"><i class="fas fa-check"></i></div>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="checkbox" name="zones" value="Гостиная">
+                            <div class="option-content">
+                                <div class="option-icon"><i class="fas fa-couch"></i></div>
+                                <span>Гостиная</span>
+                                <div class="check-indicator"><i class="fas fa-check"></i></div>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="checkbox" name="zones" value="Спальня">
+                            <div class="option-content">
+                                <div class="option-icon"><i class="fas fa-bed"></i></div>
+                                <span>Спальня</span>
+                                <div class="check-indicator"><i class="fas fa-check"></i></div>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="checkbox" name="zones" value="Детская">
+                            <div class="option-content">
+                                <div class="option-icon"><i class="fas fa-baby"></i></div>
+                                <span>Детская</span>
+                                <div class="check-indicator"><i class="fas fa-check"></i></div>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="checkbox" name="zones" value="Санузел">
+                            <div class="option-content">
+                                <div class="option-icon"><i class="fas fa-bath"></i></div>
+                                <span>Санузел</span>
+                                <div class="check-indicator"><i class="fas fa-check"></i></div>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="checkbox" name="zones" value="Прихожая">
+                            <div class="option-content">
+                                <div class="option-icon"><i class="fas fa-door-open"></i></div>
+                                <span>Прихожая</span>
+                                <div class="check-indicator"><i class="fas fa-check"></i></div>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="checkbox" name="zones" value="Кабинет">
+                            <div class="option-content">
+                                <div class="option-icon"><i class="fas fa-laptop"></i></div>
+                                <span>Кабинет</span>
+                                <div class="check-indicator"><i class="fas fa-check"></i></div>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="checkbox" name="zones" value="Гардеробная">
+                            <div class="option-content">
+                                <div class="option-icon"><i class="fas fa-tshirt"></i></div>
+                                <span>Гардеробная</span>
+                                <div class="check-indicator"><i class="fas fa-check"></i></div>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="checkbox" name="zones" value="Балкон / лоджия">
+                            <div class="option-content">
+                                <div class="option-icon"><i class="fas fa-sun"></i></div>
+                                <span>Балкон / лоджия</span>
+                                <div class="check-indicator"><i class="fas fa-check"></i></div>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="checkbox" name="zones" value="Всё помещение">
+                            <div class="option-content">
+                                <div class="option-icon"><i class="fas fa-layer-group"></i></div>
+                                <span>Всё помещение</span>
+                                <div class="check-indicator"><i class="fas fa-check"></i></div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Step 3: Slider -->
+                <div class="quiz-step" data-step="3">
+                    <div class="step-header">
+                        <span class="step-label">Шаг 3</span>
+                        <h2 class="step-question">Укажите примерную площадь помещения</h2>
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-display">
+                            <span class="slider-value" id="sliderValue">60</span>
+                            <span class="slider-unit">м²</span>
+                        </div>
+                        <input type="range" min="20" max="300" value="60" step="5" class="custom-slider" id="areaSlider">
+                        <div class="slider-labels">
+                            <span>20 м²</span>
+                            <span>300 м²</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Style -->
+                <div class="quiz-step" data-step="4">
+                    <div class="step-header">
+                        <span class="step-label">Шаг 4</span>
+                        <h2 class="step-question">Какой стиль интерьера вам ближе?</h2>
+                    </div>
+                    <!-- First row: 3 style options -->
+                    <div class="style-row">
+                        <label class="style-image-card">
+                            <input type="radio" name="style" value="Современный">
+                            <div class="style-card-content">
+                                <div class="style-image" style="background-image: url('/static/images/modern.png')"></div>
+                                <div class="style-label">Современный</div>
+                            </div>
+                        </label>
+                        <label class="style-image-card">
+                            <input type="radio" name="style" value="Минимализм">
+                            <div class="style-card-content">
+                                <div class="style-image" style="background-image: url('/static/images/minimalism.png')"></div>
+                                <div class="style-label">Минимализм</div>
+                            </div>
+                        </label>
+                        <label class="style-image-card">
+                            <input type="radio" name="style" value="Скандинавский">
+                            <div class="style-card-content">
+                                <div class="style-image" style="background-image: url('/static/images/scandinavian.png')"></div>
+                                <div class="style-label">Скандинавский</div>
+                            </div>
+                        </label>
+                    </div>
+                    <!-- Second row: 3 more style options -->
+                    <div class="style-row">
+                        <label class="style-image-card">
+                            <input type="radio" name="style" value="Лофт">
+                            <div class="style-card-content">
+                                <div class="style-image" style="background-image: url('/static/images/loft.png')"></div>
+                                <div class="style-label">Лофт</div>
+                            </div>
+                        </label>
+                        <label class="style-image-card">
+                            <input type="radio" name="style" value="Неоклассика">
+                            <div class="style-card-content">
+                                <div class="style-image" style="background-image: url('/static/images/neoclassic.png')"></div>
+                                <div class="style-label">Неоклассика</div>
+                            </div>
+                        </label>
+                        <label class="style-image-card">
+                            <input type="radio" name="style" value="Классика">
+                            <div class="style-card-content">
+                                <div class="style-image" style="background-image: url('/static/images/classic.png')"></div>
+                                <div class="style-label">Классика</div>
+                            </div>
+                        </label>
+                    </div>
+                    <!-- Bottom row: wide undecided option -->
+                    <div class="style-row">
+                        <label class="style-image-card wide">
+                            <input type="radio" name="style" value="Пока не определился">
+                            <div class="style-card-content">
+                                <div class="style-label">Пока не определился</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Step 5: Budget -->
+                <div class="quiz-step" data-step="5">
+                    <div class="step-header">
+                        <span class="step-label">Шаг 5</span>
+                        <h2 class="step-question">Какой бюджет на реализацию интерьера вы рассматриваете?</h2>
+                    </div>
+                    <div class="options-grid">
+                        <label class="option-card">
+                            <input type="radio" name="budget" value="До 500 000 ₽">
+                            <div class="option-content"><span>До 500 000 ₽</span></div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="budget" value="500 000 – 1 000 000 ₽">
+                            <div class="option-content"><span>500 000 – 1 000 000 ₽</span></div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="budget" value="1 000 000 – 2 000 000 ₽">
+                            <div class="option-content"><span>1 000 000 – 2 000 000 ₽</span></div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="budget" value="От 2 000 000 ₽">
+                            <div class="option-content"><span>От 2 000 000 ₽</span></div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="budget" value="Пока не знаю">
+                            <div class="option-content"><span>Пока не знаю</span></div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Step 6: Form -->
+                <div class="quiz-step" data-step="6">
+                    <div class="step-header">
+                        <span class="step-label">Финал</span>
+                        <h2 class="step-question">Оставьте контакты, и мы свяжемся с вами</h2>
+                        <p class="step-hint">Расчёт стоимости займёт не более 15 минут</p>
+                    </div>
+                    <form class="contact-form" id="leadForm">
+                        <div class="form-group">
+                            <label>Имя <span class="required">*</span></label>
+                            <input type="text" id="inputName" placeholder="Как к вам обращаться?">
+                        </div>
+                        <div class="form-group">
+                            <label>Телефон <span class="required">*</span></label>
+                            <input type="tel" id="inputPhone" placeholder="+7 (___) ___-__-__" maxlength="18" oninput="window.stateManager.formatPhone(this)">
+                            <div class="error-msg" id="phoneError">Введите корректный российский номер телефона (например: +7 (999) 123-45-67)</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Email <span class="optional">(необязательно)</span></label>
+                            <input type="email" id="inputEmail" placeholder="example@mail.ru">
+                        </div>
+                        <div class="form-group">
+                            <label>Комментарий <span class="optional">(необязательно)</span></label>
+                            <textarea id="inputComment" placeholder="Опишите ваши пожелания..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="consentCheck">
+                                <div class="checkmark-custom"></div>
+                                <span>Я соглашаюсь на обработку персональных данных</span>
+                            </label>
+                            <div class="error-msg" id="consentError">Необходимо согласие</div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Success -->
+                <div class="success-screen" id="successScreen">
+                    <div class="success-card">
+                        <div class="success-icon"><i class="fas fa-check"></i></div>
+                        <h2>Спасибо за заявку!</h2>
+                        <p>Мы получили ваши ответы и расчёт стоимости. Наш менеджер свяжется с вами в ближайшее время.</p>
+                        <button class="btn-primary-hero" id="downloadPdfBtn">
+                            <i class="fas fa-file-pdf"></i> Скачать PDF
+                        </button>
+                        <br><br>
+                        <a href="/" class="btn-outline" style="display:inline-flex;">
+                            <i class="fas fa-home"></i> Вернуться на главную
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Nav -->
+                <div class="quiz-nav" id="quizNav">
+                    <button class="btn-back" id="prevBtn" disabled>
+                        <i class="fas fa-arrow-left"></i> Назад
+                    </button>
+                    <div class="quiz-nav-right">
+                        <button class="btn-finish-early" id="finishEarlyBtn" title="Досрочное завершение">
+                            <i class="fas fa-flag-checkered"></i> Завершить
+                        </button>
+                        <button class="btn-next" id="nextBtn">
+                            Далее <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- A11y Panel -->
+    <div class="a11y-panel" id="a11yPanel">
+        <button class="a11y-close" id="a11yClose"><i class="fas fa-times"></i></button>
+        <h3>Настройки для слабовидящих</h3>
+        <label class="a11y-option">
+            <input type="checkbox" id="highContrast">
+            <div class="checkmark"></div>
+            <span>Высокий контраст</span>
+        </label>
+        <label class="a11y-option">
+            <input type="checkbox" id="largeButtons">
+            <div class="checkmark"></div>
+            <span>Крупные кнопки</span>
+        </label>
+        <label class="a11y-option">
+            <input type="checkbox" id="largeText">
+            <div class="checkmark"></div>
+            <span>Увеличенный текст</span>
+        </label>
+    </div>
+
+    <!-- Модальное окно авторизации -->
+    <div id="authModal" class="auth-modal">
+        <div class="auth-modal-content">
+            <span class="auth-close" onclick="window.authManager.closeModal()">&times;</span>
+            
+            <!-- Шаг 1: Ввод номера телефона -->
+            <div id="phoneStep" class="auth-step">
+                <h2>Вход в личный кабинет</h2>
+                <p>Введите номер телефона</p>
+                <input type="tel" id="phoneInput" placeholder="+7 (999) 123-45-67" maxlength="18" oninput="window.authManager.formatPhone(this)">
+                <button onclick="window.authManager.checkPhone()">Далее</button>
+                <div id="phoneError" class="auth-error-message"></div>
+            </div>
+
+            <!-- Шаг 2а: Ввод пароля (существующий пользователь) -->
+            <div id="passwordStep" class="auth-step" style="display: none;">
+                <h2>Вход в личный кабинет</h2>
+                <p id="userPhone"></p>
+                <input type="password" id="passwordInput" placeholder="Введите пароль">
+                <button onclick="window.authManager.login()">Войти</button>
+                <button onclick="window.authManager.backToPhone()" class="secondary">Назад</button>
+                <div id="passwordError" class="auth-error-message"></div>
+            </div>
+
+            <!-- Шаг 2б: Регистрация нового пользователя -->
+            <div id="registerStep" class="auth-step" style="display: none;">
+                <h2>Регистрация</h2>
+                <p id="newUserPhone"></p>
+                <input type="text" id="nicknameInput" placeholder="Введите никнейм">
+                <input type="password" id="newPasswordInput" placeholder="Введите пароль">
+                <input type="password" id="confirmPasswordInput" placeholder="Подтвердите пароль">
+                <button onclick="window.authManager.register()">Зарегистрироваться</button>
+                <button onclick="window.authManager.backToPhone()" class="secondary">Назад</button>
+                <div id="registerError" class="auth-error-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно личного кабинета -->
+    <div id="cabinetModal" class="cabinet-modal">
+        <div class="cabinet-modal-content">
+            <span class="cabinet-close" onclick="window.authManager.closeCabinetModal()">&times;</span>
+            <div class="cabinet-container">
+                <button class="logout-btn" onclick="window.authManager.logout()">Выйти</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="/static/quiz.js"></script>
+</body>
+</html>
