@@ -1,5 +1,6 @@
 """
 Interio Bot — Entry Point for Render
+Импортирует app из bot/main.py
 """
 from bot.main import app
 
