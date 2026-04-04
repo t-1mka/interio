@@ -685,6 +685,54 @@ document.addEventListener('DOMContentLoaded', () => {
         saveAnswer();
     }
 
+    // --- Touch Gestures (Swipe Navigation) ---
+    function initTouchGestures() {
+        if (typeof Hammer === 'undefined') {
+            console.warn('Hammer.js not loaded, swipe gestures disabled');
+            return;
+        }
+
+        const quizContainer = document.getElementById('quizContainer');
+        if (!quizContainer) return;
+
+        const hammer = new Hammer(quizContainer, {
+            recognizers: [
+                [Hammer.Swipe, { direction: Hammer.DIRECTION_HORIZONTAL }]
+            ]
+        });
+
+        hammer.on('swipeleft', () => {
+            // Swipe left = next/forward
+            if (currentStep < totalSteps && validateStep(currentStep)) {
+                if (currentStep === 4) {
+                    const checkedStyle = document.querySelector('.quiz-container input[name="style"]:checked');
+                    if (checkedStyle && checkedStyle.id === 'undecidedStyle' && !miniQuizCompleted) {
+                        if (offerMiniQuizModal) {
+                            offerMiniQuizModal.style.display = 'block';
+                            return;
+                        }
+                    }
+                }
+                
+                if (currentStep === totalSteps) {
+                    submitForm();
+                } else {
+                    goToStep(currentStep + 1);
+                }
+            }
+        });
+
+        hammer.on('swiperight', () => {
+            // Swipe right = back
+            if (currentStep > 1) {
+                goToStep(currentStep - 1);
+            }
+        });
+    }
+
+    // Initialize touch gestures
+    initTouchGestures();
+
     // Кнопка продолжения после мини-квиза
     const applyMiniQuizBtn = document.getElementById('applyMiniQuizBtn');
     if (applyMiniQuizBtn) {
