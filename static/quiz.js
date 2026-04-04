@@ -474,3 +474,72 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.save('Interio_заявка_' + Date.now() + '.pdf');
     }
 });
+
+// ═══════════════════════════════════════════
+// ACCESSIBILITY FUNCTIONS
+// ═══════════════════════════════════════════
+function toggleA11y(checkbox, feature) {
+    const html = document.documentElement;
+    const key = 'interio_a11y_' + feature;
+    if (checkbox.checked) {
+        html.setAttribute('data-' + feature, 'true');
+        localStorage.setItem(key, 'true');
+    } else {
+        html.removeAttribute('data-' + feature);
+        localStorage.removeItem(key);
+    }
+}
+
+// Restore A11y settings on load
+document.addEventListener('DOMContentLoaded', () => {
+    ['contrast', 'large-buttons', 'large-text', 'reduced-motion', 'focus-outline'].forEach(f => {
+        const val = localStorage.getItem('interio_a11y_' + f);
+        if (val === 'true') {
+            document.documentElement.setAttribute('data-' + f, 'true');
+            const cb = document.getElementById(
+                f === 'contrast' ? 'a11y_contrast' :
+                f === 'large-buttons' ? 'a11y_buttons' :
+                f === 'large-text' ? 'a11y_text' :
+                f === 'reduced-motion' ? 'a11y_motion' :
+                f === 'focus-outline' ? 'a11y_focus' : null
+            );
+            if (cb) cb.checked = true;
+        }
+    });
+});
+
+// Reduced motion style injection
+function applyReducedMotion() {
+    if (document.documentElement.getAttribute('data-reduced-motion') === 'true') {
+        let style = document.getElementById('a11y-motion-style');
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'a11y-motion-style';
+            document.head.appendChild(style);
+        }
+        style.textContent = '*, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }';
+    } else {
+        const style = document.getElementById('a11y-motion-style');
+        if (style) style.textContent = '';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const motionCb = document.getElementById('a11y_motion');
+    if (motionCb) motionCb.addEventListener('change', applyReducedMotion);
+    applyReducedMotion();
+});
+
+// Focus outline
+document.addEventListener('DOMContentLoaded', () => {
+    const focusCb = document.getElementById('a11y_focus');
+    if (focusCb) {
+        focusCb.addEventListener('change', () => {
+            if (focusCb.checked) {
+                document.body.classList.add('a11y-focus-enabled');
+            } else {
+                document.body.classList.remove('a11y-focus-enabled');
+            }
+        });
+    }
+});

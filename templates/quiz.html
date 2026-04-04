@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interio — Пройти тест</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/a11y-3d.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="/static/3d-room.js"></script>
     <script src="/static/state-manager.js"></script>
     <script src="/static/auth.js"></script>
 </head>
@@ -20,6 +24,9 @@
             <div class="header-actions">
                 <button class="theme-toggle" id="themeToggle" title="Сменить тему">
                     <i class="fas fa-sun"></i>
+                </button>
+                <button class="theme-toggle" onclick="toggleRoom3D()" title="3D-комната" style="font-size:0.9rem;">
+                    🏠
                 </button>
                 <button class="a11y-toggle" id="a11yToggle" title="Режим для слабовидящих">
                     <i class="fas fa-eye"></i>
@@ -452,6 +459,57 @@
         </div>
     </div>
 
+    <!-- Accessibility Panel -->
+    <div id="a11yPanel" class="a11y-panel" role="dialog" aria-label="Настройки доступности">
+        <button class="a11y-close" onclick="document.getElementById('a11yPanel').classList.remove('show')" aria-label="Закрыть">&times;</button>
+        <h3><i class="fas fa-universal-access"></i> Настройки доступности</h3>
+        <label class="a11y-option">
+            <input type="checkbox" id="a11y_contrast" onchange="toggleA11y(this, 'contrast')">
+            <span class="checkmark"><i class="fas fa-check"></i></span>
+            <span class="a11y-label">Высокий контраст
+                <span class="a11y-desc">— чёрный фон, белый текст, яркие акценты</span>
+            </span>
+        </label>
+        <label class="a11y-option">
+            <input type="checkbox" id="a11y_buttons" onchange="toggleA11y(this, 'large-buttons')">
+            <span class="checkmark"><i class="fas fa-check"></i></span>
+            <span class="a11y-label">Крупные кнопки
+                <span class="a11y-desc">— увеличенные кнопки и поля ввода</span>
+            </span>
+        </label>
+        <label class="a11y-option">
+            <input type="checkbox" id="a11y_text" onchange="toggleA11y(this, 'large-text')">
+            <span class="checkmark"><i class="fas fa-check"></i></span>
+            <span class="a11y-label">Увеличенный текст
+                <span class="a11y-desc">— крупный шрифт во всём интерфейсе</span>
+            </span>
+        </label>
+        <label class="a11y-option">
+            <input type="checkbox" id="a11y_motion" onchange="toggleA11y(this, 'reduced-motion')">
+            <span class="checkmark"><i class="fas fa-check"></i></span>
+            <span class="a11y-label">Без анимаций
+                <span class="a11y-desc">— отключает переходы и анимации</span>
+            </span>
+        </label>
+        <label class="a11y-option">
+            <input type="checkbox" id="a11y_focus" onchange="toggleA11y(this, 'focus-outline')">
+            <span class="checkmark"><i class="fas fa-check"></i></span>
+            <span class="a11y-label">Подсветка фокуса
+                <span class="a11y-desc">— видимая рамка при навигации Tab</span>
+            </span>
+        </label>
+    </div>
+
+    <!-- 3D Room Widget -->
+    <div id="room3dWidget" class="room3d-widget" style="display:none;">
+        <div class="room3d-header">
+            <span>🏠 3D-комната</span>
+            <button onclick="toggleRoom3D()" title="Закрыть">&times;</button>
+        </div>
+        <div id="room3dContainer"></div>
+        <div class="room3d-hint">🖱 Вращайте мышкой • Наведите на объект</div>
+    </div>
+
     <!-- Модальное окно личного кабинета -->
     <div id="cabinetModal" class="cabinet-modal">
         <div class="cabinet-modal-content">
@@ -462,7 +520,64 @@
         </div>
     </div>
 
+    <!-- Toast Notification -->
+    <div id="toastNotification" class="toast">
+        <span id="toastMessage"></span>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="/static/quiz.js"></script>
+    <script>
+    // A11y toggle
+    document.getElementById('a11yToggle')?.addEventListener('click', () => {
+        document.getElementById('a11yPanel').classList.toggle('show');
+    });
+
+    // 3D Room integration
+    let room3DInitialized = false;
+
+    function toggleRoom3D() {
+        const widget = document.getElementById('room3dWidget');
+        if (!widget) return;
+        if (widget.style.display === 'none') {
+            widget.style.display = 'block';
+            if (!room3DInitialized) {
+                const container = document.getElementById('room3dContainer');
+                if (container && typeof Room3D !== 'undefined') {
+                    Room3D.init(container);
+                    room3DInitialized = true;
+                }
+            }
+            updateRoom3D();
+        } else {
+            widget.style.display = 'none';
+        }
+    }
+
+    function updateRoom3D() {
+        if (typeof Room3D === 'undefined') return;
+        const answers = JSON.parse(localStorage.getItem('interio_quiz_answers') || '{}');
+        Room3D.update({
+            room_type: answers.roomType,
+            zones: answers.zones || [],
+            area: parseInt(answers.area) || 60,
+            style: answers.style,
+            budget: answers.budget,
+            colors: answers.colors || []
+        });
+    }
+
+    // Обновляем 3D при каждом сохранении ответа
+    const origSaveAnswer = window.saveAnswer;
+    document.addEventListener('DOMContentLoaded', () => {
+        const observer = new MutationObserver(() => {
+            if (document.getElementById('room3dWidget').style.display !== 'none') {
+                updateRoom3D();
+            }
+        });
+        const quizContainer = document.querySelector('.quiz-container');
+        if (quizContainer) observer.observe(quizContainer, { childList: true, subtree: true, attributes: true });
+    });
+    </script>
 </body>
 </html>
