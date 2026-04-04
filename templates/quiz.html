@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="ru" data-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="/static/state-manager.js"></script>
     <script src="/static/session-state-manager.js"></script>
     <script>
-    try {
-        window.stateManager.applyThemeFromStorage();
-        window.stateManager.applyA11yAttrsFromStorage();
-    } catch (e) {}
+        try {
+            window.stateManager.applyThemeFromStorage();
+            window.stateManager.applyA11yAttrsFromStorage();
+        } catch (e) { }
     </script>
     <title>Interio — Пройти тест</title>
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
 </head>
+
 <body class="quiz-body">
     <div class="bg-image"></div>
     <div class="bg-overlay"></div>
@@ -31,13 +33,14 @@
                 <button class="a11y-toggle" id="a11yToggle" title="Режим для слабовидящих">
                     <i class="fas fa-eye"></i>
                 </button>
-                
+
                 <!-- Блок профиля / авторизации -->
                 <div class="user-profile-container" id="userProfileContainer">
                     <button class="login-btn" id="loginBtn" onclick="window.authManager.openModal()">
                         <i class="fas fa-user"></i> Войти
                     </button>
-                    <div class="user-profile" id="userProfile" style="display: none;" onclick="window.authManager.openCabinetModal()">
+                    <div class="user-profile" id="userProfile" style="display: none;"
+                        onclick="window.authManager.openCabinetModal()">
                         <div class="user-avatar" id="userAvatar"></div>
                         <span class="user-nickname" id="userNicknameDisplay"></span>
                     </div>
@@ -232,7 +235,8 @@
                             <span class="slider-value" id="sliderValue">60</span>
                             <span class="slider-unit">м²</span>
                         </div>
-                        <input type="range" min="20" max="300" value="60" step="5" class="custom-slider" id="areaSlider">
+                        <input type="range" min="20" max="300" value="60" step="5" class="custom-slider"
+                            id="areaSlider">
                         <div class="slider-labels">
                             <span id="sliderMinLabel">20 м²</span>
                             <span id="sliderMaxLabel">300 м²</span>
@@ -251,21 +255,24 @@
                         <label class="style-image-card">
                             <input type="radio" name="style" value="Современный">
                             <div class="style-card-content">
-                                <div class="style-image" style="background-image: url('/static/images/modern.png')"></div>
+                                <div class="style-image" style="background-image: url('/static/images/modern.png')">
+                                </div>
                                 <div class="style-label">Современный</div>
                             </div>
                         </label>
                         <label class="style-image-card">
                             <input type="radio" name="style" value="Минимализм">
                             <div class="style-card-content">
-                                <div class="style-image" style="background-image: url('/static/images/minimalism.png')"></div>
+                                <div class="style-image" style="background-image: url('/static/images/minimalism.png')">
+                                </div>
                                 <div class="style-label">Минимализм</div>
                             </div>
                         </label>
                         <label class="style-image-card">
                             <input type="radio" name="style" value="Скандинавский">
                             <div class="style-card-content">
-                                <div class="style-image" style="background-image: url('/static/images/scandinavian.png')"></div>
+                                <div class="style-image"
+                                    style="background-image: url('/static/images/scandinavian.png')"></div>
                                 <div class="style-label">Скандинавский</div>
                             </div>
                         </label>
@@ -282,14 +289,16 @@
                         <label class="style-image-card">
                             <input type="radio" name="style" value="Неоклассика">
                             <div class="style-card-content">
-                                <div class="style-image" style="background-image: url('/static/images/neoclassic.png')"></div>
+                                <div class="style-image" style="background-image: url('/static/images/neoclassic.png')">
+                                </div>
                                 <div class="style-label">Неоклассика</div>
                             </div>
                         </label>
                         <label class="style-image-card">
                             <input type="radio" name="style" value="Классика">
                             <div class="style-card-content">
-                                <div class="style-image" style="background-image: url('/static/images/classic.png')"></div>
+                                <div class="style-image" style="background-image: url('/static/images/classic.png')">
+                                </div>
                                 <div class="style-label">Классика</div>
                             </div>
                         </label>
@@ -341,7 +350,6 @@
                     <div class="step-header">
                         <span class="step-label">Финал</span>
                         <h2 class="step-question">Оставьте контакты, и мы свяжемся с вами</h2>
-                        <p class="step-hint">Расчёт стоимости займёт не более 15 минут</p>
                     </div>
                     <form class="contact-form" id="leadForm">
                         <div class="form-group">
@@ -350,7 +358,8 @@
                         </div>
                         <div class="form-group">
                             <label>Телефон <span class="required">*</span></label>
-                            <input type="tel" id="inputPhone" placeholder="+7 (___) ___-__-__" maxlength="18" oninput="window.authManager && window.authManager.formatPhone(this)">
+                            <input type="tel" id="inputPhone" placeholder="+7 (___) ___-__-__" maxlength="18"
+                                oninput="window.authManager && window.authManager.formatPhone(this)">
                             <div class="error-msg" id="phoneError">Введите корректный номер</div>
                         </div>
                         <div class="form-group">
@@ -378,14 +387,20 @@
                     <div class="success-card">
                         <div class="success-icon"><i class="fas fa-check"></i></div>
                         <h2>Спасибо за заявку!</h2>
-                        <p>Мы получили ваши ответы и расчёт стоимости. Наш менеджер свяжется с вами в ближайшее время.</p>
-                        <button class="btn-primary-hero" id="downloadPdfBtn">
-                            <i class="fas fa-file-pdf"></i> Скачать PDF
-                        </button>
-                        <br><br>
-                        <a href="/" class="btn-outline" style="display:inline-flex;">
-                            <i class="fas fa-home"></i> Вернуться на главную
-                        </a>
+                        <p style="margin-bottom: 24px;">
+                            Мы получили ваши ответы и расчёт стоимости.<br>
+                            Наш менеджер свяжется с вами в ближайшее время.
+                        </p>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                            <button class="btn-primary-hero" id="downloadPdfBtn"
+                                style="width: 240px; justify-content: center;">
+                                <i class="fas fa-file-pdf"></i> Скачать PDF
+                            </button>
+                            <a href="/" class="btn-outline"
+                                style="display:inline-flex; width: 240px; justify-content: center;">
+                                <i class="fas fa-home"></i> Вернуться на главную
+                            </a>
+                        </div>
                     </div>
                 </div>
 
@@ -442,7 +457,8 @@
             <div id="phoneStep" class="auth-step">
                 <h2>Вход в личный кабинет</h2>
                 <p>Введите номер телефона</p>
-                <input type="tel" id="phoneInput" placeholder="+7 (999) 123-45-67" maxlength="18" oninput="window.authManager.formatPhone(this)">
+                <input type="tel" id="phoneInput" placeholder="+7 (999) 123-45-67" maxlength="18"
+                    oninput="window.authManager.formatPhone(this)">
                 <button onclick="window.authManager.checkPhone()">Далее</button>
                 <div id="phoneError" class="auth-error-message"></div>
             </div>
@@ -497,15 +513,16 @@
     <!-- MINI QUIZ MODAL (Помощник выбора стиля)    -->
     <!-- ========================================== -->
     <div id="miniQuizModal" class="auth-modal" style="display: none;">
-        <div class="auth-modal-content" style="max-width: 650px; padding: 40px;">
+        <div class="auth-modal-content"
+            style="max-width: 650px; padding: 40px; top: 50%; transform: translateY(-50%); margin: 0 auto; max-height: 90vh; overflow-y: auto; position: relative;">
             <span class="auth-close" id="closeMiniQuiz">&times;</span>
-            
+
             <div id="miniQuizQuestions">
                 <div class="step-header" style="margin-bottom: 24px; text-align: left;">
                     <span class="step-label">Помощник выбора стиля</span>
                     <h2 class="step-question" style="font-size: 1.8rem;">Давайте подберем ваш идеальный стиль!</h2>
                 </div>
-                
+
                 <div class="quiz-progress" style="margin-bottom: 24px;">
                     <div class="progress-header">
                         <span class="progress-step">Вопрос <span id="currentMiniStepNum">1</span> из 6</span>
@@ -518,7 +535,8 @@
 
                 <!-- MQ1 -->
                 <div class="mini-quiz-step active" data-mini-step="1">
-                    <p class="step-question" style="font-size: 1.3rem; margin-bottom: 16px;">Какая атмосфера вам ближе в жилом пространстве?</p>
+                    <p class="step-question" style="font-size: 1.3rem; margin-bottom: 16px;">Какая атмосфера вам ближе в
+                        жилом пространстве?</p>
                     <div class="mini-options-list">
                         <label class="option-card">
                             <input type="radio" name="mq1" value="Скандинавский,Минимализм">
@@ -530,18 +548,21 @@
                         </label>
                         <label class="option-card">
                             <input type="radio" name="mq1" value="Лофт">
-                            <div class="option-content"><span>Урбанистичная, брутальная, с индустриальными акцентами</span></div>
+                            <div class="option-content"><span>Урбанистичная, брутальная, с индустриальными
+                                    акцентами</span></div>
                         </label>
                         <label class="option-card">
                             <input type="radio" name="mq1" value="Современный,Минимализм">
-                            <div class="option-content"><span>Лаконичная, функциональная, без лишних деталей</span></div>
+                            <div class="option-content"><span>Лаконичная, функциональная, без лишних деталей</span>
+                            </div>
                         </label>
                     </div>
                 </div>
 
                 <!-- MQ2 -->
                 <div class="mini-quiz-step" data-mini-step="2">
-                    <p class="step-question" style="font-size: 1.3rem; margin-bottom: 16px;">Какие материалы вам нравятся в отделке?</p>
+                    <p class="step-question" style="font-size: 1.3rem; margin-bottom: 16px;">Какие материалы вам
+                        нравятся в отделке?</p>
                     <div class="mini-options-list">
                         <label class="option-card">
                             <input type="radio" name="mq2" value="Скандинавский">
@@ -564,7 +585,8 @@
 
                 <!-- MQ3 -->
                 <div class="mini-quiz-step" data-mini-step="3">
-                    <p class="step-question" style="font-size: 1.3rem; margin-bottom: 16px;">Какая цветовая палитра вам ближе?</p>
+                    <p class="step-question" style="font-size: 1.3rem; margin-bottom: 16px;">Какая цветовая палитра вам
+                        ближе?</p>
                     <div class="mini-options-list">
                         <label class="option-card">
                             <input type="radio" name="mq3" value="Скандинавский,Минимализм">
@@ -576,7 +598,8 @@
                         </label>
                         <label class="option-card">
                             <input type="radio" name="mq3" value="Классика,Неоклассика">
-                            <div class="option-content"><span>Тёплая, насыщенная: золото, бордо, изумруд, сливочный</span></div>
+                            <div class="option-content"><span>Тёплая, насыщенная: золото, бордо, изумруд,
+                                    сливочный</span></div>
                         </label>
                         <label class="option-card">
                             <input type="radio" name="mq3" value="Минимализм,Современный">
@@ -587,30 +610,36 @@
 
                 <!-- MQ4 -->
                 <div class="mini-quiz-step" data-mini-step="4">
-                    <p class="step-question" style="font-size: 1.3rem; margin-bottom: 16px;">Как вы относитесь к декору и деталям?</p>
+                    <p class="step-question" style="font-size: 1.3rem; margin-bottom: 16px;">Как вы относитесь к декору
+                        и деталям?</p>
                     <div class="mini-options-list">
                         <label class="option-card">
                             <input type="radio" name="mq4" value="Минимализм,Скандинавский">
-                            <div class="option-content"><span>Минимум декора, только функциональные предметы</span></div>
+                            <div class="option-content"><span>Минимум декора, только функциональные предметы</span>
+                            </div>
                         </label>
                         <label class="option-card">
                             <input type="radio" name="mq4" value="Классика,Неоклассика">
-                            <div class="option-content"><span>Люблю выразительные детали: лепнину, молдинги, карнизы</span></div>
+                            <div class="option-content"><span>Люблю выразительные детали: лепнину, молдинги,
+                                    карнизы</span></div>
                         </label>
                         <label class="option-card">
                             <input type="radio" name="mq4" value="Лофт">
-                            <div class="option-content"><span>Нравится индустриальный декор: трубы, балки, винтажные элементы</span></div>
+                            <div class="option-content"><span>Нравится индустриальный декор: трубы, балки, винтажные
+                                    элементы</span></div>
                         </label>
                         <label class="option-card">
                             <input type="radio" name="mq4" value="Современный">
-                            <div class="option-content"><span>Декор допустим, но лаконичный: постеры, геометрия, растения</span></div>
+                            <div class="option-content"><span>Декор допустим, но лаконичный: постеры, геометрия,
+                                    растения</span></div>
                         </label>
                     </div>
                 </div>
 
                 <!-- MQ5 -->
                 <div class="mini-quiz-step" data-mini-step="5">
-                    <p class="step-question" style="font-size: 1.3rem; margin-bottom: 16px;">Какой тип мебели вы предпочитаете?</p>
+                    <p class="step-question" style="font-size: 1.3rem; margin-bottom: 16px;">Какой тип мебели вы
+                        предпочитаете?</p>
                     <div class="mini-options-list">
                         <label class="option-card">
                             <input type="radio" name="mq5" value="Современный,Минимализм">
@@ -622,18 +651,21 @@
                         </label>
                         <label class="option-card">
                             <input type="radio" name="mq5" value="Классика,Неоклассика">
-                            <div class="option-content"><span>Массивная, с резьбой, гнутыми ножками, обивкой</span></div>
+                            <div class="option-content"><span>Массивная, с резьбой, гнутыми ножками, обивкой</span>
+                            </div>
                         </label>
                         <label class="option-card">
                             <input type="radio" name="mq5" value="Лофт">
-                            <div class="option-content"><span>Сочетание винтажа и современной мебели, металл + кожа</span></div>
+                            <div class="option-content"><span>Сочетание винтажа и современной мебели, металл +
+                                    кожа</span></div>
                         </label>
                     </div>
                 </div>
 
                 <!-- MQ6 -->
                 <div class="mini-quiz-step" data-mini-step="6">
-                    <p class="step-question" style="font-size: 1.3rem; margin-bottom: 16px;">Что для вас важнее в интерьере?</p>
+                    <p class="step-question" style="font-size: 1.3rem; margin-bottom: 16px;">Что для вас важнее в
+                        интерьере?</p>
                     <div class="mini-options-list">
                         <label class="option-card">
                             <input type="radio" name="mq6" value="Скандинавский,Минимализм,Современный">
@@ -645,7 +677,8 @@
                         </label>
                         <label class="option-card">
                             <input type="radio" name="mq6" value="Лофт,Современный">
-                            <div class="option-content"><span>Индивидуальность и выразительность пространства</span></div>
+                            <div class="option-content"><span>Индивидуальность и выразительность пространства</span>
+                            </div>
                         </label>
                         <label class="option-card">
                             <input type="radio" name="mq6" value="Классика,Неоклассика">
@@ -663,10 +696,16 @@
 
             <!-- Mini Quiz Result Screen -->
             <div id="miniQuizResult" style="display: none; text-align: center; padding: 20px 0;">
-                <div class="success-icon" style="margin: 0 auto 24px; width: 80px; height: 80px; font-size: 2rem;"><i class="fas fa-magic"></i></div>
-                <h2 style="font-family: var(--font-display); font-size: 2rem; margin-bottom: 12px; color: var(--text-main);">Вам больше всего подходит:</h2>
-                <h3 id="miniQuizResultText" style="color: var(--accent-light); font-size: 1.6rem; font-weight: 700; margin-bottom: 32px;">Скандинавский</h3>
-                <button class="btn-primary-hero" id="applyMiniQuizBtn" style="width: 100%; justify-content: center;">Продолжить к шагу 5</button>
+                <div class="success-icon" style="margin: 0 auto 24px; width: 80px; height: 80px; font-size: 2rem;"><i
+                        class="fas fa-magic"></i></div>
+                <h2
+                    style="font-family: var(--font-display); font-size: 2rem; margin-bottom: 12px; color: var(--text-main);">
+                    Вам больше всего подходит:</h2>
+                <h3 id="miniQuizResultText"
+                    style="color: var(--accent-light); font-size: 1.6rem; font-weight: 700; margin-bottom: 32px;">
+                    Скандинавский</h3>
+                <button class="btn-primary-hero" id="applyMiniQuizBtn"
+                    style="width: 100%; justify-content: center;">Перейти к шагу 5</button>
             </div>
         </div>
     </div>
@@ -676,4 +715,5 @@
     <script src="/static/auth.js"></script>
     <script src="/static/quiz.js"></script>
 </body>
+
 </html>
