@@ -1,0 +1,433 @@
+from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse, FileResponse
+from pydantic import BaseModel
+import sqlite3
+import hashlib
+import secrets
+from datetime import datetime
+import uvicorn
+import os
+
+app = FastAPI(title="Auth API", version="1.0.0")
+
+# Подключение статических файлов
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# CORS настройки
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5000", "http://127.0.0.1:5000", "http://localhost:58528", "http://127.0.0.1:58528"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["*"],
+    allow_origin_regex="https://cdnjs\\.cloudflare\\.com/.*",
+    expose_headers=["*"]
+)
+
+# Путь к базе данных
+DB_PATH = 'data.db'
+
+# Pydantic модели
+class PhoneCheckRequest(BaseModel):
+    phone: str
+
+class LoginRequest(BaseModel):
+    phone: str
+    password: str
+
+class RegisterRequest(BaseModel):
+    phone: str
+    nickname: str
+    password: str
+
+class SessionRequest(BaseModel):
+    session_id: str
+
+class QuizSubmissionRequest(BaseModel):
+    name: str
+    phone: str
+    email: str = None
+    room_type: str
+    zones: list
+    area: int
+    style: str
+    budget: str
+    comment: str = None
+    consent: bool
+
+class UserResponse(BaseModel):
+    id: int
+    phone: str
+    nickname: str
+    created_at: str
+
+def init_db():
+    """Инициализация базы данных"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            phone TEXT UNIQUE NOT NULL,
+            nickname TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS quiz_submissions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            email TEXT,
+            room_type TEXT NOT NULL,
+            zones TEXT NOT NULL,
+            area INTEGER NOT NULL,
+            style TEXT NOT NULL,
+            budget TEXT NOT NULL,
+            comment TEXT,
+            consent BOOLEAN NOT NULL,
+            user_id INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    
+    conn.commit()
+    conn.close()
+    print("База данных SQLite инициализирована")
+
+def get_db_connection():
+    """Получение соединения с базой данных"""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+# Валидация пароля
+def validate_password(password: str) -> str:
+    """Валидация пароля"""
+    if len(password) < 8:
+        raise HTTPException(status_code=400, detail="Пароль должен содержать минимум 8 символов")
+    
+    if not any(c.isalpha() for c in password):
+        raise HTTPException(status_code=400, detail="Пароль должен содержать минимум одну букву")
+    
+    return password
+
+def hash_password(password):
+    """Хеширование пароля"""
+    return hashlib.sha256(password.encode()).hexdigest()
+
+@app.on_event("startup")
+async def startup_event():
+    """Инициализация при запуске"""
+    init_db()
+
+@app.post("/api/auth/check-phone")
+async def check_phone(request: PhoneCheckRequest):
+    """Проверка существования пользователя по номеру телефона"""
+    try:
+        phone = request.phone.strip()
+        
+        if not phone:
+            raise HTTPException(status_code=400, detail="Номер телефона обязателен")
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT id FROM users WHERE phone = ?', (phone,))
+        user = cursor.fetchone()
+        conn.close()
+        
+        return {
+            "exists": user is not None,
+            "phone": phone
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/auth/login")
+async def login(request: LoginRequest, response: Response):
+    """Вход пользователя"""
+    try:
+        phone = request.phone.strip()
+        password = request.password
+        
+        if not phone or not password:
+            raise HTTPException(status_code=400, detail="Телефон и пароль обязательны")
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT * FROM users WHERE phone = ? AND password_hash = ?', 
+            (phone, hash_password(password))
+        )
+        user = cursor.fetchone()
+        conn.close()
+        
+        if user:
+            # Создаем сессию через cookie
+            session_id = secrets.token_hex(16)
+            response.set_cookie(
+                key="session_id",
+                value=session_id,
+                max_age=3600*24*7,  # 7 дней
+                httponly=True,
+                samesite="lax"
+            )
+            
+            # Здесь можно сохранить сессию в Redis или базу данных
+            # Для простоты используем cookie
+            
+            return {
+                "success": True,
+                "user": {
+                    "id": user["id"],
+                    "phone": user["phone"],
+                    "nickname": user["nickname"]
+                }
+            }
+        else:
+            raise HTTPException(status_code=401, detail="Неверный пароль")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/auth/register")
+async def register(request: RegisterRequest, response: Response):
+    """Регистрация нового пользователя"""
+    try:
+        phone = request.phone.strip()
+        nickname = request.nickname.strip()
+        password = request.password
+        
+        # Валидация никнейма
+        if not nickname:
+            raise HTTPException(status_code=400, detail="Никнейм обязателен")
+        
+        # Валидация пароля
+        validated_password = validate_password(password)
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Проверка уникальности телефона и никнейма
+        cursor.execute('SELECT id FROM users WHERE phone = ? OR nickname = ?', (phone, nickname))
+        existing_user = cursor.fetchone()
+        
+        if existing_user:
+            conn.close()
+            if existing_user["phone"] == phone:
+                raise HTTPException(status_code=409, detail="Этот номер телефона уже зарегистрирован")
+            else:
+                raise HTTPException(status_code=409, detail="Этот никнейм уже занят")
+        
+        # Создание пользователя
+        cursor.execute(
+            'INSERT INTO users (phone, nickname, password_hash) VALUES (?, ?, ?)',
+            (phone, nickname, hash_password(validated_password))
+        )
+        
+        user_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        # Автоматический вход
+        session_id = secrets.token_hex(16)
+        response.set_cookie(
+            key="session_id",
+            value=session_id,
+            max_age=3600*24*7,  # 7 дней
+            httponly=True,
+            samesite="lax"
+        )
+        
+        return {
+            "success": True,
+            "user": {
+                "id": user_id,
+                "phone": phone,
+                "nickname": nickname
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/auth/logout")
+async def logout(response: Response):
+    """Выход пользователя"""
+    response.delete_cookie(key="session_id")
+    return {"success": True}
+
+@app.get("/api/auth/current-user")
+async def current_user(request: Request):
+    """Получение текущего пользователя"""
+    session_id = request.cookies.get("session_id")
+    
+    if session_id:
+        # Здесь можно проверить сессию в Redis или базе данных
+        # Для простоты вернем заглушку - в реальном приложении нужна проверка
+        return {
+            "success": False,
+            "user": None
+        }
+    else:
+        return {
+            "success": False,
+            "user": None
+        }
+
+@app.get("/api/auth/users")
+async def get_users():
+    """Получение списка пользователей (для отладки)"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT id, phone, nickname, created_at FROM users ORDER BY created_at DESC')
+    users = cursor.fetchall()
+    conn.close()
+    
+    return {
+        "users": [dict(user) for user in users]
+    }
+
+@app.post("/api/session/data")
+async def get_session_data(request: SessionRequest):
+    """Получение данных сессии StateManager"""
+    try:
+        # В реальном приложении здесь была бы проверка в Redis/БД
+        # Для примера просто возвращаем заглушку
+        return {
+            "success": True,
+            "session_id": request.session_id,
+            "data": None,
+            "message": "Данные сессии получены"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/session/save")
+async def save_session_data(request: SessionRequest, http_request: Request):
+    """Сохранение данных сессии StateManager"""
+    try:
+        # В реальном приложении здесь было бы сохранение в Redis/БД
+        # Для примера просто логируем
+        print(f"Сохранение данных сессии: {request.session_id}")
+        
+        return {
+            "success": True,
+            "message": "Данные сессии сохранены"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/quiz/submit")
+async def submit_quiz(request: QuizSubmissionRequest, http_request: Request):
+    """Сохранение заявки квиза в базу данных"""
+    try:
+        # Валидация обязательных полей
+        if not request.name or not request.phone:
+            raise HTTPException(status_code=400, detail="Имя и телефон обязательны")
+        
+        if not request.room_type or not request.style or not request.budget:
+            raise HTTPException(status_code=400, detail="Необходимо выбрать тип помещения, стиль и бюджет")
+        
+        if not request.consent:
+            raise HTTPException(status_code=400, detail="Необходимо согласие на обработку данных")
+        
+        # Проверка формата телефона
+        import re
+        phone_clean = re.sub(r'[^\d]', '', request.phone)
+        if len(phone_clean) != 11 or not phone_clean.startswith(('7', '8')):
+            raise HTTPException(status_code=400, detail="Некорректный формат телефона")
+        
+        # Нормализация телефона
+        normalized_phone = '+' + (phone_clean if phone_clean.startswith('7') else '7' + phone_clean[1:])
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Проверяем, есть ли пользователь с таким телефоном
+        cursor.execute('SELECT id FROM users WHERE phone = ?', (normalized_phone,))
+        user_record = cursor.fetchone()
+        user_id = user_record["id"] if user_record else None
+        
+        # Сохраняем заявку квиза
+        cursor.execute('''
+            INSERT INTO quiz_submissions 
+            (name, phone, email, room_type, zones, area, style, budget, comment, consent, user_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            request.name,
+            normalized_phone,
+            request.email,
+            request.room_type,
+            ','.join(request.zones) if request.zones else '',
+            request.area,
+            request.style,
+            request.budget,
+            request.comment,
+            request.consent,
+            user_id
+        ))
+        
+        submission_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        print(f"Заявка квиза #{submission_id} успешно сохранена")
+        
+        return {
+            "success": True,
+            "submission_id": submission_id,
+            "message": "Заявка успешно сохранена"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Ошибка при сохранении заявки квиза: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Ошибка при сохранении заявки: {str(e)}")
+
+@app.get("/api/quiz/submissions")
+async def get_quiz_submissions():
+    """Получение списка заявок квиза (для отладки)"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT qs.*, u.nickname as user_nickname 
+            FROM quiz_submissions qs 
+            LEFT JOIN users u ON qs.user_id = u.id 
+            ORDER BY qs.created_at DESC 
+            LIMIT 50
+        ''')
+        submissions = cursor.fetchall()
+        conn.close()
+        
+        return {
+            "submissions": [dict(sub) for sub in submissions]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    """Главная страница"""
+    return FileResponse("templates/index.html")
+
+@app.get("/quiz", response_class=HTMLResponse)
+async def quiz():
+    """Страница квиза"""
+    return FileResponse("templates/quiz.html")
+
+if __name__ == "__main__":
+    uvicorn.run("server:app", host="0.0.0.0", port=5000, reload=True)
