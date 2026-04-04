@@ -97,7 +97,9 @@ async def gc_ask(question):
 # Уведомления
 async def notify_tg(text):
     if not TG_API or not TG_CHAT: return
-    try: async with httpx.AsyncClient() as c: await c.post(f"{TG_API}/sendMessage", json={"chat_id": TG_CHAT, "text": text, "parse_mode": "HTML"}, timeout=10)
+    try:
+        async with httpx.AsyncClient() as c:
+            await c.post(f"{TG_API}/sendMessage", json={"chat_id": TG_CHAT, "text": text, "parse_mode": "HTML"}, timeout=10)
     except: pass
 
 async def notify_email(data):
