@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дизайн — Interio</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+    .design-page { padding-top: 100px; min-height: 100vh; }
+    .design-container { max-width: 700px; margin: 0 auto; padding: 0 24px; }
+    .design-header { margin-bottom: 24px; }
+    .design-header h1 { font-family: var(--font-display); font-size: 2rem; color: var(--text-main); }
+    .design-header p { color: var(--text-muted); }
+    .design-details { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 24px; }
+    .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { color: var(--text-muted); }
+    .detail-value { color: var(--text-main); font-weight: 600; }
+    .design-actions { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+    .design-actions button { padding: 12px 20px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main); font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+    .design-actions button:hover { border-color: var(--accent); }
+    .comments-section { margin-top: 24px; }
+    .comments-section h3 { margin-bottom: 16px; color: var(--text-main); }
+    .comment-form { display: flex; gap: 8px; margin-bottom: 16px; }
+    .comment-form input { flex: 1; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-main); outline: none; }
+    .comment-form button { padding: 10px 20px; border-radius: 10px; background: var(--accent); color: white; border: none; cursor: pointer; font-weight: 600; }
+    .comment { background: var(--bg-primary); border-radius: 10px; padding: 12px; margin-bottom: 8px; }
+    .comment-author { font-size: 0.8rem; color: var(--accent); font-weight: 600; }
+    .comment-text { font-size: 0.9rem; color: var(--text-main); margin-top: 4px; }
+    </style>
+</head>
+<body class="design-page">
+    <header class="header header-minimal"><div class="header-container"><a href="/portfolio" class="logo"><span>Портфолио</span></a><div class="header-actions"><a href="/" class="btn-outline btn-small"><i class="fas fa-home"></i> На главную</a></div></div></header>
+    <div class="design-container">
+        <div class="design-header"><h1 id="designTitle">Загрузка...</h1><p id="designDesc"></p></div>
+        <div class="design-actions">
+            <button id="likeBtn"><i class="fas fa-heart" id="likeIcon"></i> <span id="likeCount">0</span></button>
+            <button onclick="window.location.href='/portfolio'"><i class="fas fa-arrow-left"></i> Назад</button>
+        </div>
+        <div class="design-details" id="designDetails"></div>
+        <div class="comments-section"><h3>Комментарии</h3><div class="comment-form"><input id="commentInput" placeholder="Ваш комментарий..."><button id="commentBtn">Отправить</button></div><div id="commentsList"></div></div>
+    </div>
+    <script>
+    var designId = window.location.pathname.split('/').pop();
+    async function loadDesign() {
+        try {
+            var r = await fetch('/api/portfolio/'+designId);
+            var d = await r.json();
+            document.getElementById('designTitle').textContent = d.title;
+            document.getElementById('designDesc').textContent = d.description || '';
+            document.getElementById('likeCount').textContent = d.likes_count || 0;
+            var sc = JSON.parse(d.scene_params||'{}');
+            document.getElementById('designDetails').innerHTML = '<div class="detail-row"><span class="detail-label">Стиль</span><span class="detail-value">'+(d.style||'—')+'</span></div><div class="detail-row"><span class="detail-label">Помещение</span><span class="detail-value">'+(d.room||'—')+'</span></div><div class="detail-row"><span class="detail-label">Бюджет</span><span class="detail-value">'+(d.budget||'—')+'</span></div><div class="detail-row"><span class="detail-label">Площадь</span><span class="detail-value">'+(sc.area||'—')+' м²</span></div><div class="detail-row"><span class="detail-label">Зоны</span><span class="detail-value">'+((sc.zones||[]).join(', ')||'—')+'</span></div><div class="detail-row"><span class="detail-label">Просмотры</span><span class="detail-value">'+(d.views_count||0)+'</span></div>';
+            loadComments();
+        } catch(e) { document.getElementById('designTitle').textContent = 'Дизайн не найден'; }
+    }
+    document.getElementById('likeBtn').addEventListener('click', async function() {
+        var r = await fetch('/api/portfolio/'+designId+'/like', {method:'POST'});
+        var d = await r.json();
+        document.getElementById('likeCount').textContent = d.likes_count;
+    });
+    async function loadComments() {
+        var r = await fetch('/api/portfolio/'+designId+'/comments');
+        var d = await r.json();
+        document.getElementById('commentsList').innerHTML = (d.comments||[]).map(function(c){return '<div class="comment"><div class="comment-author">'+c.author_name+'</div><div class="comment-text">'+c.text+'</div></div>';}).join('')||'<p style="color:var(--text-muted)">Нет комментариев</p>';
+    }
+    document.getElementById('commentBtn').addEventListener('click', async function() {
+        var text = document.getElementById('commentInput').value.trim();
+        if(!text) return;
+        await fetch('/api/portfolio/'+designId+'/comment', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({design_id:parseInt(designId),text:text,author_name:'Аноним'})});
+        document.getElementById('commentInput').value=''; loadComments();
+    });
+    loadDesign();
+    </script>
+</body>
+</html>

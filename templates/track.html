@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отследить заявку — Interio</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+    .track-page { padding-top: 100px; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .track-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 40px; max-width: 500px; width: 90%; text-align: center; }
+    .track-card h2 { font-family: var(--font-display); font-size: 1.8rem; color: var(--text-main); margin-bottom: 8px; }
+    .track-card > p { color: var(--text-muted); margin-bottom: 24px; }
+    .track-input-group { display: flex; gap: 10px; margin-bottom: 12px; }
+    .track-input-group input { flex: 1; padding: 14px 18px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-main); font-size: 1rem; outline: none; }
+    .track-input-group input:focus { border-color: var(--accent); }
+    .track-input-group button { padding: 14px 24px; border-radius: 12px; background: var(--accent); color: white; border: none; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .track-input-group button:hover { transform: translateY(-2px); }
+    .step { display: none; }
+    .step.active { display: block; }
+    .demo-code { margin-top: 12px; padding: 12px; background: var(--bg-primary); border-radius: 8px; font-family: monospace; font-size: 0.9rem; color: var(--accent); }
+    .submissions-list { text-align: left; margin-top: 20px; }
+    .submission-item { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+    .submission-item h4 { color: var(--accent); margin-bottom: 6px; }
+    .submission-item p { font-size: 0.85rem; color: var(--text-secondary); margin: 2px 0; }
+    .no-subs { text-align: center; padding: 30px; color: var(--text-muted); }
+    .error-msg { color: var(--error); font-size: 0.8rem; margin-top: 6px; }
+    </style>
+</head>
+<body class="track-page">
+    <div class="track-card">
+        <h2><i class="fas fa-search"></i> Отследить заявку</h2>
+        <p>Введите номер телефона для просмотра статуса</p>
+        <div class="step active" id="stepPhone"><div class="track-input-group"><input type="tel" id="trackPhone" placeholder="+7 (999) 123-45-67" maxlength="18"><button onclick="requestCode()">Получить код</button></div><div class="error-msg" id="phoneError"></div></div>
+        <div class="step" id="stepCode"><p style="color:var(--text-main);">Код отправлен на ваш телефон</p><div class="track-input-group"><input type="text" id="trackCode" placeholder="4-значный код" maxlength="4"><button onclick="verifyCode()">Проверить</button></div><div id="demoCode" class="demo-code"></div><div class="error-msg" id="codeError"></div></div>
+        <div class="step" id="stepResult"><h3 style="margin-bottom:16px;color:var(--text-main);">Ваши заявки</h3><div class="submissions-list" id="submissionsList"></div><button onclick="resetTrack()" style="margin-top:16px;padding:10px 20px;border-radius:10px;background:transparent;border:1px solid var(--border-color);color:var(--text-main);cursor:pointer;"><i class="fas fa-redo"></i> Отследить другую</button></div>
+    </div>
+    <script>
+    var currentPhone = '';
+    document.getElementById('trackPhone').addEventListener('input', function() {
+        var v = this.value.replace(/[^\d]/g,'');
+        if(v.startsWith('8')) v='7'+v.substring(1);
+        if(!v.startsWith('7')&&v.length>0) v='7'+v;
+        var f='';
+        if(v.length>0) f='+'+v.substring(0,1);
+        if(v.length>1) f+=' ('+v.substring(1,4);
+        if(v.length>4) f+=') '+v.substring(4,7);
+        if(v.length>7) f+='-'+v.substring(7,9);
+        if(v.length>9) f+='-'+v.substring(9,11);
+        this.value=f;
+    });
+    async function requestCode() {
+        var phone = document.getElementById('trackPhone').value.trim();
+        if(phone.length<5) { document.getElementById('phoneError').textContent='Введите номер'; return; }
+        document.getElementById('phoneError').textContent='';
+        try {
+            var r = await fetch('/api/track/request-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:phone})});
+            var d = await r.json();
+            if(d.success) { currentPhone = phone; document.getElementById('stepPhone').classList.remove('active'); document.getElementById('stepCode').classList.add('active'); if(d.demo_code) document.getElementById('demoCode').innerHTML='🔑 Демо-код: <b>'+d.demo_code+'</b>'; }
+            else { document.getElementById('phoneError').textContent=d.detail||'Ошибка'; }
+        } catch(e) { document.getElementById('phoneError').textContent='Ошибка соединения'; }
+    }
+    async function verifyCode() {
+        var code = document.getElementById('trackCode').value.trim();
+        if(code.length!==4) { document.getElementById('codeError').textContent='Введите 4-значный код'; return; }
+        try {
+            var r = await fetch('/api/track/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:currentPhone,code:code})});
+            var d = await r.json();
+            if(d.success && d.submissions.length>0) {
+                document.getElementById('stepCode').classList.remove('active');
+                document.getElementById('stepResult').classList.add('active');
+                document.getElementById('submissionsList').innerHTML = d.submissions.map(function(s){return '<div class="submission-item"><h4>Заявка #'+s.id+'</h4><p>🏢 '+s.room_type+' · 🎨 '+s.style+'</p><p>💰 '+s.budget+' · 📐 '+s.area+' м²</p><p style="color:var(--text-muted);font-size:0.75rem;">'+new Date(s.created_at).toLocaleDateString('ru-RU')+'</p></div>';}).join('');
+            } else { document.getElementById('codeError').textContent='Заявки не найдены'; }
+        } catch(e) { document.getElementById('codeError').textContent='Ошибка'; }
+    }
+    function resetTrack() {
+        document.getElementById('stepResult').classList.remove('active');
+        document.getElementById('stepPhone').classList.add('active');
+        document.getElementById('trackPhone').value='';
+        document.getElementById('trackCode').value='';
+        currentPhone='';
+    }
+    </script>
+</body>
+</html>

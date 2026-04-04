@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: interio
+    env: python
+    region: frankfurt
+    plan: free
+    buildCommand: pip install --no-cache-dir -r requirements.txt
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+
+      # GigaChat AI
+      - key: GIGACHAT_AUTH_KEY
+        sync: false
+
+      # Telegram Bot
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_ADMIN_CHAT_ID
+        sync: false
+
+      # Email SMTP
+      - key: SMTP_HOST
+        value: "smtp.yandex.ru"
+      - key: SMTP_PORT
+        value: "465"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+
+      # App URL (change after first deploy)
+      - key: FRONTEND_URL
+        value: https://interio.onrender.com

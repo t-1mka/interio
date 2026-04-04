@@ -1,0 +1,14 @@
+# Core — работают везде
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.6.0
+python-multipart==0.0.9
+
+# HTTP client
+httpx==0.27.0
+
+# Email
+aiosmtplib==3.0.1
+
+# Environment
+python-dotenv==1.0.1
