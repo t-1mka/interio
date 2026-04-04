@@ -199,7 +199,11 @@ async def page_track(): return FileResponse("templates/track.html")
 @app.get("/admin", response_class=HTMLResponse)
 async def page_admin(): return FileResponse("templates/admin.html")
 
-@app.get("/cabinet", response_class=HTMLResponse)`nasync def page_cabinet(): return FileResponse("templates/cabinet.html")`n`n@app.get("/privacy", response_class=HTMLResponse)
+@app.get("/cabinet", response_class=HTMLResponse)
+async def page_cabinet():
+    return FileResponse("templates/cabinet.html")
+
+@app.get("/privacy", response_class=HTMLResponse)
 async def page_privacy(): return FileResponse("templates/privacy.html")
 
 @app.get("/terms", response_class=HTMLResponse)
