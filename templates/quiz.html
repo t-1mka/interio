@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interio — Пройти тест</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/cursor.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -15,23 +16,26 @@
     <div class="bg-image"></div>
     <div class="bg-overlay"></div>
 
-    <!-- Header -->
+    <!-- ═══ HEADER ═══ -->
     <header class="header header-minimal">
         <div class="header-container">
             <a href="/" class="logo"><span>Interio</span></a>
             <div class="header-actions">
                 <button class="theme-toggle" id="themeToggle" title="Сменить тему"><i class="fas fa-sun"></i></button>
-                <button class="a11y-toggle" id="a11yToggle" title="Для слабовидящих"><i class="fas fa-eye"></i></button>
+                <button class="a11y-toggle" id="a11yToggle" title="Доступность"><i class="fas fa-eye"></i></button>
                 <div class="user-profile-container">
                     <button class="login-btn" id="loginBtn" onclick="window.authManager.openModal()"><i class="fas fa-user"></i> Войти</button>
-                    <div class="user-profile" id="userProfile" style="display:none;" onclick="window.authManager.openCabinetModal()"><div class="user-avatar" id="userAvatar"></div><span class="user-nickname" id="userNicknameDisplay"></span></div>
+                    <div class="user-profile" id="userProfile" style="display:none;" onclick="window.authManager.openCabinetModal()">
+                        <div class="user-avatar" id="userAvatar"></div>
+                        <span class="user-nickname" id="userNicknameDisplay"></span>
+                    </div>
                 </div>
                 <a href="/" class="btn-outline btn-small"><i class="fas fa-arrow-left"></i> На главную</a>
             </div>
         </div>
     </header>
 
-    <!-- Quiz -->
+    <!-- ═══ QUIZ ═══ -->
     <section class="quiz-section">
         <div class="quiz-wrapper">
             <div class="quiz-container" id="quizContainer">
@@ -42,12 +46,17 @@
                         <span class="progress-step">Шаг <span id="currentStepNum">1</span> из 6</span>
                         <span class="progress-percent" id="progressPercent">17%</span>
                     </div>
-                    <div class="progress-bar-container"><div class="progress-bar" id="progressBar" style="width:17%"></div></div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progressBar" style="width:17%"></div>
+                    </div>
                 </div>
 
-                <!-- Step 1: Room Type -->
+                <!-- ════ ШАГ 1: Тип помещения ════ -->
                 <div class="quiz-step active" data-step="1">
-                    <div class="step-header"><span class="step-label">Шаг 1</span><h2 class="step-question">Какое помещение вы планируете оформить?</h2></div>
+                    <div class="step-header">
+                        <span class="step-label">Шаг 1</span>
+                        <h2 class="step-question">Какое помещение вы планируете оформить?</h2>
+                    </div>
                     <div class="options-grid">
                         <label class="option-card"><input type="radio" name="roomType" value="Квартира"><div class="option-content"><div class="option-icon"><i class="fas fa-building"></i></div><span>Квартира</span></div></label>
                         <label class="option-card"><input type="radio" name="roomType" value="Частный дом"><div class="option-content"><div class="option-icon"><i class="fas fa-home"></i></div><span>Частный дом</span></div></label>
@@ -58,9 +67,13 @@
                     </div>
                 </div>
 
-                <!-- Step 2: Zones -->
+                <!-- ════ ШАГ 2: Зоны ════ -->
                 <div class="quiz-step" data-step="2">
-                    <div class="step-header"><span class="step-label">Шаг 2</span><h2 class="step-question">Какие зоны нужно включить в дизайн-проект?</h2><p class="step-hint">Можно выбрать несколько</p></div>
+                    <div class="step-header">
+                        <span class="step-label">Шаг 2</span>
+                        <h2 class="step-question">Какие зоны нужно включить в дизайн-проект?</h2>
+                        <p class="step-hint">Можно выбрать несколько вариантов</p>
+                    </div>
                     <div class="options-grid">
                         <label class="option-card"><input type="checkbox" name="zones" value="Кухня"><div class="option-content"><div class="option-icon"><i class="fas fa-utensils"></i></div><span>Кухня</span><div class="check-indicator"><i class="fas fa-check"></i></div></div></label>
                         <label class="option-card"><input type="checkbox" name="zones" value="Гостиная"><div class="option-content"><div class="option-icon"><i class="fas fa-couch"></i></div><span>Гостиная</span><div class="check-indicator"><i class="fas fa-check"></i></div></div></label>
@@ -75,9 +88,12 @@
                     </div>
                 </div>
 
-                <!-- Step 3: Area -->
+                <!-- ════ ШАГ 3: Площадь ════ -->
                 <div class="quiz-step" data-step="3">
-                    <div class="step-header"><span class="step-label">Шаг 3</span><h2 class="step-question">Укажите примерную площадь помещения</h2></div>
+                    <div class="step-header">
+                        <span class="step-label">Шаг 3</span>
+                        <h2 class="step-question">Укажите примерную площадь помещения</h2>
+                    </div>
                     <div class="slider-container">
                         <div class="slider-display"><span class="slider-value" id="sliderValue">60</span><span class="slider-unit">м²</span></div>
                         <input type="range" min="20" max="300" value="60" step="5" class="custom-slider" id="areaSlider">
@@ -85,9 +101,12 @@
                     </div>
                 </div>
 
-                <!-- Step 4: Style -->
+                <!-- ════ ШАГ 4: Стиль ════ -->
                 <div class="quiz-step" data-step="4">
-                    <div class="step-header"><span class="step-label">Шаг 4</span><h2 class="step-question">Какой стиль интерьера вам ближе?</h2></div>
+                    <div class="step-header">
+                        <span class="step-label">Шаг 4</span>
+                        <h2 class="step-question">Какой стиль интерьера вам ближе?</h2>
+                    </div>
                     <div class="style-row">
                         <label class="style-image-card"><input type="radio" name="style" value="Современный"><div class="style-card-content"><div class="style-image" style="background-image:url('/static/images/modern.png')"></div><div class="style-label">Современный</div></div></label>
                         <label class="style-image-card"><input type="radio" name="style" value="Минимализм"><div class="style-card-content"><div class="style-image" style="background-image:url('/static/images/minimalism.png')"></div><div class="style-label">Минимализм</div></div></label>
@@ -103,9 +122,12 @@
                     </div>
                 </div>
 
-                <!-- Step 5: Budget -->
+                <!-- ════ ШАГ 5: Бюджет ════ -->
                 <div class="quiz-step" data-step="5">
-                    <div class="step-header"><span class="step-label">Шаг 5</span><h2 class="step-question">Какой бюджет на реализацию?</h2></div>
+                    <div class="step-header">
+                        <span class="step-label">Шаг 5</span>
+                        <h2 class="step-question">Какой бюджет на реализацию интерьера вы рассматриваете?</h2>
+                    </div>
                     <div class="options-grid">
                         <label class="option-card"><input type="radio" name="budget" value="До 500 000 ₽"><div class="option-content"><span>До 500 000 ₽</span></div></label>
                         <label class="option-card"><input type="radio" name="budget" value="500 000 – 1 000 000 ₽"><div class="option-content"><span>500 000 – 1 000 000 ₽</span></div></label>
@@ -121,17 +143,27 @@
                     </div>
                 </div>
 
-                <!-- Step 6: Form + Photo -->
+                <!-- ════ ШАГ 6: Форма + Фото ════ -->
                 <div class="quiz-step" data-step="6">
-                    <div class="step-header"><span class="step-label">Финал</span><h2 class="step-question">Оставьте контакты</h2><p class="step-hint">Расчёт займёт не более 15 минут</p></div>
+                    <div class="step-header">
+                        <span class="step-label">Финал</span>
+                        <h2 class="step-question">Оставьте контакты, и мы свяжемся с вами</h2>
+                        <p class="step-hint">Расчёт стоимости займёт не более 15 минут</p>
+                    </div>
+
                     <!-- Photo Upload -->
-                    <div class="photo-upload-area" id="photoUploadSection">
+                    <div class="photo-upload-area">
                         <h3 style="font-size:1rem;color:var(--text-main);margin-bottom:12px;"><i class="fas fa-camera"></i> Прикрепить фото помещения (до 5)</h3>
-                        <div class="photo-drop-zone" id="photoDropZone"><i class="fas fa-cloud-upload-alt"></i><p>Перетащите фото или <span style="color:var(--accent);cursor:pointer;">выберите файлы</span></p><small>JPG, PNG, WEBP (макс. 5MB)</small></div>
+                        <div class="photo-drop-zone" id="photoDropZone">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Перетащите фото или <span style="color:var(--accent);cursor:pointer;">выберите файлы</span></p>
+                            <small>JPG, PNG, WEBP (макс. 5MB)</small>
+                        </div>
                         <input type="file" id="photoFileInput" multiple accept="image/*" style="display:none;">
                         <div class="photo-preview-grid" id="photoGrid"></div>
                     </div>
-                    <!-- Form -->
+
+                    <!-- Contact Form -->
                     <form class="contact-form" id="leadForm">
                         <div class="form-group"><label>Имя <span class="required">*</span></label><input type="text" id="inputName" placeholder="Как к вам обращаться?"></div>
                         <div class="form-group"><label>Телефон <span class="required">*</span></label><input type="tel" id="inputPhone" placeholder="+7 (___) ___-__-__" maxlength="18" oninput="window.stateManager.formatPhone(this)"><div class="error-msg" id="phoneError">Введите корректный номер</div></div>
@@ -141,23 +173,22 @@
                     </form>
                 </div>
 
-                <!-- Success -->
+                <!-- ════ SUCCESS ════ -->
                 <div class="success-screen" id="successScreen">
                     <div class="success-card">
                         <div class="success-icon"><i class="fas fa-check"></i></div>
                         <h2>Спасибо за заявку!</h2>
-                        <p>Мы получили ваши ответы. Менеджер свяжется с вами в ближайшее время.</p>
+                        <p>Мы получили ваши ответы и расчёт стоимости. Наш менеджер свяжется с вами в ближайшее время.</p>
                         <button class="btn-primary-hero" id="downloadPdfBtn"><i class="fas fa-file-pdf"></i> Скачать PDF</button>
                         <br><br>
-                        <a href="/" class="btn-outline" style="display:inline-flex;"><i class="fas fa-home"></i> На главную</a>
+                        <a href="/" class="btn-outline" style="display:inline-flex;"><i class="fas fa-home"></i> Вернуться на главную</a>
                     </div>
                 </div>
 
-                <!-- Nav -->
+                <!-- ════ NAVIGATION ════ -->
                 <div class="quiz-nav" id="quizNav">
                     <button class="btn-back" id="prevBtn" disabled><i class="fas fa-arrow-left"></i> Назад</button>
                     <div class="quiz-nav-right">
-                        <button class="btn-random" id="randomAnswerBtn" title="Случайный ответ"><i class="fas fa-dice"></i></button>
                         <button class="btn-next" id="nextBtn">Далее <i class="fas fa-arrow-right"></i></button>
                     </div>
                 </div>
@@ -166,10 +197,10 @@
         </div>
     </section>
 
-    <!-- Toast -->
+    <!-- ═══ TOAST ═══ -->
     <div class="toast-notification" id="toastNotification"><i class="fas fa-exclamation-circle"></i><span id="toastMessage"></span></div>
 
-    <!-- A11y -->
+    <!-- ═══ A11Y PANEL ═══ -->
     <div class="a11y-panel" id="a11yPanel">
         <button class="a11y-close" id="a11yClose"><i class="fas fa-times"></i></button>
         <h3>Настройки для слабовидящих</h3>
@@ -178,90 +209,53 @@
         <label class="a11y-option"><input type="checkbox" id="largeText"><div class="checkmark"></div><span>Увеличенный текст</span></label>
     </div>
 
-    <!-- Auth -->
+    <!-- ═══ AUTH MODAL ═══ -->
     <div id="authModal" class="auth-modal">
-        <div class="auth-modal-content"><span class="auth-close" onclick="window.authManager.closeModal()">&times;</span>
-            <div id="phoneStep" class="auth-step"><h2>Вход</h2><p>Введите номер телефона</p><input type="tel" id="phoneInput" placeholder="+7 (999) 123-45-67" maxlength="18" oninput="window.authManager.formatPhone(this)"><button onclick="window.authManager.checkPhone()">Далее</button><div id="phoneError" class="auth-error-message"></div></div>
+        <div class="auth-modal-content">
+            <span class="auth-close" onclick="window.authManager.closeModal()">&times;</span>
+            <div id="phoneStep" class="auth-step"><h2>Вход в личный кабинет</h2><p>Введите номер телефона</p><input type="tel" id="phoneInput" placeholder="+7 (999) 123-45-67" maxlength="18" oninput="window.authManager.formatPhone(this)"><button onclick="window.authManager.checkPhone()">Далее</button><div id="phoneError" class="auth-error-message"></div></div>
             <div id="passwordStep" class="auth-step" style="display:none;"><h2>Вход</h2><p id="userPhone"></p><input type="password" id="passwordInput" placeholder="Пароль"><button onclick="window.authManager.login()">Войти</button><button onclick="window.authManager.backToPhone()" class="secondary">Назад</button><div id="passwordError" class="auth-error-message"></div></div>
             <div id="registerStep" class="auth-step" style="display:none;"><h2>Регистрация</h2><p id="newUserPhone"></p><input type="text" id="nicknameInput" placeholder="Никнейм"><input type="password" id="newPasswordInput" placeholder="Пароль"><input type="password" id="confirmPasswordInput" placeholder="Повторите"><button onclick="window.authManager.register()">Зарегистрироваться</button><button onclick="window.authManager.backToPhone()" class="secondary">Назад</button><div id="registerError" class="auth-error-message"></div></div>
         </div>
     </div>
     <div id="cabinetModal" class="cabinet-modal"><div class="cabinet-modal-content"><span class="cabinet-close" onclick="window.authManager.closeCabinetModal()">&times;</span><div class="cabinet-container"><button class="logout-btn" onclick="window.authManager.logout()">Выйти</button></div></div></div>
 
-    <!-- Floating Buttons -->
-    <div class="float-buttons">
-        <button class="float-btn gc" id="gcMainBtn" title="ИИ-советник">🤖<span class="badge">AI</span></button>
-        <button class="float-btn colors" id="colorBtn" title="Цвета"><i class="fas fa-palette"></i></button>
-        <button class="float-btn preview" id="previewAnswersBtn" title="Предпросмотр"><i class="fas fa-eye"></i></button>
-    </div>
+    <!-- ═══ GIGACHAT BUTTON — КРАСИВЫЙ ═══ -->
+    <button id="gcFloatBtn" title="ИИ-советник по дизайну" onclick="document.getElementById('gcModal').classList.add('show')" style="position:fixed;bottom:28px;right:28px;z-index:1000;width:64px;height:64px;border-radius:50%;border:none;background:linear-gradient(135deg,#2563eb,#e74c5e);color:white;font-size:1.6rem;cursor:pointer;box-shadow:0 4px 24px rgba(37,99,235,0.5);transition:all .3s;display:flex;align-items:center;justify-content:center;">🤖<span style="position:absolute;top:-2px;right:-2px;width:22px;height:22px;background:#22c55e;border-radius:50%;font-size:.65rem;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;box-shadow:0 2px 8px rgba(34,197,94,0.5);">AI</span></button>
 
-    <!-- Color Panel -->
-    <div class="color-panel" id="colorPanel">
-        <h4><i class="fas fa-palette"></i> Цветовая гамма</h4>
-        <div class="color-presets">
-            <div class="color-preset active" data-color="#2563eb" style="background:#2563eb;" title="Синий"></div>
-            <div class="color-preset" data-color="#e74c5e" style="background:#e74c5e;" title="Красный"></div>
-            <div class="color-preset" data-color="#22c55e" style="background:#22c55e;" title="Зелёный"></div>
-            <div class="color-preset" data-color="#f39c12" style="background:#f39c12;" title="Оранжевый"></div>
-            <div class="color-preset" data-color="#9b59b6" style="background:#9b59b6;" title="Фиолетовый"></div>
-        </div>
-        <div class="color-picker-row"><label>Свой:</label><input type="color" id="colorPicker" value="#2563eb"></div>
-    </div>
-
-    <!-- Preview Modal -->
-    <div class="preview-overlay" id="previewOverlay">
-        <div class="preview-modal">
-            <button class="preview-close" id="previewClose"><i class="fas fa-times"></i></button>
-            <h2 style="margin-bottom:20px;color:var(--text-main);"><i class="fas fa-clipboard-check"></i> Проверьте ответы</h2>
-            <div class="preview-cards" id="previewCards"></div>
-            <div class="preview-actions">
-                <button class="preview-back-btn" id="previewBack"><i class="fas fa-arrow-left"></i> Назад</button>
-                <button class="preview-submit-btn" id="previewSubmit"><i class="fas fa-paper-plane"></i> Отправить</button>
+    <!-- ═══ GIGACHAT MODAL ═══ -->
+    <div id="gcModal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);align-items:flex-end;justify-content:center;">
+        <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:24px 24px 0 0;width:100%;max-width:500px;max-height:80vh;display:flex;flex-direction:column;animation:slideUp .3s ease;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--border-color);">
+                <h3 style="margin:0;font-size:1.1rem;color:var(--text-main);">🤖 ИИ-советник</h3>
+                <button onclick="document.getElementById('gcModal').classList.remove('show')" style="background:none;border:none;color:var(--text-muted);font-size:1.3rem;cursor:pointer;">&times;</button>
+            </div>
+            <div id="gcMsgs" style="flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:12px;">
+                <div style="padding:12px 16px;border-radius:16px 16px 16px 4px;background:var(--bg-card);color:var(--text-main);align-self:flex-start;max-width:85%;font-size:.9rem;line-height:1.5;">Привет! Я ИИ-советник по дизайну интерьера. Спросите про стиль, бюджет, планировку, размеры помещений или материалы. 🏠</div>
+            </div>
+            <div style="display:flex;gap:8px;padding:16px 24px;border-top:1px solid var(--border-color);">
+                <input id="gcInput" type="text" placeholder="Спросите о дизайне..." style="flex:1;padding:12px 16px;border-radius:12px;background:var(--bg-primary);border:1px solid var(--border-color);color:var(--text-main);font-size:.9rem;outline:none;" onkeydown="if(event.key==='Enter')sendGC()">
+                <button id="gcSendBtn" onclick="sendGC()" style="padding:12px 20px;border-radius:12px;background:var(--accent);color:white;border:none;cursor:pointer;font-weight:600;font-size:1rem;">→</button>
             </div>
         </div>
     </div>
 
-    <!-- Mini Quiz Modal -->
-    <div id="miniQuizModal" class="auth-modal" style="display:none;">
-        <div class="auth-modal-content" style="max-width:650px;padding:40px;">
-            <span class="auth-close" id="closeMiniQuiz">&times;</span>
-            <div id="miniQuizQuestions">
-                <div class="step-header" style="margin-bottom:24px;text-align:left;"><span class="step-label">Помощник выбора стиля</span><h2 class="step-question" style="font-size:1.8rem;">Подберём идеальный стиль!</h2></div>
-                <div class="quiz-progress" style="margin-bottom:24px;"><div class="progress-header"><span class="progress-step">Вопрос <span id="currentMiniStepNum">1</span> из 6</span><span class="progress-percent" id="miniProgressPercent">17%</span></div><div class="progress-bar-container"><div class="progress-bar" id="miniProgressBar" style="width:17%"></div></div></div>
-                <div class="mini-quiz-step active" data-mini-step="1"><p class="step-question" style="font-size:1.3rem;margin-bottom:16px;">Какая атмосфера вам ближе?</p><div class="mini-options-list"><label class="option-card"><input type="radio" name="mq1" value="Скандинавский,Минимализм"><div class="option-content"><span>Спокойная, светлая</span></div></label><label class="option-card"><input type="radio" name="mq1" value="Классика,Неоклассика"><div class="option-content"><span>Роскошная, торжественная</span></div></label><label class="option-card"><input type="radio" name="mq1" value="Лофт"><div class="option-content"><span>Урбанистичная, брутальная</span></div></label><label class="option-card"><input type="radio" name="mq1" value="Современный,Минимализм"><div class="option-content"><span>Лаконичная, функциональная</span></div></label></div></div>
-                <div class="mini-quiz-step" data-mini-step="2"><p class="step-question" style="font-size:1.3rem;margin-bottom:16px;">Какие материалы нравятся?</p><div class="mini-options-list"><label class="option-card"><input type="radio" name="mq2" value="Скандинавский"><div class="option-content"><span>Светлое дерево, лён</span></div></label><label class="option-card"><input type="radio" name="mq2" value="Лофт"><div class="option-content"><span>Бетон, кирпич, металл</span></div></label><label class="option-card"><input type="radio" name="mq2" value="Классика,Неоклассика"><div class="option-content"><span>Мрамор, лепнина</span></div></label><label class="option-card"><input type="radio" name="mq2" value="Современный,Минимализм"><div class="option-content"><span>Гладкие поверхности</span></div></label></div></div>
-                <div class="mini-quiz-step" data-mini-step="3"><p class="step-question" style="font-size:1.3rem;margin-bottom:16px;">Какая палитра ближе?</p><div class="mini-options-list"><label class="option-card"><input type="radio" name="mq3" value="Скандинавский,Минимализм"><div class="option-content"><span>Нейтральная: белый, серый</span></div></label><label class="option-card"><input type="radio" name="mq3" value="Современный,Лофт"><div class="option-content"><span>Контрастная: чёрный + белый</span></div></label><label class="option-card"><input type="radio" name="mq3" value="Классика,Неоклассика"><div class="option-content"><span>Тёплая: золото, бордо</span></div></label><label class="option-card"><input type="radio" name="mq3" value="Минимализм,Современный"><div class="option-content"><span>Монохромная</span></div></label></div></div>
-                <div class="mini-quiz-step" data-mini-step="4"><p class="step-question" style="font-size:1.3rem;margin-bottom:16px;">Как относитесь к декору?</p><div class="mini-options-list"><label class="option-card"><input type="radio" name="mq4" value="Минимализм,Скандинавский"><div class="option-content"><span>Минимум, функциональное</span></div></label><label class="option-card"><input type="radio" name="mq4" value="Классика,Неоклассика"><div class="option-content"><span>Лепнина, молдинги</span></div></label><label class="option-card"><input type="radio" name="mq4" value="Лофт"><div class="option-content"><span>Индустриальный декор</span></div></label><label class="option-card"><input type="radio" name="mq4" value="Современный"><div class="option-content"><span>Лаконичный: постеры</span></div></label></div></div>
-                <div class="mini-quiz-step" data-mini-step="5"><p class="step-question" style="font-size:1.3rem;margin-bottom:16px;">Какая мебель предпочтительнее?</p><div class="mini-options-list"><label class="option-card"><input type="radio" name="mq5" value="Современный,Минимализм"><div class="option-content"><span>Простая, модульная</span></div></label><label class="option-card"><input type="radio" name="mq5" value="Скандинавский"><div class="option-content"><span>Лёгкая, из дерева</span></div></label><label class="option-card"><input type="radio" name="mq5" value="Классика,Неоклассика"><div class="option-content"><span>Массивная, с резьбой</span></div></label><label class="option-card"><input type="radio" name="mq5" value="Лофт"><div class="option-content"><span>Винтаж + современная</span></div></label></div></div>
-                <div class="mini-quiz-step" data-mini-step="6"><p class="step-question" style="font-size:1.3rem;margin-bottom:16px;">Что важнее в интерьере?</p><div class="mini-options-list"><label class="option-card"><input type="radio" name="mq6" value="Скандинавский,Минимализм,Современный"><div class="option-content"><span>Функциональность</span></div></label><label class="option-card"><input type="radio" name="mq6" value="Неоклассика,Классика"><div class="option-content"><span>Эстетика и гармония</span></div></label><label class="option-card"><input type="radio" name="mq6" value="Лофт,Современный"><div class="option-content"><span>Индивидуальность</span></div></label><label class="option-card"><input type="radio" name="mq6" value="Классика,Неоклассика"><div class="option-content"><span>Традиции</span></div></label></div></div>
-                <div class="quiz-nav" style="margin-top:24px;"><button class="btn-back" id="prevMiniBtn" disabled><i class="fas fa-arrow-left"></i> Назад</button><button class="btn-next" id="nextMiniBtn">Далее <i class="fas fa-arrow-right"></i></button></div>
-            </div>
-            <div id="miniQuizResult" style="display:none;text-align:center;padding:20px 0;"><div class="success-icon" style="margin:0 auto 24px;width:80px;height:80px;font-size:2rem;"><i class="fas fa-magic"></i></div><h2 style="font-size:2rem;margin-bottom:12px;color:var(--text-main);">Вам подходит:</h2><h3 id="miniQuizResultText" style="color:var(--accent-light);font-size:1.6rem;font-weight:700;margin-bottom:32px;"></h3><button class="btn-primary-hero" id="applyMiniQuizBtn" style="width:100%;justify-content:center;">Продолжить</button></div>
-        </div>
-    </div>
-
-    <!-- GigaChat Modal -->
-    <div class="gc-modal" id="gcModal">
-        <div class="gc-chat"><div class="gc-header"><h3>🤖 ИИ-советник</h3><button class="gc-close" id="gcClose">&times;</button></div><div class="gc-messages" id="gcMsgs"><div class="gc-msg-bot">Привет! Спросите о дизайне, бюджете, комнатах, размерах или материалах. 🏠</div></div><div class="gc-input-bar"><input id="gcInput" type="text" placeholder="Спросите о дизайне..." onkeydown="if(event.key==='Enter')sendGC()"><button id="gcSendBtn" onclick="sendGC()">→</button></div></div>
-    </div>
-
-    <!-- Scripts -->
+    <!-- ═══ SCRIPTS ═══ -->
     <script src="/static/quiz.js"></script>
     <script>
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    </script>
+    <script>
     // GigaChat
-    var gcBtn = document.getElementById('gcMainBtn'), gcModal = document.getElementById('gcModal'), gcClose = document.getElementById('gcClose');
-    if (gcBtn && gcModal) {
-        gcBtn.addEventListener('click', function() { gcModal.classList.add('show'); });
-        gcClose.addEventListener('click', function() { gcModal.classList.remove('show'); });
-        gcModal.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
-    }
+    document.getElementById('gcFloatBtn')?.addEventListener('click', function() { document.getElementById('gcModal').style.display = 'flex'; });
+    document.getElementById('gcModal')?.addEventListener('click', function(e) { if (e.target === this) this.style.display = 'none'; });
     async function sendGC() {
         var inp = document.getElementById('gcInput'), btn = document.getElementById('gcSendBtn'), msgs = document.getElementById('gcMsgs');
         var q = inp.value.trim(); if (!q) return;
-        msgs.innerHTML += '<div class="gc-msg-user">' + esc(q) + '</div>';
+        msgs.innerHTML += '<div style="padding:12px 16px;border-radius:16px 16px 4px 16px;background:var(--accent);color:white;align-self:flex-end;max-width:85%;font-size:.9rem;line-height:1.5;">' + esc(q) + '</div>';
         inp.value = ''; btn.disabled = true; msgs.scrollTop = msgs.scrollHeight;
-        try { var r = await fetch('/api/support', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q})}); var d = await r.json(); msgs.innerHTML += '<div class="gc-msg-bot">' + esc(d.answer||'Ошибка') + '</div>'; }
-        catch(e) { msgs.innerHTML += '<div class="gc-msg-bot">⚠️ Ошибка</div>'; }
+        try { var r = await fetch('/api/support', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q})}); var d = await r.json(); msgs.innerHTML += '<div style="padding:12px 16px;border-radius:16px 16px 16px 4px;background:var(--bg-card);color:var(--text-main);align-self:flex-start;max-width:85%;font-size:.9rem;line-height:1.5;">' + esc(d.answer||'Ошибка') + '</div>'; }
+        catch(e) { msgs.innerHTML += '<div style="padding:12px 16px;border-radius:16px 16px 16px 4px;background:var(--bg-card);color:var(--text-main);align-self:flex-start;max-width:85%;font-size:.9rem;line-height:1.5;">⚠️ Ошибка соединения</div>'; }
         btn.disabled = false; msgs.scrollTop = msgs.scrollHeight;
     }
     function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
