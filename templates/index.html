@@ -38,6 +38,9 @@
                 <button class="a11y-toggle" id="a11yToggle" title="Режим для слабовидящих">
                     <i class="fas fa-eye"></i>
                 </button>
+                <button class="admin-btn" id="adminBtn" onclick="window.adminAuth.openModal()" title="Админ панель">
+                    <i class="fas fa-ban"></i>
+                </button>
                 
                 <!-- Блок профиля / авторизации -->
                 <div class="user-profile-container" id="userProfileContainer">
@@ -189,6 +192,50 @@
         </label>
     </div>
 
+    <!-- Модальное окно админ авторизации -->
+    <div id="adminAuthModal" class="auth-modal">
+        <div class="admin-auth-modal-content">
+            <div class="admin-auth-header">
+                <div class="admin-auth-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h2>Админ панель</h2>
+                <p>Введите код для доступа к управлению</p>
+            </div>
+            
+            <div class="admin-auth-form">
+                <div class="admin-input-group">
+                    <label for="adminCodeInput">Код доступа</label>
+                    <div class="admin-input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="adminCodeInput" placeholder="••••••••" maxlength="20">
+                        <button type="button" class="admin-toggle-password" onclick="window.adminAuth.togglePassword()">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <button class="admin-auth-btn" onclick="window.adminAuth.login()">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Войти в админ панель
+                </button>
+                
+                <div id="adminError" class="admin-error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span></span>
+                </div>
+            </div>
+            
+            <div class="admin-auth-footer">
+                <small>Доступ только для авторизованных пользователей</small>
+            </div>
+            
+            <span class="admin-auth-close" onclick="window.adminAuth.closeModal()">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+    </div>
+
     <!-- Модальное окно авторизации -->
     <div id="authModal" class="auth-modal">
         <div class="auth-modal-content">
@@ -258,5 +305,6 @@
     <script src="/static/actions.js"></script>
     <script src="/static/session-integration.js"></script>
     <script src="/static/auth.js"></script>
+    <script src="/static/admin-auth.js"></script>
 </body>
 </html>

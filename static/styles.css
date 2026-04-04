@@ -378,10 +378,288 @@ font-size: 1.2rem;
     box-shadow: 0 6px 25px var(--accent-glow);
 }
 
+/* Статусы заявок */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.status-new {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+}
+
+.status-contacted {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+}
+
+.status-in_progress {
+    background: rgba(236, 72, 153, 0.2);
+    color: #ec4899;
+}
+
+.status-completed {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+}
+
+.status-cancelled {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+/* Админ модальное окно */
+.admin-auth-modal-content {
+    max-width: 420px;
+    padding: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.admin-auth-header {
+    background: linear-gradient(135deg, var(--accent), #1e40af);
+    padding: 30px;
+    text-align: center;
+    color: white;
+}
+
+.admin-auth-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 1.5rem;
+}
+
+.admin-auth-header h2 {
+    margin: 0 0 8px;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.admin-auth-header p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.95rem;
+}
+
+.admin-auth-form {
+    padding: 30px;
+}
+
+.admin-input-group {
+    margin-bottom: 24px;
+}
+
+.admin-input-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.admin-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.admin-input-wrapper i {
+    position: absolute;
+    left: 16px;
+    color: var(--text-secondary);
+    z-index: 1;
+}
+
+.admin-input-wrapper input {
+    width: 100%;
+    padding: 12px 16px 12px 45px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.admin-input-wrapper input:focus {
+    border-color: var(--accent);
+    background: var(--card-bg);
+}
+
+.admin-input-wrapper input::placeholder {
+    color: var(--text-muted);
+}
+
+.admin-toggle-password {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.admin-toggle-password:hover {
+    color: var(--accent);
+    background: rgba(37, 99, 235, 0.1);
+}
+
+.admin-auth-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--accent), #1e40af);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.admin-auth-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+}
+
+.admin-auth-btn:active {
+    transform: translateY(0);
+}
+
+.admin-error-message {
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    color: #ef4444;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.admin-error-message i {
+    font-size: 1rem;
+}
+
+.admin-auth-footer {
+    padding: 20px 30px;
+    background: var(--bg-secondary);
+    text-align: center;
+    border-top: 1px solid var(--border);
+}
+
+.admin-auth-footer small {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.admin-auth-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.admin-auth-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* В светлой теме */
+[data-theme="light"] .admin-auth-modal-content {
+    background: white;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .admin-auth-header {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+}
+
+[data-theme="light"] .admin-input-wrapper input {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #1a202c;
+}
+
+[data-theme="light"] .admin-input-wrapper input:focus {
+    background: white;
+    border-color: #2563eb;
+}
+
+[data-theme="light"] .admin-input-wrapper input::placeholder {
+    color: #94a3b8;
+}
+
+[data-theme="light"] .admin-input-wrapper i,
+[data-theme="light"] .admin-toggle-password {
+    color: #64748b;
+}
+
+[data-theme="light"] .admin-auth-footer {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+[data-theme="light"] .admin-auth-footer small {
+    color: #94a3b8;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 480px) {
+    .admin-auth-modal-content {
+        margin: 20px;
+        max-width: calc(100vw - 40px);
+    }
+    
+    .admin-auth-header {
+        padding: 24px 20px;
+    }
+    
+    .admin-auth-form {
+        padding: 24px 20px;
+    }
+    
+    .admin-auth-footer {
+        padding: 16px 20px;
+    }
+}
+
 /* ============================================
 Theme Toggle & A11y
 ============================================ */
-.theme-toggle, .a11y-toggle {
+.theme-toggle, .a11y-toggle, .admin-btn {
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -396,7 +674,7 @@ Theme Toggle & A11y
     font-size: 1rem;
 }
 
-.theme-toggle:hover, .a11y-toggle:hover {
+.theme-toggle:hover, .a11y-toggle:hover, .admin-btn:hover {
     border-color: var(--accent);
     color: var(--accent);
     background: rgba(37, 99, 235, 0.1);
@@ -404,13 +682,15 @@ Theme Toggle & A11y
 
 /* В светлой теме кнопки темы более контрастные */
 [data-theme="light"] .theme-toggle,
-[data-theme="light"] .a11y-toggle {
+[data-theme="light"] .a11y-toggle,
+[data-theme="light"] .admin-btn {
     border-color: rgba(0, 0, 0, 0.15);
     color: #1a1a2e;
 }
 
 [data-theme="light"] .theme-toggle:hover,
-[data-theme="light"] .a11y-toggle:hover {
+[data-theme="light"] .a11y-toggle:hover,
+[data-theme="light"] .admin-btn:hover {
     border-color: var(--accent);
     color: var(--accent);
     background: rgba(37, 99, 235, 0.08);

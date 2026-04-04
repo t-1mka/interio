@@ -48,6 +48,9 @@ class RegisterRequest(BaseModel):
 class SessionRequest(BaseModel):
     session_id: str
 
+class AdminLoginRequest(BaseModel):
+    code: str
+
 class QuizSubmissionRequest(BaseModel):
     name: str
     phone: str
@@ -77,9 +80,16 @@ def init_db():
             phone TEXT UNIQUE NOT NULL,
             nickname TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
+            role TEXT DEFAULT 'user',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    
+    # Добавляем колонку role если её нет
+    try:
+        cursor.execute('ALTER TABLE users ADD COLUMN role TEXT DEFAULT "user"')
+    except sqlite3.OperationalError:
+        pass  # Колонка уже существует
     
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS sessions (
@@ -105,10 +115,17 @@ def init_db():
             comment TEXT,
             consent BOOLEAN NOT NULL,
             user_id INTEGER,
+            status TEXT DEFAULT 'new',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
     ''')
+    
+    # Добавляем колонку status если её нет
+    try:
+        cursor.execute('ALTER TABLE quiz_submissions ADD COLUMN status TEXT DEFAULT "new"')
+    except sqlite3.OperationalError:
+        pass  # Колонка уже существует
     
     conn.commit()
     conn.close()
@@ -121,6 +138,33 @@ def get_db_connection():
     return conn
 
 # Валидация пароля
+def get_current_admin_user(request: Request):
+    """Проверка админ прав"""
+    session_token = request.cookies.get("session_id")
+    if not session_token:
+        return None
+    
+    now = int(time.time())
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        '''SELECT u.id, u.phone, u.nickname, u.role FROM sessions s
+           JOIN users u ON s.user_id = u.id
+           WHERE s.session_token = ? AND s.expires_at > ?''',
+        (session_token, now),
+    )
+    row = cursor.fetchone()
+    conn.close()
+    
+    if row and row["role"] == "admin":
+        return {
+            "id": row["id"],
+            "phone": row["phone"],
+            "nickname": row["nickname"],
+            "role": row["role"],
+        }
+    return None
+
 def validate_password(password: str) -> str:
     """Валидация пароля"""
     if len(password) < 8:
@@ -274,6 +318,48 @@ async def register(request: RegisterRequest, response: Response):
                 "phone": phone,
                 "nickname": nickname
             }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/auth/admin-login")
+async def admin_login(request: AdminLoginRequest, http_request: Request, response: Response):
+    """Вход в админ панель по коду"""
+    try:
+        ADMIN_CODE = "ADMIN123"  # В реальном проекте вынести в env
+        
+        if request.code != ADMIN_CODE:
+            raise HTTPException(status_code=401, detail="Неверный код")
+        
+        # Получаем текущего пользователя
+        session_token = http_request.cookies.get("session_id")
+        if not session_token:
+            raise HTTPException(status_code=401, detail="Требуется авторизация")
+        
+        now = int(time.time())
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT user_id FROM sessions WHERE session_token = ? AND expires_at > ?',
+            (session_token, now),
+        )
+        session = cursor.fetchone()
+        
+        if not session:
+            conn.close()
+            raise HTTPException(status_code=401, detail="Сессия недействительна")
+        
+        # Обновляем роль пользователя на admin
+        cursor.execute('UPDATE users SET role = ? WHERE id = ?', ('admin', session["user_id"]))
+        conn.commit()
+        conn.close()
+        
+        return {
+            "success": True,
+            "message": "Доступ к админ панели предоставлен"
         }
         
     except HTTPException:
@@ -475,10 +561,81 @@ async def get_quiz_submissions():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/admin/submissions")
+async def get_admin_submissions(request: Request):
+    """Получение списка заявок для админки"""
+    try:
+        admin_user = get_current_admin_user(request)
+        if not admin_user:
+            raise HTTPException(status_code=403, detail="Доступ запрещен")
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT qs.*, u.nickname as user_nickname 
+            FROM quiz_submissions qs 
+            LEFT JOIN users u ON qs.user_id = u.id 
+            ORDER BY qs.created_at DESC 
+            LIMIT 100
+        ''')
+        submissions = cursor.fetchall()
+        conn.close()
+        
+        return {
+            "success": True,
+            "submissions": [dict(sub) for sub in submissions]
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/admin/submissions/{submission_id}")
+async def update_submission_status(submission_id: int, request: Request, status_request: dict):
+    """Обновление статуса заявки"""
+    try:
+        admin_user = get_current_admin_user(request)
+        if not admin_user:
+            raise HTTPException(status_code=403, detail="Доступ запрещен")
+        
+        new_status = status_request.get("status")
+        if new_status not in ["new", "contacted", "in_progress", "completed", "cancelled"]:
+            raise HTTPException(status_code=400, detail="Неверный статус")
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute(
+            'UPDATE quiz_submissions SET status = ? WHERE id = ?',
+            (new_status, submission_id)
+        )
+        
+        if cursor.rowcount == 0:
+            conn.close()
+            raise HTTPException(status_code=404, detail="Заявка не найдена")
+        
+        conn.commit()
+        conn.close()
+        
+        return {
+            "success": True,
+            "message": f"Статус заявки {submission_id} обновлен на {new_status}"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/", response_class=HTMLResponse)
 async def root():
     """Главная страница"""
     return FileResponse("templates/index.html")
+
+@app.get("/admin", response_class=HTMLResponse)
+async def admin():
+    """Страница админ панели"""
+    return FileResponse("templates/admin.html")
 
 @app.get("/quiz", response_class=HTMLResponse)
 async def quiz():

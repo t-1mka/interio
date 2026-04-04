@@ -326,7 +326,7 @@ formatPhone(input) {
     }
 
     // Показать личный кабинет
-    showUserCabinet() {
+    async showUserCabinet() {
         const cabinetContainer = document.querySelector('.cabinet-container');
         if (cabinetContainer && this.currentUser) {
             cabinetContainer.innerHTML = `
@@ -335,17 +335,98 @@ formatPhone(input) {
                     <h3>Личный кабинет</h3>
                     <p>Никнейм: <strong>${this.currentUser.nickname}</strong></p>
                     <p>Телефон: <strong>${this.currentUser.phone}</strong></p>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 16px;">
-                        Вы вошли в систему. Здесь будет отображаться история ваших заявок и настройки.
-                    </p>
+                    <div id="userSubmissions" class="submissions-list">
+                        <div class="loading">Загрузка истории заявок...</div>
+                    </div>
                     <button class="logout-btn" onclick="window.authManager.logout()">
                         <i class="fas fa-sign-out-alt"></i> Выйти
                     </button>
                 </div>
             `;
+            
+            // Загружаем заявки пользователя
+            await this.loadUserSubmissions();
         }
         // Показываем модальное окно
         document.getElementById('cabinetModal').style.display = 'block';
+    }
+
+    // Загрузить заявки пользователя
+    async loadUserSubmissions() {
+        try {
+            const response = await fetch('/api/quiz/submissions');
+            const data = await response.json();
+            
+            const submissionsContainer = document.getElementById('userSubmissions');
+            if (!submissionsContainer) return;
+            
+            if (!response.ok) {
+                submissionsContainer.innerHTML = '<p style="color: var(--error);">Ошибка загрузки заявок</p>';
+                return;
+            }
+            
+            const allSubmissions = data.submissions || [];
+            // Фильтруем заявки текущего пользователя по телефону
+            const userSubmissions = allSubmissions.filter(sub => sub.phone === this.currentUser.phone);
+            
+            if (userSubmissions.length === 0) {
+                submissionsContainer.innerHTML = `
+                    <div style="margin-top: 20px; padding: 20px; background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border);">
+                        <h4 style="margin-bottom: 10px; color: var(--text-primary);">История заявок</h4>
+                        <p style="color: var(--text-secondary);">У вас пока нет заявок</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const submissionsHTML = userSubmissions.map(sub => {
+                const createdDate = new Date(sub.created_at).toLocaleDateString('ru-RU');
+                const status = sub.status || 'new';
+                const statusClass = `status-${status}`;
+                const statusText = this.getStatusText(status);
+                
+                return `
+                    <div style="margin-top: 20px; padding: 20px; background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border);">
+                        <h4 style="margin-bottom: 10px; color: var(--text-primary);">Заявка #${sub.id}</h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.9rem;">
+                            <div><strong>Тип:</strong> ${sub.room_type}</div>
+                            <div><strong>Стиль:</strong> ${sub.style}</div>
+                            <div><strong>Площадь:</strong> ${sub.area} м²</div>
+                            <div><strong>Бюджет:</strong> ${sub.budget}</div>
+                            <div><strong>Дата:</strong> ${createdDate}</div>
+                            <div><strong>Статус:</strong> <span class="status-badge ${statusClass}" style="padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">${statusText}</span></div>
+                        </div>
+                        ${sub.comment ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);"><strong>Комментарий:</strong> ${sub.comment}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            submissionsContainer.innerHTML = `
+                <div style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 15px; color: var(--text-primary);">История заявок (${userSubmissions.length})</h4>
+                    ${submissionsHTML}
+                </div>
+            `;
+            
+        } catch (error) {
+            console.error('Ошибка загрузки заявок:', error);
+            const submissionsContainer = document.getElementById('userSubmissions');
+            if (submissionsContainer) {
+                submissionsContainer.innerHTML = '<p style="color: var(--error);">Ошибка загрузки заявок</p>';
+            }
+        }
+    }
+
+    // Получить текст статуса
+    getStatusText(status) {
+        const statusMap = {
+            'new': 'Новая',
+            'contacted': 'Связались',
+            'in_progress': 'В работе',
+            'completed': 'Завершена',
+            'cancelled': 'Отмена'
+        };
+        return statusMap[status] || 'Новая';
     }
 
     // Закрыть модальное окно личного кабинета
