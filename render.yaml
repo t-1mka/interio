@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: project-design
+    runtime: python
+    pythonVersion: 3.11.0
+    buildCommand: pip install -r requirements.txt
+    startCommand: python server.py
+    healthCheckPath: /
+    autoDeploy: yes
+    plan: free
