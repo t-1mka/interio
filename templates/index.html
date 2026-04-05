@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="ru" data-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="/static/state-manager.js"></script>
     <script src="/static/session-state-manager.js"></script>
     <script>
-    try {
-        window.stateManager.applyThemeFromStorage();
-        window.stateManager.applyA11yAttrsFromStorage();
-    } catch (e) {}
+        try {
+            window.stateManager.applyThemeFromStorage();
+            window.stateManager.applyA11yAttrsFromStorage();
+        } catch (e) { }
     </script>
     <title>Interio — Дизайн-проекты</title>
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
 </head>
+
 <body>
     <div class="bg-image"></div>
     <div class="bg-overlay"></div>
@@ -41,15 +43,16 @@
                 <button class="admin-btn" id="adminBtn" onclick="window.adminAuth.openModal()" title="Админ панель">
                     <i class="fas fa-ban"></i>
                 </button>
-                
+
                 <!-- Блок профиля / авторизации -->
                 <div class="user-profile-container" id="userProfileContainer">
-                    <div class="user-profile" id="userProfile" style="display: none;" onclick="window.authManager.openCabinetModal()">
+                    <div class="user-profile" id="userProfile" style="display: none;"
+                        onclick="window.authManager.openCabinetModal()">
                         <div class="user-avatar" id="userAvatar"></div>
                         <span class="user-nickname" id="userNicknameDisplay"></span>
                     </div>
                 </div>
-    <button class="login-btn" id="loginBtn" onclick="window.authManager.openModal()">
+                <button class="login-btn" id="loginBtn" onclick="window.authManager.openModal()">
                     <i class="fas fa-user"></i> Войти
                 </button>
             </div>
@@ -62,9 +65,10 @@
             <div class="hero-badge"><i class="fas fa-star"></i> Профессиональный дизайн</div>
             <h1 class="hero-title">Платформа дизайн-проектов</h1>
             <h2 class="hero-subtitle">Создавайте идеальные интерьеры вместе с нами</h2>
-            <p class="hero-description">Ответьте на вопросы и получите персональное предложение с рекомендацией стиля и ориентировочной стоимостью.</p>
+            <p class="hero-description">Ответьте на вопросы и получите персональное предложение с рекомендацией стиля и
+                ориентировочной стоимостью.</p>
             <a href="/quiz" class="btn-primary-hero">
-                <i class="fas fa-rocket"></i> Начать тест
+                <i class="fas fa-rocket"></i> Начать
             </a>
             <div class="hero-stats">
                 <div class="stat">
@@ -202,7 +206,7 @@
                 <h2>Админ панель</h2>
                 <p>Введите код для доступа к управлению</p>
             </div>
-            
+
             <div class="admin-auth-form">
                 <div class="admin-input-group">
                     <label for="adminCodeInput">Код доступа</label>
@@ -214,25 +218,23 @@
                         </button>
                     </div>
                 </div>
-                
+
                 <button class="admin-auth-btn" onclick="window.adminAuth.login()">
                     <i class="fas fa-sign-in-alt"></i>
                     Войти в админ панель
                 </button>
-                
+
                 <div id="adminError" class="admin-error-message">
                     <i class="fas fa-exclamation-triangle"></i>
                     <span></span>
                 </div>
             </div>
-            
+
             <div class="admin-auth-footer">
                 <small>Доступ только для авторизованных пользователей</small>
             </div>
-            
-            <span class="admin-auth-close" onclick="window.adminAuth.closeModal()">
-                <i class="fas fa-times"></i>
-            </span>
+
+            <span class="admin-auth-close" onclick="window.adminAuth.closeModal()">&times;</span>
         </div>
     </div>
 
@@ -240,12 +242,13 @@
     <div id="authModal" class="auth-modal">
         <div class="auth-modal-content">
             <span class="auth-close" onclick="window.authManager.closeModal()">&times;</span>
-            
+
             <!-- Шаг 1: Ввод номера телефона -->
             <div id="phoneStep" class="auth-step">
                 <h2>Вход в личный кабинет</h2>
                 <p>Введите номер телефона</p>
-                <input type="tel" id="phoneInput" placeholder="+7 (999) 123-45-67" maxlength="18" oninput="window.authManager && window.authManager.formatPhone && window.authManager.formatPhone(this)">
+                <input type="tel" id="phoneInput" placeholder="+7 (999) 123-45-67" maxlength="18"
+                    oninput="window.authManager && window.authManager.formatPhone && window.authManager.formatPhone(this)">
                 <button onclick="window.authManager.checkPhone()">Далее</button>
                 <div id="phoneError" class="auth-error-message"></div>
             </div>
@@ -289,14 +292,14 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="cabinet-section">
                     <h3>История заявок</h3>
                     <div id="userSubmissions" class="submissions-list">
                         <div class="loading">Загрузка...</div>
                     </div>
                 </div>
-                
+
                 <button class="logout-btn" onclick="window.authManager.logout()">Выйти</button>
             </div>
         </div>
@@ -307,4 +310,5 @@
     <script src="/static/auth.js"></script>
     <script src="/static/admin-auth.js"></script>
 </body>
+
 </html>
