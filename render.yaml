@@ -20,7 +20,7 @@ services:
     # Переменные окружения
     envVars:
       - key: APP_URL
-        value: https://project-design.onrender.com
+        value: https://interio-0foc.onrender.com
     
     # Настройки health check
     healthCheckPath: /
