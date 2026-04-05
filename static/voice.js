@@ -1,21 +1,40 @@
 /**
  * voice.js — Голосовой ввод 🎙️
- * КРОМЕ полей регистрации/авторизации
+ * ТОЛЬКО для квиза и обычных форм. НЕ для авторизации/регистрации/админки.
  */
 (function() {
     var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) return;
 
-    function isAuthField(input) {
+    // Список ID и классов которые СКИПАЕМ (авторизация, регистрация, админка, трек)
+    var SKIP_IDS = [
+        'phoneInput', 'passwordInput', 'nicknameInput',
+        'newPasswordInput', 'confirmPasswordInput',
+        'adminCodeInput', 'trackCode', 'trackPhone',
+        'inputPhone', 'inputName', 'inputComment'
+    ];
+
+    var SKIP_CLASSES = [
+        'auth-modal', 'auth-step', 'admin-auth', 'admin-error',
+        'password-input-wrapper', 'toggle-password-view'
+    ];
+
+    function isSkipField(input) {
+        // По ID
+        if (input.id && SKIP_IDS.indexOf(input.id) !== -1) return true;
+        // По классу элемента
+        var cls = input.className || '';
+        for (var i = 0; i < SKIP_CLASSES.length; i++) {
+            if (cls.indexOf(SKIP_CLASSES[i]) !== -1) return true;
+        }
+        // По родительским контейнерам
         var el = input;
         while (el) {
-            if (el.id === 'authModal' || el.id === 'phoneStep' ||
-                el.id === 'passwordStep' || el.id === 'registerStep' ||
-                el.classList.contains('auth-modal') || el.classList.contains('auth-step') ||
-                el.id === 'phoneInput' || el.id === 'passwordInput' ||
-                el.id === 'nicknameInput' || el.id === 'newPasswordInput' ||
-                el.id === 'confirmPasswordInput') {
-                return true;
+            if (el.id === 'authModal' || el.id === 'adminAuthModal' ||
+                el.id === 'phoneStep' || el.id === 'passwordStep' || el.id === 'registerStep') return true;
+            var ecl = el.className || '';
+            for (var j = 0; j < SKIP_CLASSES.length; j++) {
+                if (ecl.indexOf(SKIP_CLASSES[j]) !== -1) return true;
             }
             el = el.parentElement;
         }
@@ -24,8 +43,7 @@
 
     function addVoiceBtn(input) {
         if (input.dataset._voiceAdded) return;
-        // Пропускаем поля авторизации/регистрации
-        if (isAuthField(input)) return;
+        if (isSkipField(input)) return;
 
         input.dataset._voiceAdded = '1';
 
