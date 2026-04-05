@@ -197,26 +197,28 @@ async def gc_ask(q):
 # ═══════════════════════════════════════════
 # Pages
 # ═══════════════════════════════════════════
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 @app.get("/", response_class=HTMLResponse)
-async def page_index(): return FileResponse("templates/index.html")
+async def page_index(): return FileResponse(os.path.join(BASE_DIR, "templates/index.html"))
 @app.get("/quiz", response_class=HTMLResponse)
-async def page_quiz(): return FileResponse("templates/quiz.html")
+async def page_quiz(): return FileResponse(os.path.join(BASE_DIR, "templates/quiz.html"))
 @app.get("/result/{sl}", response_class=HTMLResponse)
-async def page_result(sl: str): return FileResponse("templates/result.html")
+async def page_result(sl: str): return FileResponse(os.path.join(BASE_DIR, "templates/result.html"))
 @app.get("/portfolio", response_class=HTMLResponse)
-async def page_portfolio(): return FileResponse("templates/portfolio.html")
+async def page_portfolio(): return FileResponse(os.path.join(BASE_DIR, "templates/portfolio.html"))
 @app.get("/design/{did}", response_class=HTMLResponse)
-async def page_design(did: int): return FileResponse("templates/design.html")
+async def page_design(did: int): return FileResponse(os.path.join(BASE_DIR, "templates/design.html"))
 @app.get("/track", response_class=HTMLResponse)
-async def page_track(): return FileResponse("templates/track.html")
+async def page_track(): return FileResponse(os.path.join(BASE_DIR, "templates/track.html"))
 @app.get("/admin", response_class=HTMLResponse)
-async def page_admin(): return FileResponse("templates/admin.html")
+async def page_admin(): return FileResponse(os.path.join(BASE_DIR, "templates/admin.html"))
 @app.get("/cabinet", response_class=HTMLResponse)
-async def page_cabinet(): return FileResponse("templates/cabinet.html")
+async def page_cabinet(): return FileResponse(os.path.join(BASE_DIR, "templates/cabinet.html"))
 @app.get("/privacy", response_class=HTMLResponse)
-async def page_privacy(): return FileResponse("templates/privacy.html")
+async def page_privacy(): return FileResponse(os.path.join(BASE_DIR, "templates/privacy.html"))
 @app.get("/terms", response_class=HTMLResponse)
-async def page_terms(): return FileResponse("templates/terms.html")
+async def page_terms(): return FileResponse(os.path.join(BASE_DIR, "templates/terms.html"))
 
 # ═══════════════════════════════════════════
 # API — Auth
@@ -458,6 +460,10 @@ async def start_bot():
 
     bot = Bot(token=TG_TOKEN)
     dp = Dispatcher(storage=MemoryStorage())
+
+    # Ensure webhook is deleted before polling
+    await bot.delete_webhook()
+    logging.info("Webhook deleted, starting polling...")
 
     class RegState(StatesGroup):
         name = State(); phone = State()
