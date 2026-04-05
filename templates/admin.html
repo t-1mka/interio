@@ -310,48 +310,7 @@
 
     <script src="/static/admin-auth.js"></script>
     <script src="/static/admin.js"></script>
-
-    
-
-<p style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);font-size:0.45rem;color:rgba(128,128,128,0.12);pointer-events:none;z-index:1;"><a href="https://brainstorm-c0ap.onrender.com/" style="color:rgba(128,128,128,0.12);text-decoration:none;">brainstorm</a></p>
-
-    <script>
-    // Voice input for all textareas and inputs
-    (function(){
-        var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SR) return;
-        function addVoiceBtn(input) {
-            if (input.dataset.voiceAdded) return;
-            input.dataset.voiceAdded = 'true';
-            var btn = document.createElement('button');
-            btn.type = 'button';
-            btn.innerHTML = '&#127908;';
-            btn.title = 'Голосовой ввод';
-            btn.style.cssText = 'position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:1.1rem;cursor:pointer;opacity:0.6;z-index:10;';
-            btn.addEventListener('click', function() {
-                var rec = new SR();
-                rec.lang = 'ru-RU';
-                rec.onresult = function(ev) { input.value = ev.results[0][0].transcript; };
-                btn.style.opacity = '1';
-                rec.start();
-                setTimeout(function(){ btn.style.opacity = '0.6'; }, 3000);
-            });
-            var wrap = document.createElement('div');
-            wrap.style.cssText = 'position:relative;display:inline-block;width:100%;';
-            input.parentNode.insertBefore(wrap, input);
-            wrap.appendChild(input);
-            wrap.appendChild(btn);
-        }
-        document.querySelectorAll('input[type="text"], input[type="email"], textarea').forEach(addVoiceBtn);
-        // Re-check on dynamic content
-        var obs = new MutationObserver(function(){
-            document.querySelectorAll('input[type="text"], input[type="email"], textarea').forEach(addVoiceBtn);
-        });
-        obs.observe(document.body, {childList:true, subtree:true});
-    })();
-    </script>
-
-
+    <script src="/static/voice.js"></script>
     <script src="/static/widgets.js"></script>
 </body>
 </html>
