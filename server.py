@@ -57,7 +57,7 @@ threading.Thread(target=keep_alive, daemon=True).start()
 SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", 465))
 SMTP_USERNAME = os.environ.get("SMTP_USERNAME", "interiopersonal@gmail.com")
-SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "pcjloityrxwuotht")
+SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "xtsdtjlhsantqhqi")
 
 # Pydantic модели
 class PhoneCheckRequest(BaseModel):
