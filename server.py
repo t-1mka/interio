@@ -9,6 +9,8 @@ import re
 import secrets
 import hashlib
 import datetime
+import threading
+import requests
 import time
 import uvicorn
 import os
@@ -23,7 +25,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # CORS настройки
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5000", "http://127.0.0.1:5000", "http://localhost:58528", "http://127.0.0.1:58528"],
+    allow_origins=["http://localhost:5000", "http://127.0.0.1:5000", "http://localhost:58528", "http://127.0.0.1:58528", "https://interio-0foc.onrender.com/"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
@@ -33,6 +35,23 @@ app.add_middleware(
 
 # Путь к базе данных
 DB_PATH = 'data.db'
+
+def keep_alive():
+    """Функция для поддержания активности приложения"""
+    app_url = os.getenv("APP_URL", "https://interio-0foc.onrender.com/")
+    while True:
+        try:
+            response = requests.get(f"{app_url}/", timeout=10)
+            if response.status_code == 200:
+                print(f"✅ Keep-alive ping successful: {app_url}")
+            else:
+                print(f"⚠️ Keep-alive ping warning: {response.status_code}")
+        except Exception as e:
+            print(f"❌ Keep-alive ping failed: {str(e)}")
+        time.sleep(300)  # 5 минут
+
+# Запуск keep-alive в фоновом потоке
+threading.Thread(target=keep_alive, daemon=True).start()
 
 # Настройки SMTP для автоматической рассылки
 SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
