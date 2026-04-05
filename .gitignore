@@ -16,6 +16,10 @@ venv/
 uploads/*
 !uploads/.gitkeep
 
+# Bot data
+bot/data/*.json
+!bot/data/.gitkeep
+
 # IDE
 .vscode/
 .idea/
