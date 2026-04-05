@@ -25,7 +25,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # CORS настройки
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5000", "http://127.0.0.1:5000", "http://localhost:58528", "http://127.0.0.1:58528", "https://interio-0foc.onrender.com/"],
+    allow_origins=["http://localhost:5000", "http://127.0.0.1:5000", "http://localhost:58528", "http://127.0.0.1:58528", "https://interio-0foc.onrender.com/", "smtp.gmail.com"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
