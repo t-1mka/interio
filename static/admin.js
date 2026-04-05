@@ -6,12 +6,6 @@ class AdminManager {
     }
 
     async init() {
-        // Проверяем авторизацию
-        if (!document.cookie.includes('admin_session=')) {
-            // Ждём пока admin-auth откроет модалку
-            return;
-        }
-
         try {
             await this.loadSubmissions();
             this.setupEventListeners();
@@ -27,7 +21,7 @@ class AdminManager {
         try {
             const response = await fetch('/api/admin/submissions');
             const data = await response.json();
-            
+
             if (!response.ok) {
                 if (response.status === 403) {
                     window.location.href = '/';
@@ -35,7 +29,7 @@ class AdminManager {
                 }
                 throw new Error(data.detail || 'Ошибка загрузки заявок');
             }
-            
+
             this.submissions = data.submissions || [];
             this.filteredSubmissions = [...this.submissions];
         } catch (error) {
@@ -55,17 +49,15 @@ class AdminManager {
 
     filterSubmissions(searchTerm) {
         const term = searchTerm.toLowerCase().trim();
-        
         if (!term) {
             this.filteredSubmissions = [...this.submissions];
         } else {
-            this.filteredSubmissions = this.submissions.filter(sub => 
+            this.filteredSubmissions = this.submissions.filter(sub =>
                 sub.name.toLowerCase().includes(term) ||
                 sub.phone.toLowerCase().includes(term) ||
                 sub.email.toLowerCase().includes(term)
             );
         }
-        
         this.renderSubmissions();
     }
 
@@ -73,12 +65,10 @@ class AdminManager {
         const total = this.submissions.length;
         const newSubmissions = this.submissions.filter(s => s.status === 'new' || !s.status).length;
         const completed = this.submissions.filter(s => s.status === 'completed').length;
-        
         const today = new Date().toISOString().split('T')[0];
-        const todaySubmissions = this.submissions.filter(s => 
+        const todaySubmissions = this.submissions.filter(s =>
             s.created_at && s.created_at.startsWith(today)
         ).length;
-
         this.updateStat('totalSubmissions', total);
         this.updateStat('newSubmissions', newSubmissions);
         this.updateStat('completedSubmissions', completed);
@@ -94,7 +84,6 @@ class AdminManager {
 
     renderSubmissions() {
         const container = document.getElementById('submissionsContent');
-        
         if (this.filteredSubmissions.length === 0) {
             container.innerHTML = `
                 <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
@@ -126,7 +115,6 @@ class AdminManager {
                 </tbody>
             </table>
         `;
-
         container.innerHTML = tableHTML;
         this.attachRowListeners();
     }
@@ -135,7 +123,7 @@ class AdminManager {
         const status = submission.status || 'new';
         const statusClass = `status-${status}`;
         const createdDate = new Date(submission.created_at).toLocaleDateString('ru-RU');
-        
+
         return `
             <tr data-id="${submission.id}">
                 <td>#${submission.id}</td>
@@ -178,16 +166,12 @@ class AdminManager {
         return statusMap[status] || 'Новая';
     }
 
-    attachRowListeners() {
-        // Дополнительные обработчики если нужны
-    }
+    attachRowListeners() {}
 
     viewSubmission(id) {
         const submission = this.submissions.find(s => s.id === id);
         if (!submission) return;
-
         const zones = submission.zones ? submission.zones.split(',') : [];
-        
         const modal = document.createElement('div');
         modal.className = 'auth-modal';
         modal.style.display = 'block';
@@ -195,64 +179,24 @@ class AdminManager {
             <div class="auth-modal-content" style="max-width: 600px;">
                 <span class="auth-close" onclick="this.closest('.auth-modal').remove()">&times;</span>
                 <h2 style="margin-bottom: 20px;">Детали заявки #${submission.id}</h2>
-                
                 <div class="submission-details">
-                    <div class="detail-row">
-                        <span class="detail-label">Имя:</span>
-                        <span class="detail-value">${submission.name}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Телефон:</span>
-                        <span class="detail-value">${submission.phone}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Email:</span>
-                        <span class="detail-value">${submission.email}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Тип помещения:</span>
-                        <span class="detail-value">${submission.room_type}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Зоны:</span>
-                        <span class="detail-value">${zones.join(', ')}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Площадь:</span>
-                        <span class="detail-value">${submission.area} м²</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Стиль:</span>
-                        <span class="detail-value">${submission.style}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Бюджет:</span>
-                        <span class="detail-value">${submission.budget}</span>
-                    </div>
-                    ${submission.comment ? `
-                    <div class="detail-row">
-                        <span class="detail-label">Комментарий:</span>
-                        <span class="detail-value">${submission.comment}</span>
-                    </div>
-                    ` : ''}
-                    <div class="detail-row">
-                        <span class="detail-label">Дата:</span>
-                        <span class="detail-value">${new Date(submission.created_at).toLocaleString('ru-RU')}</span>
-                    </div>
-                    ${submission.user_nickname ? `
-                    <div class="detail-row">
-                        <span class="detail-label">Пользователь:</span>
-                        <span class="detail-value">${submission.user_nickname}</span>
-                    </div>
-                    ` : ''}
+                    <div class="detail-row"><span class="detail-label">Имя:</span><span class="detail-value">${submission.name}</span></div>
+                    <div class="detail-row"><span class="detail-label">Телефон:</span><span class="detail-value">${submission.phone}</span></div>
+                    <div class="detail-row"><span class="detail-label">Email:</span><span class="detail-value">${submission.email}</span></div>
+                    <div class="detail-row"><span class="detail-label">Тип помещения:</span><span class="detail-value">${submission.room_type}</span></div>
+                    <div class="detail-row"><span class="detail-label">Зоны:</span><span class="detail-value">${zones.join(', ')}</span></div>
+                    <div class="detail-row"><span class="detail-label">Площадь:</span><span class="detail-value">${submission.area} м²</span></div>
+                    <div class="detail-row"><span class="detail-label">Стиль:</span><span class="detail-value">${submission.style}</span></div>
+                    <div class="detail-row"><span class="detail-label">Бюджет:</span><span class="detail-value">${submission.budget}</span></div>
+                    ${submission.comment ? `<div class="detail-row"><span class="detail-label">Комментарий:</span><span class="detail-value">${submission.comment}</span></div>` : ''}
+                    <div class="detail-row"><span class="detail-label">Дата:</span><span class="detail-value">${new Date(submission.created_at).toLocaleString('ru-RU')}</span></div>
+                    ${submission.user_nickname ? `<div class="detail-row"><span class="detail-label">Пользователь:</span><span class="detail-value">${submission.user_nickname}</span></div>` : ''}
                 </div>
-                
                 <div style="margin-top: 20px; text-align: center;">
                     <button class="btn-primary-hero" onclick="this.closest('.auth-modal').remove()">Закрыть</button>
                 </div>
             </div>
         `;
-        
         document.body.appendChild(modal);
     }
 
@@ -260,30 +204,19 @@ class AdminManager {
         try {
             const response = await fetch(`/api/admin/submissions/${id}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus })
             });
-
             const data = await response.json();
-            
             if (!response.ok) {
                 throw new Error(data.detail || 'Ошибка обновления статуса');
             }
-
-            // Обновляем локальные данные
             const submission = this.submissions.find(s => s.id === id);
-            if (submission) {
-                submission.status = newStatus;
-            }
-
+            if (submission) submission.status = newStatus;
             this.renderStats();
             this.renderSubmissions();
-            
         } catch (error) {
             this.showError(error.message);
-            // Возвращаем предыдущий статус в select
             this.renderSubmissions();
         }
     }
@@ -293,15 +226,11 @@ class AdminManager {
         if (errorElement) {
             errorElement.textContent = message;
             errorElement.style.display = 'block';
-            
-            setTimeout(() => {
-                errorElement.style.display = 'none';
-            }, 5000);
+            setTimeout(() => { errorElement.style.display = 'none'; }, 5000);
         }
     }
 }
 
-// Инициализация при загрузке страницы
 let adminManager;
 document.addEventListener('DOMContentLoaded', () => {
     adminManager = new AdminManager();

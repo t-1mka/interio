@@ -184,8 +184,21 @@ def get_current_admin_user(request: Request):
     session_token = request.cookies.get("admin_session")
     if not session_token:
         return None
-    # Проверяем что admin_session валиден (любой непустой токен = валиден)
     return {"id": 0, "phone": "", "nickname": "Admin", "role": "admin"}
+
+@app.get("/api/auth/current-user")
+async def auth_current(request: Request):
+    # Проверяем admin_session — если есть, возвращаем админа
+    admin_tok = request.cookies.get("admin_session")
+    if admin_tok:
+        return {"success": True, "user": {"id": 0, "phone": "", "nickname": "Admin", "role": "admin"}}
+    # Иначе проверяем обычную сессию
+    tok = request.cookies.get("session_id")
+    if not tok: return {"success": False, "user": None}
+    now = int(time.time()); conn = get_db(); c = conn.cursor()
+    c.execute("SELECT u.id,u.phone,u.nickname,u.role FROM sessions s JOIN users u ON s.user_id=u.id WHERE s.session_token=? AND s.expires_at>?", (tok, now)); r = c.fetchone(); conn.close()
+    if r: return {"success": True, "user": {"id": r["id"], "phone": r["phone"], "nickname": r["nickname"], "role": r.get("role","user")}}
+    return {"success": False, "user": None}
 
 # Email рассылка
 def send_quiz_email(recipient_email: str, data):
@@ -384,24 +397,6 @@ async def auth_logout(request: Request, resp: Response):
         conn.commit(); conn.close()
     resp.delete_cookie(key="session_id", path="/")
     return {"success": True}
-
-@app.get("/api/auth/current-user")
-async def auth_current(request: Request):
-    session_token = request.cookies.get("session_id")
-    if not session_token:
-        return {"success": False, "user": None}
-    now = int(time.time())
-    conn = get_db(); c = conn.cursor()
-    c.execute(
-        '''SELECT u.id, u.phone, u.nickname, u.role FROM sessions s 
-           JOIN users u ON s.user_id = u.id 
-           WHERE s.session_token = ? AND s.expires_at > ?''',
-        (session_token, now),
-    )
-    row = c.fetchone(); conn.close()
-    if row:
-        return {"success": True, "user": {"id": row["id"], "phone": row["phone"], "nickname": row["nickname"], "role": row.get("role", "user")}}
-    return {"success": False, "user": None}
 
 @app.get("/api/auth/users")
 async def auth_users():
