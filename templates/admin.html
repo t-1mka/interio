@@ -199,20 +199,68 @@
         .back-btn:hover {
             background: var(--bg-secondary);
         }
+        /* Admin Auth Modal */
+        .auth-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .auth-modal-content {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+        }
+        .auth-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+        .admin-code-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .admin-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="bg-image"></div>
     <div class="bg-overlay"></div>
-    
+
     <div class="admin-container">
         <div class="admin-header">
             <h1 class="admin-title">Админ панель</h1>
             <p style="color: var(--text-secondary);">Управление заявками</p>
         </div>
-        
+
         <div id="adminError" class="error" style="display: none;"></div>
-        
+
         <div class="admin-stats" id="adminStats">
             <div class="stat-card">
                 <div class="stat-number" id="totalSubmissions">-</div>
@@ -231,7 +279,7 @@
                 <div class="stat-label">За сегодня</div>
             </div>
         </div>
-        
+
         <div class="submissions-table">
             <div class="table-header">
                 <h2 style="color: var(--text-primary); margin: 0;">Заявки</h2>
@@ -240,13 +288,27 @@
                     <input type="text" id="searchInput" placeholder="Поиск по имени или телефону...">
                 </div>
             </div>
-            
+
             <div id="submissionsContent">
                 <div class="loading">Загрузка заявок...</div>
             </div>
         </div>
     </div>
-    
+
+    <!-- Admin Auth Modal -->
+    <div id="adminAuthModal" class="auth-modal" style="display: none;">
+        <div class="auth-modal-content">
+            <span class="auth-close" onclick="window.adminAuth.closeModal()">&times;</span>
+            <h2 style="margin-bottom: 20px;">Вход в админ панель</h2>
+            <div id="adminError" class="admin-error">
+                <span></span>
+            </div>
+            <input type="password" id="adminCodeInput" class="admin-code-input" placeholder="Введите код администратора...">
+            <button class="btn-primary-hero" onclick="window.adminAuth.login()" style="width: 100%;">Войти</button>
+        </div>
+    </div>
+
+    <script src="/static/admin-auth.js"></script>
     <script src="/static/admin.js"></script>
 
     

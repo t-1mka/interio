@@ -8,27 +8,28 @@ class AdminAuth {
     }
 
     init() {
-        // Проверяем, есть ли уже админ доступ
-        this.checkAdminAccess();
+        if (!this.modal || !this.codeInput) {
+            // На странице админки - сразу проверяем доступ
+            this.checkAdminAccess();
+            return;
+        }
         
         // Обработчик Enter в поле ввода кода
-        if (this.codeInput) {
-            this.codeInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.login();
-                }
-            });
-        }
+        this.codeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.login();
+            }
+        });
     }
 
     togglePassword() {
         const input = this.codeInput;
         const button = document.querySelector('.admin-toggle-password i');
-        
+
         if (!input || !button) return;
-        
+
         this.passwordVisible = !this.passwordVisible;
-        
+
         if (this.passwordVisible) {
             input.type = 'text';
             button.className = 'fas fa-eye-slash';
@@ -42,46 +43,19 @@ class AdminAuth {
         try {
             const response = await fetch('/api/auth/current-user');
             const data = await response.json();
-            
+
             if (data.success && data.user && data.user.role === 'admin') {
-                this.showAdminButton();
+                if (this.modal) {
+                    this.closeModal();
+                }
             } else {
-                this.hideAdminButton();
+                // Если нет доступа и мы на странице админки - редирект
+                if (!this.modal && window.location.pathname === '/admin') {
+                    window.location.href = '/';
+                }
             }
         } catch (error) {
             console.error('Ошибка проверки админ доступа:', error);
-            this.hideAdminButton();
-        }
-    }
-
-    showAdminButton() {
-        const adminBtn = document.getElementById('adminBtn');
-        const adminBtnContainer = document.getElementById('adminBtnContainer');
-        
-        if (adminBtn) {
-            adminBtn.style.display = 'flex';
-            adminBtn.onclick = () => {
-                window.location.href = '/admin';
-            };
-        }
-        
-        // Если есть контейнер, показываем и его
-        if (adminBtnContainer) {
-            adminBtnContainer.style.display = 'block';
-        }
-    }
-
-    hideAdminButton() {
-        const adminBtn = document.getElementById('adminBtn');
-        const adminBtnContainer = document.getElementById('adminBtnContainer');
-        
-        if (adminBtn) {
-            adminBtn.style.display = 'flex';
-            adminBtn.onclick = () => this.openModal();
-        }
-        
-        if (adminBtnContainer) {
-            adminBtnContainer.style.display = 'none';
         }
     }
 
@@ -105,7 +79,7 @@ class AdminAuth {
 
     async login() {
         const code = this.codeInput?.value?.trim();
-        
+
         if (!code) {
             this.showError('Введите код');
             return;
@@ -121,18 +95,17 @@ class AdminAuth {
             });
 
             const data = await response.json();
-            
+
             if (!response.ok) {
                 throw new Error(data.detail || 'Ошибка входа');
             }
 
             // Успешный вход
             this.closeModal();
-            this.showAdminButton();
             
-            // Перенаправляем в админ панель
-            window.location.href = '/admin';
-            
+            // Перезагружаем страницу для обновления доступа
+            window.location.reload();
+
         } catch (error) {
             this.showError(error.message);
         }
