@@ -23,7 +23,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # CORS настройки
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5000", "http://127.0.0.1:5000", "http://localhost:58528", "http://127.0.0.1:58528"],
+    allow_origins=["http://localhost:5000", "http://127.0.0.1:5000", "http://localhost:58528", "http://127.0.0.1:58528", "https://interio-0foc.onrender.com/"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
@@ -36,7 +36,7 @@ DB_PATH = 'data.db'
 
 def keep_alive():
     """Функция для поддержания активности приложения"""
-    app_url = os.getenv("APP_URL", "https://project-design.onrender.com")
+    app_url = os.getenv("APP_URL", "https://interio-0foc.onrender.com/")
     while True:
         try:
             response = requests.get(f"{app_url}/", timeout=10)
