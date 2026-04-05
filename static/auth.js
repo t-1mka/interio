@@ -109,6 +109,19 @@ class AuthManager {
         document.getElementById('passwordInput').focus();
     }
 
+    // Показать/скрыть пароль
+    togglePassword(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fas fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fas fa-eye';
+        }
+    }
+
     // Показать шаг регистрации
     showRegisterStep() {
         document.getElementById('phoneStep').style.display = 'none';
