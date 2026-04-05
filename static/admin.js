@@ -6,6 +6,12 @@ class AdminManager {
     }
 
     async init() {
+        // Проверяем авторизацию
+        if (!document.cookie.includes('admin_session=')) {
+            // Ждём пока admin-auth откроет модалку
+            return;
+        }
+
         try {
             await this.loadSubmissions();
             this.setupEventListeners();

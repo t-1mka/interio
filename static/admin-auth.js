@@ -3,65 +3,31 @@ class AdminAuth {
         this.modal = document.getElementById('adminAuthModal');
         this.codeInput = document.getElementById('adminCodeInput');
         this.errorElement = document.getElementById('adminError');
-        this.passwordVisible = false;
         this.init();
     }
 
     init() {
-        if (!this.modal || !this.codeInput) {
-            // На странице админки - сразу проверяем доступ
-            this.checkAdminAccess();
-            return;
-        }
-        
-        // Обработчик Enter в поле ввода кода
+        if (!this.modal || !this.codeInput) return;
+
+        this.checkAdminAccess();
+
         this.codeInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.login();
-            }
+            if (e.key === 'Enter') this.login();
         });
     }
 
-    togglePassword() {
-        const input = this.codeInput;
-        const button = document.querySelector('.admin-toggle-password i');
-
-        if (!input || !button) return;
-
-        this.passwordVisible = !this.passwordVisible;
-
-        if (this.passwordVisible) {
-            input.type = 'text';
-            button.className = 'fas fa-eye-slash';
-        } else {
-            input.type = 'password';
-            button.className = 'fas fa-eye';
-        }
-    }
-
     async checkAdminAccess() {
-        try {
-            const response = await fetch('/api/auth/current-user');
-            const data = await response.json();
-
-            if (data.success && data.user && data.user.role === 'admin') {
-                if (this.modal) {
-                    this.closeModal();
-                }
-            } else {
-                // Если нет доступа и мы на странице админки - редирект
-                if (!this.modal && window.location.pathname === '/admin') {
-                    window.location.href = '/';
-                }
-            }
-        } catch (error) {
-            console.error('Ошибка проверки админ доступа:', error);
+        // Проверяем есть ли admin_session cookie
+        if (document.cookie.includes('admin_session=')) {
+            this.closeModal();
+        } else {
+            this.openModal();
         }
     }
 
     openModal() {
         if (this.modal) {
-            this.modal.style.display = 'block';
+            this.modal.style.display = 'flex';
             this.clearError();
             if (this.codeInput) {
                 this.codeInput.value = '';
@@ -79,7 +45,6 @@ class AdminAuth {
 
     async login() {
         const code = this.codeInput?.value?.trim();
-
         if (!code) {
             this.showError('Введите код');
             return;
@@ -88,24 +53,15 @@ class AdminAuth {
         try {
             const response = await fetch('/api/auth/admin-login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code })
             });
 
             const data = await response.json();
+            if (!response.ok) throw new Error(data.detail || 'Ошибка входа');
 
-            if (!response.ok) {
-                throw new Error(data.detail || 'Ошибка входа');
-            }
-
-            // Успешный вход
             this.closeModal();
-            
-            // Перезагружаем страницу для обновления доступа
             window.location.reload();
-
         } catch (error) {
             this.showError(error.message);
         }
@@ -113,26 +69,21 @@ class AdminAuth {
 
     showError(message) {
         if (this.errorElement) {
-            const errorSpan = this.errorElement.querySelector('span');
-            if (errorSpan) {
-                errorSpan.textContent = message;
-            }
+            const s = this.errorElement.querySelector('span');
+            if (s) s.textContent = message;
             this.errorElement.style.display = 'flex';
         }
     }
 
     clearError() {
         if (this.errorElement) {
-            const errorSpan = this.errorElement.querySelector('span');
-            if (errorSpan) {
-                errorSpan.textContent = '';
-            }
+            const s = this.errorElement.querySelector('span');
+            if (s) s.textContent = '';
             this.errorElement.style.display = 'none';
         }
     }
 }
 
-// Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
     window.adminAuth = new AdminAuth();
 });

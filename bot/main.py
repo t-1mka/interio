@@ -251,13 +251,11 @@ async def notify_managers(text: str):
 # Handlers — Регистрация
 # ═══════════════════════════════════════════
 @dp.message(CommandStart())
-async def cmd_start(m: Message, s: FSMContext):
-    await s.clear()
+async def cmd_start(m: Message):
     tg_id = m.from_user.id
     role = get_user_role(tg_id)
-    
+
     if role:
-        # Пользователь уже зарегистрирован
         role_name = "👔 Менеджер" if role == "manager" else "🛒 Заказчик"
         await m.answer(
             f"👋 С возвращением, <b>{m.from_user.full_name}</b>!\n\n"
@@ -271,7 +269,6 @@ async def cmd_start(m: Message, s: FSMContext):
             parse_mode="HTML"
         )
     else:
-        # Новый пользователь — предлагаем выбрать роль
         await m.answer(
             f"👋 Добро пожаловать в <b>Interio</b>!\n\n"
             f"🏠 Онлайн-студия дизайна интерьеров\n\n"
@@ -347,14 +344,20 @@ async def reg_phone(m: Message, s: FSMContext):
 # Handlers — Главное меню
 # ═══════════════════════════════════════════
 @dp.callback_query(F.data == "back")
-async def go_back(cb: CallbackQuery, s: FSMContext):
-    await s.clear()
+async def go_back(cb: CallbackQuery):
     role = get_user_role(cb.from_user.id)
-    await cb.message.edit_text(
-        "🏠 Главное меню <b>Interio</b>\n\nВыберите действие:",
-        reply_markup=main_kb(role),
-        parse_mode="HTML"
-    )
+    try:
+        await cb.message.edit_text(
+            "🏠 Главное меню <b>Interio</b>\n\nВыберите действие:",
+            reply_markup=main_kb(role),
+            parse_mode="HTML"
+        )
+    except:
+        await cb.message.answer(
+            "🏠 Главное меню <b>Interio</b>\n\nВыберите действие:",
+            reply_markup=main_kb(role),
+            parse_mode="HTML"
+        )
 
 @dp.callback_query(F.data == "about")
 async def go_about(cb: CallbackQuery):
