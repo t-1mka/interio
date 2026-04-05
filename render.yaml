@@ -1,34 +1,10 @@
 services:
-  # Тип сервиса
   - type: web
-  
-    # Название сервиса
     name: project-design
-    
-    # Среда выполнения
-    env: python
-    envVars:
-      - key: PYTHON_VERSION
-        value: "3.11"
-    # Версия Python
+    runtime: python
     pythonVersion: 3.11.0
-    
-    # Команда сборки
     buildCommand: pip install -r requirements.txt
-    
-    # Команда запуска
-    startCommand: uvicorn server:app --host 0.0.0.0 --port 5000
-    
-    # Переменные окружения
-    envVars:
-      - key: APP_URL
-        value: https://interio-0foc.onrender.com
-    
-    # Настройки health check
+    startCommand: python server.py
     healthCheckPath: /
-    
-    # Автоматические деплои
     autoDeploy: yes
-    
-    # Настройки для предотвращения "сна"
     plan: free
