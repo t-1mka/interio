@@ -1,0 +1,32 @@
+services:
+  # Тип сервиса
+  - type: web
+  
+    # Название сервиса
+    name: project-design
+    
+    # Среда выполнения
+    runtime: python
+    
+    # Версия Python
+    pythonVersion: 3.11
+    
+    # Команда сборки
+    buildCommand: pip install -r requirements.txt
+    
+    # Команда запуска
+    startCommand: uvicorn server:app --host 0.0.0.0 --port 5000
+    
+    # Переменные окружения
+    envVars:
+      - key: APP_URL
+        value: https://project-design.onrender.com
+    
+    # Настройки health check
+    healthCheckPath: /
+    
+    # Автоматические деплои
+    autoDeploy: yes
+    
+    # Настройки для предотвращения "сна"
+    plan: free

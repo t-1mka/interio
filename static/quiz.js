@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Toast Notification ---
-    window.showToast = function (message, duration = 3000) {
+    window.showToast = function(message, duration = 3000) {
         const toast = document.getElementById('toastNotification');
         const toastMessage = document.getElementById('toastMessage');
         if (!toast || !toastMessage) {
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Slider ---
     const areaSlider = document.getElementById('areaSlider');
     const sliderValueDisplay = document.getElementById('sliderValue');
-
+    
     function updateSliderBackground(slider) {
         const min = parseFloat(slider.min) || 20;
         const max = parseFloat(slider.max) || 300;
@@ -128,18 +128,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     localStorage.removeItem('interio_quiz_answers');
-
+    
     document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(el => el.checked = false);
     document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], textarea').forEach(el => el.value = '');
 
     if (areaSlider) {
         areaSlider.value = 60;
         sliderValueDisplay.textContent = areaSlider.value;
-        updateSliderBackground(areaSlider);
+        updateSliderBackground(areaSlider); 
 
         areaSlider.addEventListener('input', (e) => {
             sliderValueDisplay.textContent = e.target.value;
-            updateSliderBackground(e.target);
+            updateSliderBackground(e.target); 
             saveAnswer();
         });
     }
@@ -289,14 +289,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function validateStep(step) {
         switch (step) {
-            case 1:
+            case 1: 
                 const roomType = document.querySelector('.quiz-container input[name="roomType"]:checked');
                 if (!roomType) {
                     showToast('Пожалуйста, выберите тип помещения');
                     return false;
                 }
                 return true;
-            case 2:
+            case 2: 
                 const zones = document.querySelectorAll('.quiz-container input[name="zones"]:checked');
                 if (zones.length === 0) {
                     showToast('Пожалуйста, выберите хотя бы одну зону');
@@ -304,14 +304,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 return true;
             case 3: return true;
-            case 4:
+            case 4: 
                 const style = document.querySelector('.quiz-container input[name="style"]:checked');
                 if (!style) {
                     showToast('Пожалуйста, выберите стиль интерьера');
                     return false;
                 }
                 return true;
-            case 5:
+            case 5: 
                 const budget = document.querySelector('.quiz-container input[name="budget"]:checked');
                 if (!budget) {
                     showToast('Пожалуйста, выберите бюджет');
@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const emailErr = document.getElementById('emailError');
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+        
         // Email теперь обязательный
         if (!email) {
             if (emailErr) emailErr.classList.add('show');
@@ -374,12 +374,12 @@ document.addEventListener('DOMContentLoaded', () => {
     async function submitForm() {
         saveAnswer();
         const answers = JSON.parse(localStorage.getItem('interio_quiz_answers') || '{}');
-
+        
         const nextBtn = document.getElementById('nextBtn');
         const originalText = nextBtn.innerHTML;
         nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
         nextBtn.disabled = true;
-
+        
         try {
             const submissionData = {
                 name: answers.name || '',
@@ -393,35 +393,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 comment: answers.comment || '',
                 consent: answers.consent || false
             };
-
+            
             console.log('📩 Отправка заявки:', submissionData);
-
-            const mockResponse = new Promise(resolve => setTimeout(() => resolve({ ok: true, json: () => ({ success: true, submission_id: Math.floor(Math.random() * 10000) }) }), 1000));
+            
+            const mockResponse = new Promise(resolve => setTimeout(() => resolve({ok: true, json: () => ({success: true, submission_id: Math.floor(Math.random()*10000)})}), 1000));
             const response = await fetch('/api/quiz/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify(submissionData)
-            }).catch(() => mockResponse);
-
+            }).catch(() => mockResponse); 
+            
             const result = await response.json();
-
+            
             if (response.ok && result.success) {
                 console.log('✅ Заявка успешно сохранена, ID:', result.submission_id);
-
+                
                 steps.forEach(s => s.style.display = 'none');
                 document.querySelector('.quiz-progress').style.display = 'none';
                 quizNav.style.display = 'none';
                 finishEarlyBtn.style.display = 'none';
                 successScreen.classList.add('active');
                 successScreen.style.display = 'block';
-
+                
                 localStorage.setItem('interio_submission_id', result.submission_id);
-
+                
             } else {
                 throw new Error(result.error || result.detail || 'Ошибка сервера');
             }
-
+            
         } catch (error) {
             console.error('❌ Ошибка при отправке заявки:', error);
             showToast(`Ошибка при сохранении заявки: ${error.message}`);
@@ -484,27 +484,27 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.rect(0, 0, 210, 40, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(24);
-
+        
         doc.setFont('Roboto', 'bold');
         doc.text('Interio', 20, 22);
-
+        
         doc.setFontSize(12);
         doc.setFont('Roboto', 'normal');
         doc.text('Заявка на дизайн-проект', 20, 32);
-
+        
         let y = 55;
         doc.setTextColor(30, 30, 30);
-
+        
         const addSection = (title, value) => {
             doc.setFontSize(11);
             doc.setFont('Roboto', 'bold');
             doc.setTextColor(74, 108, 247);
             doc.text(title, 20, y);
             y += 7;
-
+            
             doc.setFont('Roboto', 'normal');
             doc.setTextColor(50, 50, 50);
-
+            
             if (Array.isArray(value)) {
                 value.forEach(v => { doc.text('• ' + v, 24, y); y += 6; });
             } else {
@@ -521,31 +521,31 @@ document.addEventListener('DOMContentLoaded', () => {
         addSection('Площадь:', answers.area ? answers.area + ' м²' : '—');
         addSection('Стиль:', answers.style);
         addSection('Бюджет:', answers.budget);
-
+        
         y += 5;
         doc.setDrawColor(200, 200, 200);
         doc.line(20, y, 190, y);
         y += 10;
-
+        
         addSection('Имя:', answers.name);
         addSection('Телефон:', answers.phone);
         addSection('Email:', answers.email || '—');
         addSection('Комментарий:', answers.comment || '—');
-
+        
         y += 10;
         doc.setFontSize(9);
         doc.setTextColor(150, 150, 150);
         doc.text('Дата заявки: ' + new Date().toLocaleString('ru-RU'), 20, y);
         y += 6;
-
+        
         const submissionId = localStorage.getItem('interio_submission_id');
         if (submissionId) {
             doc.text('ID заявки: #' + submissionId, 20, y);
             y += 6;
         }
-
+        
         doc.text('Сгенерировано автоматически платформой Interio', 20, y);
-
+        
         doc.save('Interio_заявка_' + Date.now() + '.pdf');
     }
 
@@ -589,14 +589,14 @@ document.addEventListener('DOMContentLoaded', () => {
         miniStepsList.forEach(s => s.classList.remove('active'));
         const target = document.querySelector(`.mini-quiz-step[data-mini-step="${currentMiniStep}"]`);
         if (target) target.classList.add('active');
-
+        
         const pct = Math.round((currentMiniStep / totalMiniSteps) * 100);
         document.getElementById('miniProgressBar').style.width = pct + '%';
         document.getElementById('currentMiniStepNum').textContent = currentMiniStep;
         document.getElementById('miniProgressPercent').textContent = pct + '%';
-
+        
         if (prevMiniBtn) prevMiniBtn.disabled = currentMiniStep === 1;
-
+        
         if (nextMiniBtn) {
             if (currentMiniStep === totalMiniSteps) {
                 nextMiniBtn.innerHTML = '<i class="fas fa-check"></i> Узнать результат';
@@ -667,20 +667,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const resultText = winners.join(' / ');
-
+        
         // Показываем результат
         const resultTextElement = document.getElementById('miniQuizResultText');
         if (resultTextElement) resultTextElement.textContent = resultText;
-
+        
         document.getElementById('miniQuizQuestions').style.display = 'none';
         document.getElementById('miniQuizResult').style.display = 'block';
-
+        
         // Передаем результат в основной квиз
         if (undecidedRadio) undecidedRadio.value = resultText;
-
+        
         const undecidedLabel = document.querySelector('.style-image-card.wide .style-label');
         if (undecidedLabel) undecidedLabel.textContent = 'Ваш результат: ' + resultText;
-
+        
         miniQuizCompleted = true;
         saveAnswer();
     }
@@ -713,7 +713,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                 }
-
+                
                 if (currentStep === totalSteps) {
                     submitForm();
                 } else {
